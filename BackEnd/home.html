@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulaire de CV</title>
+</head>
+<body>
+    <h2>Formulaire de CV</h2>
+    <form id="cvForm" action="generate_cv.php" method="POST">
+        <label>Nom :</label>
+        <input type="text" name="nom" required><br><br>
+        
+        <label>Prénom :</label>
+        <input type="text" name="prenom" required><br><br>
+        
+        <label>Email :</label>
+        <input type="email" name="email" required><br><br>
+        
+        <label>Téléphone :</label>
+        <input type="tel" name="telephone" required><br><br>
+
+        <label>Linkedin (optionel):</label>
+        <input type="tel" name="linkedin"><br><br>
+        
+        <label>Profil :</label>
+        <textarea name="profil" required></textarea><br><br>
+        
+        <label>Éducation :</label>
+        <textarea name="education" required></textarea><br><br>
+        
+        <label>Compétences :</label>
+        <textarea name="competences" required></textarea><br><br>
+        
+        <label>Expériences et Projets :</label>
+        <textarea name="experiences" required></textarea><br><br>
+        
+        <label>Certifications :</label>
+        <textarea name="certifications" required></textarea><br><br>
+        
+        <label>Centres d'intérêt :</label>
+        <textarea name="interets" required></textarea><br><br>
+        
+        <button type="submit">Générer PDF</button>
+    </form>
+</body>
+</html>
