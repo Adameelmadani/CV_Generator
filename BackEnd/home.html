@@ -3,45 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Formulaire de CV</title>
+    <title>Europass CV Generator</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h2>Formulaire de CV</h2>
-    <form id="cvForm" action="generate_cv.php" method="POST">
-        <label>Nom :</label>
-        <input type="text" name="nom" required><br><br>
-        
-        <label>Prénom :</label>
-        <input type="text" name="prenom" required><br><br>
-        
-        <label>Email :</label>
-        <input type="email" name="email" required><br><br>
-        
-        <label>Téléphone :</label>
-        <input type="tel" name="telephone" required><br><br>
+    <h2>Générateur de CV Europass</h2>
+    <form id="cvForm" action="generate_cv.php" method="POST" enctype="multipart/form-data">
+        <!-- Personal Information -->
+        <div class="section">
+            <h3>Information Personnelle</h3>
+            <input type="text" name="nom" placeholder="Nom" required>
+            <input type="text" name="prenom" placeholder="Prénom" required>
+            <input type="date" name="date_naissance" required>
+            <input type="text" name="nationalite" placeholder="Nationalité" required>
+            <input type="text" name="adresse" placeholder="Adresse" required>
+            <input type="email" name="email" placeholder="Email" required>
+            <input type="tel" name="telephone" placeholder="Téléphone" required>
+            <input type="url" name="linkedin" placeholder="LinkedIn (optionnel)">
+        </div>
 
-        <label>Linkedin (optionel):</label>
-        <input type="tel" name="linkedin"><br><br>
-        
-        <label>Profil :</label>
-        <textarea name="profil" required></textarea><br><br>
-        
-        <label>Éducation :</label>
-        <textarea name="education" required></textarea><br><br>
-        
-        <label>Compétences :</label>
-        <textarea name="competences" required></textarea><br><br>
-        
-        <label>Expériences et Projets :</label>
-        <textarea name="experiences" required></textarea><br><br>
-        
-        <label>Certifications :</label>
-        <textarea name="certifications" required></textarea><br><br>
-        
-        <label>Centres d'intérêt :</label>
-        <textarea name="interets" required></textarea><br><br>
-        
-        <button type="submit">Générer PDF</button>
+        <!-- Job Applied For -->
+        <div class="section">
+            <h3>Emploi Recherché</h3>
+            <input type="text" name="emploi_recherche" required>
+        </div>
+
+        <!-- Work Experience -->
+        <div class="section">
+            <h3>Expérience Professionnelle</h3>
+            <div id="experiences">
+                <div class="experience-entry">
+                    <input type="text" name="experience_dates[]" placeholder="Dates (De - À)">
+                    <input type="text" name="experience_poste[]" placeholder="Poste">
+                    <input type="text" name="experience_employeur[]" placeholder="Employeur">
+                    <textarea name="experience_description[]" placeholder="Description des responsabilités"></textarea>
+                </div>
+            </div>
+            <button type="button" onclick="addExperience()">+ Ajouter une expérience</button>
+        </div>
+
+        <!-- Education -->
+        <div class="section">
+            <h3>Formation</h3>
+            <div id="education">
+                <div class="education-entry">
+                    <input type="text" name="education_dates[]" placeholder="Dates (De - À)">
+                    <input type="text" name="education_diplome[]" placeholder="Diplôme">
+                    <input type="text" name="education_etablissement[]" placeholder="Établissement">
+                </div>
+            </div>
+            <button type="button" onclick="addEducation()">+ Ajouter une formation</button>
+        </div>
+
+        <!-- Languages -->
+        <div class="section">
+            <h3>Langues</h3>
+            <div id="languages">
+                <div class="language-entry">
+                    <input type="text" name="langue[]" placeholder="Langue">
+                    <select name="niveau[]">
+                        <option value="A1">A1</option>
+                        <option value="A2">A2</option>
+                        <option value="B1">B1</option>
+                        <option value="B2">B2</option>
+                        <option value="C1">C1</option>
+                        <option value="C2">C2</option>
+                    </select>
+                </div>
+            </div>
+            <button type="button" onclick="addLanguage()">+ Ajouter une langue</button>
+        </div>
+
+        <!-- Skills -->
+        <div class="section">
+            <h3>Compétences</h3>
+            <textarea name="competences_numeriques" placeholder="Compétences numériques" required></textarea>
+            <textarea name="competences_autres" placeholder="Autres compétences" required></textarea>
+        </div>
+
+        <input type="submit" value="Générer CV Europass">
     </form>
+
+    <script src="form.js"></script>
 </body>
 </html>
