@@ -9,7 +9,6 @@
 <body>
     <h2>Générateur de CV Europass</h2>
     <form id="cvForm" action="generate_cv.php" method="POST" enctype="multipart/form-data">
-        <!-- Personal Information -->
         <div class="section">
             <h3>Information Personnelle</h3>
             <input type="text" name="nom" placeholder="Nom" required>
@@ -19,16 +18,16 @@
             <input type="text" name="adresse" placeholder="Adresse" required>
             <input type="email" name="email" placeholder="Email" required>
             <input type="tel" name="telephone" placeholder="Téléphone" required>
-            <input type="url" name="linkedin" placeholder="LinkedIn (optionnel)">
+            <input type="url" name="linkedin" placeholder="LinkedIn">
+            <textarea class="description" name="profil_description" placeholder="Brève description personnelle"></textarea>
         </div>
 
-        <!-- Job Applied For -->
         <div class="section">
             <h3>Emploi Recherché</h3>
             <input type="text" name="emploi_recherche" required>
+            <textarea class="description" name="emploi_description" placeholder="Description de l'emploi recherché"></textarea>
         </div>
 
-        <!-- Work Experience -->
         <div class="section">
             <h3>Expérience Professionnelle</h3>
             <div id="experiences">
@@ -42,7 +41,6 @@
             <button type="button" onclick="addExperience()">+ Ajouter une expérience</button>
         </div>
 
-        <!-- Education -->
         <div class="section">
             <h3>Formation</h3>
             <div id="education">
@@ -50,12 +48,12 @@
                     <input type="text" name="education_dates[]" placeholder="Dates (De - À)">
                     <input type="text" name="education_diplome[]" placeholder="Diplôme">
                     <input type="text" name="education_etablissement[]" placeholder="Établissement">
+                    <textarea class="description" name="education_description[]" placeholder="Description de la formation"></textarea>
                 </div>
             </div>
             <button type="button" onclick="addEducation()">+ Ajouter une formation</button>
         </div>
 
-        <!-- Languages -->
         <div class="section">
             <h3>Langues</h3>
             <div id="languages">
@@ -69,12 +67,12 @@
                         <option value="C1">C1</option>
                         <option value="C2">C2</option>
                     </select>
+                    <textarea class="description" name="language_description[]" placeholder="Description de la langue (ex: compétences orales/écrites)"></textarea>
                 </div>
             </div>
             <button type="button" onclick="addLanguage()">+ Ajouter une langue</button>
         </div>
 
-        <!-- Skills -->
         <div class="section">
             <h3>Compétences</h3>
             <textarea name="competences_numeriques" placeholder="Compétences numériques" required></textarea>

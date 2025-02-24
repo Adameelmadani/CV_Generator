@@ -20,6 +20,7 @@ function addEducation() {
         <input type="text" name="education_dates[]" placeholder="Dates (De - À)" required>
         <input type="text" name="education_diplome[]" placeholder="Diplôme" required>
         <input type="text" name="education_etablissement[]" placeholder="Établissement" required>
+        <textarea class="description" name="education_description[]" placeholder="Description de la formation"></textarea>
         <button type="button" onclick="removeEntry(this)" class="remove-btn">Supprimer</button>
     `;
     container.appendChild(entry);
@@ -39,6 +40,7 @@ function addLanguage() {
             <option value="C1">C1</option>
             <option value="C2">C2</option>
         </select>
+        <textarea class="description" name="language_description[]" placeholder="Description de la langue (ex: compétences orales/écrites)"></textarea>
         <button type="button" onclick="removeEntry(this)" class="remove-btn">Supprimer</button>
     `;
     container.appendChild(entry);
@@ -58,10 +60,8 @@ function validateForm() {
     const requiredFields = document.querySelectorAll('input[required], textarea[required], select[required]');
     let isValid = true;
 
-    // Reset all borders
     requiredFields.forEach(field => field.style.borderColor = '');
 
-    // Check personal information
     const personalFields = [
         'nom', 'prenom', 'date_naissance', 'nationalite',
         'adresse', 'email', 'telephone', 'emploi_recherche'
@@ -75,11 +75,10 @@ function validateForm() {
         }
     });
 
-    // Check dynamic sections (Experience, Education, Languages)
     const sections = {
         'experiences': ['experience_dates[]', 'experience_poste[]', 'experience_employeur[]', 'experience_description[]'],
-        'education': ['education_dates[]', 'education_diplome[]', 'education_etablissement[]'],
-        'languages': ['langue[]', 'niveau[]']
+        'education': ['education_dates[]', 'education_diplome[]', 'education_etablissement[]', 'education_description[]'],
+        'languages': ['langue[]', 'niveau[]', 'language_description[]']
     };
 
     for (const [sectionId, fields] of Object.entries(sections)) {
@@ -106,12 +105,10 @@ function validateForm() {
 }
 
 function formatData() {
-    // Format dates consistently
     document.querySelectorAll('input[name="experience_dates[]"], input[name="education_dates[]"]').forEach(input => {
         input.value = input.value.trim();
     });
 
-    // Clean up text inputs
     document.querySelectorAll('textarea').forEach(textarea => {
         textarea.value = textarea.value.trim().replace(/\n\s*\n\s*\n/g, '\n\n');
     });
@@ -128,7 +125,6 @@ document.getElementById('cvForm').onsubmit = function(e) {
     return true;
 };
 
-// Add initial entries if containers are empty
 window.onload = function() {
     if (document.querySelectorAll('#experiences .experience-entry').length === 0) {
         addExperience();

@@ -23,7 +23,7 @@ form {
   background: var(--form-background);
   padding: 2.5rem;
   border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
   width: 100%;
   max-width: 600px;
   margin-top: 2rem;
@@ -48,7 +48,8 @@ label {
 input[type="text"],
 input[type="email"],
 input[type="tel"],
-textarea {
+textarea,
+input[type="date"] {
   width: 100%;
   padding: 0.8rem;
   margin-bottom: 1.5rem;
@@ -57,12 +58,14 @@ textarea {
   font-size: 1rem;
   transition: all 0.3s ease;
   box-sizing: border-box;
+  font-family: inherit;
 }
 
 input[type="text"]:focus,
 input[type="email"]:focus,
 input[type="tel"]:focus,
-textarea:focus {
+textarea:focus,
+input[type="date"]:focus {
   border-color: var(--accent-color);
   outline: none;
   box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
@@ -70,6 +73,15 @@ textarea:focus {
 
 textarea {
   min-height: 120px;
+  resize: vertical;
+}
+
+textarea.description {
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 0.8rem;
+  margin-bottom: 1.5rem;
+  font-size: 1rem;
   resize: vertical;
 }
 
@@ -106,6 +118,8 @@ input[type="submit"]:active {
   color: var(--primary-color);
   margin-bottom: 1.5rem;
   font-size: 1.2rem;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.5rem;
 }
 
 .experience-entry, .education-entry, .language-entry {
@@ -137,6 +151,23 @@ select {
   border: 2px solid #e0e0e0;
   border-radius: 8px;
   font-size: 1rem;
+}
+
+input[name="linkedin"] {
+  border: 2px dashed var(--accent-color);
+  background-color: #e7f3fe;
+  padding: 0.8rem;
+  margin-bottom: 1.5rem;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+input[name="linkedin"]:focus {
+  border-color: var(--primary-color);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
 }
 
 @media (max-width: 768px) {
