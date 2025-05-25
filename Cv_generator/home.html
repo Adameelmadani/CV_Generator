@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Europass CV Generator</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="header">
+      <div class="user-info">
+        <span id="userEmail"></span>
+      </div>
+      <button
+        class="logout-btn"
+        onclick="logout()"
+        style="display: none"
+        id="logoutBtn"
+      >
+        Déconnexion
+      </button>
+    </div>
+
+    <h2>Générateur de CV Europass</h2>
+
+    <!-- Indicateur d'étapes -->
+    <div class="steps-indicator">
+      <div class="step active" data-step="1">
+        <div class="step-number">1</div>
+        <div class="step-title">Informations Personnelles</div>
+      </div>
+      <div class="step" data-step="2">
+        <div class="step-number">2</div>
+        <div class="step-title">Emploi Recherché</div>
+      </div>
+      <div class="step" data-step="3">
+        <div class="step-number">3</div>
+        <div class="step-title">Expérience</div>
+      </div>
+      <div class="step" data-step="4">
+        <div class="step-number">4</div>
+        <div class="step-title">Formation</div>
+      </div>
+      <div class="step" data-step="5">
+        <div class="step-number">5</div>
+        <div class="step-title">Langues</div>
+      </div>
+      <div class="step" data-step="6">
+        <div class="step-number">6</div>
+        <div class="step-title">Compétences</div>
+      </div>
+    </div>
+
+    <form
+      id="cvForm"
+      action="generate_cv.php"
+      method="POST"
+      enctype="multipart/form-data"
+    >
+      <!-- Étape 1: Informations Personnelles -->
+      <div class="step-content active" data-step="1">
+        <div class="section">
+          <h3>Information Personnelle</h3>
+          <input type="text" name="nom" placeholder="Nom" required />
+          <input type="text" name="prenom" placeholder="Prénom" required />
+          <input type="date" name="date_naissance" required />
+          <input
+            type="text"
+            name="nationalite"
+            placeholder="Nationalité"
+            required
+          />
+          <input type="text" name="adresse" placeholder="Adresse" required />
+          <input type="email" name="email" placeholder="Email" required />
+          <input type="tel" name="telephone" placeholder="Téléphone" required />
+          <input type="url" name="linkedin" placeholder="LinkedIn" />
+          <textarea
+            class="description"
+            name="profil_description"
+            placeholder="Brève description personnelle"
+          ></textarea>
+        </div>
+      </div>
+
+      <!-- Étape 2: Emploi Recherché -->
+      <div class="step-content" data-step="2">
+        <div class="section">
+          <h3>Emploi Recherché</h3>
+          <input type="text" name="emploi_recherche" required />
+          <textarea
+            class="description"
+            name="emploi_description"
+            placeholder="Description de l'emploi recherché"
+          ></textarea>
+        </div>
+      </div>
+
+      <!-- Étape 3: Expérience Professionnelle -->
+      <div class="step-content" data-step="3">
+        <div class="section">
+          <h3>Expérience Professionnelle</h3>
+          <div id="experiences">
+            <div class="experience-entry">
+              <input
+                type="text"
+                name="experience_dates[]"
+                placeholder="Dates (De - À)"
+              />
+              <input
+                type="text"
+                name="experience_poste[]"
+                placeholder="Poste"
+              />
+              <input
+                type="text"
+                name="experience_employeur[]"
+                placeholder="Employeur"
+              />
+              <textarea
+                name="experience_description[]"
+                placeholder="Description des responsabilités"
+              ></textarea>
+            </div>
+          </div>
+          <button type="button" onclick="addExperience()">
+            + Ajouter une expérience
+          </button>
+        </div>
+      </div>
+
+      <!-- Étape 4: Formation -->
+      <div class="step-content" data-step="4">
+        <div class="section">
+          <h3>Formation</h3>
+          <div id="education">
+            <div class="education-entry">
+              <input
+                type="text"
+                name="education_dates[]"
+                placeholder="Dates (De - À)"
+              />
+              <input
+                type="text"
+                name="education_diplome[]"
+                placeholder="Diplôme"
+              />
+              <input
+                type="text"
+                name="education_etablissement[]"
+                placeholder="Établissement"
+              />
+              <textarea
+                class="description"
+                name="education_description[]"
+                placeholder="Description de la formation"
+              ></textarea>
+            </div>
+          </div>
+          <button type="button" onclick="addEducation()">
+            + Ajouter une formation
+          </button>
+        </div>
+      </div>
+
+      <!-- Étape 5: Langues -->
+      <div class="step-content" data-step="5">
+        <div class="section">
+          <h3>Langues</h3>
+          <div id="languages">
+            <div class="language-entry">
+              <input type="text" name="langue[]" placeholder="Langue" />
+              <select name="niveau[]">
+                <option value="A1">A1</option>
+                <option value="A2">A2</option>
+                <option value="B1">B1</option>
+                <option value="B2">B2</option>
+                <option value="C1">C1</option>
+                <option value="C2">C2</option>
+              </select>
+              <textarea
+                class="description"
+                name="language_description[]"
+                placeholder="Description de la langue (ex: compétences orales/écrites)"
+              ></textarea>
+            </div>
+          </div>
+          <button type="button" onclick="addLanguage()">
+            + Ajouter une langue
+          </button>
+        </div>
+      </div>
+
+      <!-- Étape 6: Compétences -->
+      <div class="step-content" data-step="6">
+        <div class="section">
+          <h3>Compétences</h3>
+          <textarea
+            name="competences_numeriques"
+            placeholder="Compétences numériques"
+            required
+          ></textarea>
+          <textarea
+            name="competences_autres"
+            placeholder="Autres compétences"
+            required
+          ></textarea>
+        </div>
+      </div>
+
+      <!-- Navigation des étapes -->
+      <div class="step-navigation">
+        <button
+          type="button"
+          id="prevBtn"
+          onclick="changeStep(-1)"
+          style="display: none"
+        >
+          ← Précédent
+        </button>
+        <div class="step-info">
+          <span id="currentStepText">Étape 1 sur 6</span>
+        </div>
+        <button type="button" id="nextBtn" onclick="changeStep(1)">
+          Suivant →
+        </button>
+        <button type="submit" id="submitBtn" style="display: none">
+          Générer CV Europass
+        </button>
+      </div>
+    </form>
+
+    <script src="form.js"></script>
+  </body>
+</html>

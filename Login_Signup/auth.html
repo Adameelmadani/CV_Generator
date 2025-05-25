@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Authentification - CV Generator</title>
+    <link rel="stylesheet" href="auth_style.css">
+  </head>
+  <body>
+    <div class="container">
+      <div class="form-switch">
+        <div class="form-content" id="formContent">
+          <!-- Section Login -->
+          <div class="form-section login-section">
+            <h2>Connexion</h2>
+            <div class="alert" id="loginAlert"></div>
+
+            <form id="loginForm">
+              <div class="form-group">
+                <label for="login_email">Email</label>
+                <input
+                  type="email"
+                  id="login_email"
+                  name="login_email"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="login_password">Mot de passe</label>
+                <input
+                  type="password"
+                  id="login_password"
+                  name="login_password"
+                  required
+                />
+              </div>
+
+              <button type="submit" class="btn" id="loginBtn">
+                Se connecter
+              </button>
+
+              <div class="loading" id="loginLoading">
+                <div class="spinner"></div>
+                <p>Connexion en cours...</p>
+              </div>
+            </form>
+
+            <div class="toggle-container">
+              <p>
+                Pas encore de compte ?
+                <a href="#" class="toggle-link" onclick="toggleForm()"
+                  >S'inscrire</a
+                >
+              </p>
+            </div>
+          </div>
+
+          <!-- Section Signup -->
+          <div class="form-section signup-section">
+            <h2>Inscription</h2>
+            <div class="alert" id="signupAlert"></div>
+
+            <form id="signupForm">
+              <div class="form-group">
+                <label for="signup_email">Email</label>
+                <input
+                  type="email"
+                  id="signup_email"
+                  name="signup_email"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="signup_password">Mot de passe</label>
+                <input
+                  type="password"
+                  id="signup_password"
+                  name="signup_password"
+                  required
+                  minlength="6"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="signup_tel">Téléphone</label>
+                <input type="tel" id="signup_tel" name="signup_tel" required />
+              </div>
+
+              <button type="submit" class="btn" id="signupBtn">
+                S'inscrire
+              </button>
+
+              <div class="loading" id="signupLoading">
+                <div class="spinner"></div>
+                <p>Inscription en cours...</p>
+              </div>
+            </form>
+
+            <div class="toggle-container">
+              <p>
+                Déjà un compte ?
+                <a href="#" class="toggle-link" onclick="toggleForm()"
+                  >Se connecter</a
+                >
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="auth.js">
+      
+    </script>
+  </body>
+</html>

@@ -136,3 +136,144 @@ window.onload = function() {
         addLanguage();
     }
 };
+// Vérifier la session au chargement
+document.addEventListener('DOMContentLoaded', function() {
+    checkSession();
+});
+
+function checkSession() {
+    fetch('../Login_Signup/check_session.php')
+        .then(response => response.json())
+        .then(data => {
+            if (data.logged_in) {
+                document.getElementById('userEmail').textContent = `Connecté: ${data.user_email}`;
+                document.getElementById('logoutBtn').style.display = 'block';
+                
+                // Pré-remplir les champs email et téléphone
+                document.querySelector('input[name="email"]').value = data.user_email;
+                document.querySelector('input[name="telephone"]').value = data.user_tel || '';
+            }
+        })
+        .catch(error => console.log('Pas de session active'));
+}
+
+function logout() {
+    if (confirm('Êtes-vous sûr de vouloir vous déconnecter ?')) {
+        const formData = new FormData();
+        formData.append('logout', '1');
+        
+        fetch('../Login_Signup/logout.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                window.location.href = '../' + data.redirect;
+            }
+        });
+    }
+}
+// Variables globales pour la navigation
+let currentStep = 1;
+const totalSteps = 6;
+
+// Fonctions de navigation par étapes
+function showStep(step) {
+    // Cacher toutes les étapes
+    document.querySelectorAll('.step-content').forEach(content => {
+        content.classList.remove('active');
+    });
+    
+    // Afficher l'étape courante
+    document.querySelector(`.step-content[data-step="${step}"]`).classList.add('active');
+    
+    // Mettre à jour l'indicateur d'étapes
+    document.querySelectorAll('.step').forEach(stepEl => {
+        stepEl.classList.remove('active', 'completed');
+    });
+    
+    // Marquer les étapes complétées
+    for (let i = 1; i < step; i++) {
+        document.querySelector(`.step[data-step="${i}"]`).classList.add('completed');
+    }
+    
+    // Marquer l'étape active
+    document.querySelector(`.step[data-step="${step}"]`).classList.add('active');
+    
+    // Gestion des boutons de navigation
+    document.getElementById('prevBtn').style.display = step === 1 ? 'none' : 'inline-block';
+    document.getElementById('nextBtn').style.display = step === totalSteps ? 'none' : 'inline-block';
+    document.getElementById('submitBtn').style.display = step === totalSteps ? 'inline-block' : 'none';
+    
+    // Mettre à jour le texte de l'étape
+    document.getElementById('currentStepText').textContent = `Étape ${step} sur ${totalSteps}`;
+}
+
+function changeStep(direction) {
+    const newStep = currentStep + direction;
+    
+    if (newStep >= 1 && newStep <= totalSteps) {
+        // Valider l'étape courante avant de passer à la suivante
+        if (direction > 0 && !validateCurrentStep()) {
+            return;
+        }
+        
+        currentStep = newStep;
+        showStep(currentStep);
+    }
+}
+
+function validateCurrentStep() {
+    const currentStepContent = document.querySelector(`.step-content[data-step="${currentStep}"]`);
+    const requiredFields = currentStepContent.querySelectorAll('input[required], textarea[required], select[required]');
+    let isValid = true;
+    
+    // Réinitialiser les styles d'erreur
+    requiredFields.forEach(field => field.style.borderColor = '');
+    
+    // Vérifier chaque champ requis
+    requiredFields.forEach(field => {
+        if (!field.value.trim()) {
+            field.style.borderColor = 'red';
+            isValid = false;
+        }
+    });
+    
+    // Validation spéciale pour les sections avec plusieurs entrées
+    if (currentStep === 3) { // Expérience
+        const experiences = document.querySelectorAll('#experiences .experience-entry');
+        if (experiences.length === 0) {
+            alert('Veuillez ajouter au moins une expérience professionnelle');
+            return false;
+        }
+    }
+    
+    if (currentStep === 4) { // Formation
+        const educations = document.querySelectorAll('#education .education-entry');
+        if (educations.length === 0) {
+            alert('Veuillez ajouter au moins une formation');
+            return false;
+        }
+    }
+    
+    if (currentStep === 5) { // Langues
+        const languages = document.querySelectorAll('#languages .language-entry');
+        if (languages.length === 0) {
+            alert('Veuillez ajouter au moins une langue');
+            return false;
+        }
+    }
+    
+    if (!isValid) {
+        alert('Veuillez remplir tous les champs obligatoires');
+    }
+    
+    return isValid;
+}
+
+// Initialisation au chargement de la page
+document.addEventListener('DOMContentLoaded', function() {
+    showStep(1);
+    checkSession();
+});
