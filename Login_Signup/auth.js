@@ -85,14 +85,13 @@ document
 
       const result = await response.json();
 
-      if (result.status === "success") {
-        showAlert(
+      if (result.status === "success") {        showAlert(
           "success",
           result.message || "Connexion réussie ! Redirection...",
           "login"
         );
         setTimeout(() => {
-          window.location.href = result.redirect || '../Cv_generator/home.html';
+          window.location.href = result.redirect || '../Cv_generator/user_home.html';
         }, 1500);
       } else {
         showAlert(
@@ -142,14 +141,13 @@ document
 
       const result = await response.json();
 
-      if (result.status === "success") {
-        showAlert(
+      if (result.status === "success") {        showAlert(
           "success",
           result.message || "Inscription réussie ! Redirection...",
           "signup"
         );
         setTimeout(() => {
-          window.location.href = result.redirect || '../Cv_generator/home.html';
+          window.location.href = result.redirect || '../Cv_generator/user_home.html';
         }, 1500);
       } else {
         showAlert(

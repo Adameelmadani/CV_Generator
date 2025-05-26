@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CV Generator - Tableau de bord</title>
+    <link rel="stylesheet" href="user_home.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <div class="logo">
+                    <i class="fas fa-file-alt"></i>
+                    <span>CV Generator</span>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="user-info">
+                    <span id="userEmail">utilisateur@email.com</span>
+                    <div class="user-menu">
+                        <button class="user-btn" onclick="toggleUserMenu()">
+                            <i class="fas fa-user-circle"></i>
+                        </button>
+                        <div class="user-dropdown" id="userDropdown">
+                            <a href="#" onclick="logout()">
+                                <i class="fas fa-sign-out-alt"></i>
+                                Déconnexion
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Welcome Section -->
+            <section class="welcome-section">
+                <div class="welcome-content">
+                    <h1>Bienvenue dans votre espace CV</h1>
+                    <p>Gérez vos CV, créez de nouveaux projets et accédez à toutes vos créations.</p>
+                </div>
+                <div class="quick-actions">
+                    <button class="btn btn-primary" onclick="createNewCV()">
+                        <i class="fas fa-plus"></i>
+                        Nouveau CV
+                    </button>
+                    <button class="btn btn-secondary" onclick="importCV()">
+                        <i class="fas fa-upload"></i>
+                        Importer CV
+                    </button>
+                </div>
+            </section>
+
+            <!-- CV Management Section -->
+            <section class="cv-section">
+                <div class="section-header">
+                    <h2>Mes CV</h2>
+                    <div class="view-controls">
+                        <button class="view-btn active" onclick="setView('grid')" id="gridViewBtn">
+                            <i class="fas fa-th"></i>
+                        </button>
+                        <button class="view-btn" onclick="setView('list')" id="listViewBtn">
+                            <i class="fas fa-list"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Loading State -->
+                <div class="loading" id="loadingCVs">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <span>Chargement de vos CV...</span>
+                </div>
+
+                <!-- Empty State -->
+                <div class="empty-state" id="emptyCVs" style="display: none;">
+                    <div class="empty-icon">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <h3>Aucun CV trouvé</h3>
+                    <p>Commencez par créer votre premier CV ou importez un CV existant.</p>
+                    <button class="btn btn-primary" onclick="createNewCV()">
+                        <i class="fas fa-plus"></i>
+                        Créer mon premier CV
+                    </button>
+                </div>
+
+                <!-- CV Grid -->
+                <div class="cv-grid" id="cvGrid">
+                    <!-- Les CV seront chargés dynamiquement ici -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal pour l'aperçu CV -->
+    <div class="modal" id="previewModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Aperçu du CV</h3>
+                <button class="close-btn" onclick="closeModal('previewModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <iframe id="previewFrame" src="" width="100%" height="600"></iframe>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('previewModal')">Fermer</button>
+                <button class="btn btn-primary" onclick="downloadCurrentCV()">
+                    <i class="fas fa-download"></i>
+                    Télécharger
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal pour l'import -->
+    <div class="modal" id="importModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Importer un CV</h3>
+                <button class="close-btn" onclick="closeModal('importModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="import-zone" id="importZone">
+                    <div class="import-content">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <h4>Glissez votre fichier XML ici</h4>
+                        <p>ou cliquez pour sélectionner un fichier</p>
+                        <input type="file" id="fileInput" accept=".xml" hidden>
+                    </div>
+                </div>
+                <div class="import-progress" id="importProgress" style="display: none;">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <span id="progressText">Import en cours...</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('importModal')">Annuler</button>
+                <button class="btn btn-primary" id="importBtn" onclick="selectFile()" disabled>
+                    <i class="fas fa-upload"></i>
+                    Importer
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de confirmation de suppression -->
+    <div class="modal" id="deleteModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Confirmer la suppression</h3>
+                <button class="close-btn" onclick="closeModal('deleteModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Êtes-vous sûr de vouloir supprimer ce CV ? Cette action est irréversible.</p>
+                <div class="cv-info">
+                    <strong id="deleteCVName">Nom du CV</strong>
+                    <span id="deleteCVDate">Date de création</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('deleteModal')">Annuler</button>
+                <button class="btn btn-danger" onclick="confirmDelete()">
+                    <i class="fas fa-trash"></i>
+                    Supprimer
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de sélection de format de téléchargement -->
+    <div class="modal" id="downloadFormatModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Choisir le format de téléchargement</h3>
+                <button class="close-btn" onclick="closeModal('downloadFormatModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Sélectionnez le format dans lequel vous souhaitez télécharger votre CV :</p>
+                <div class="format-selection">
+                    <label class="format-option">
+                        <input type="radio" name="downloadFormat" value="pdf" checked>
+                        <div class="format-content">
+                            <div class="format-header">
+                                <i class="fas fa-file-pdf format-icon pdf"></i>
+                                <span class="format-label">PDF uniquement</span>
+                            </div>
+                            <span class="format-description">Format standard pour impression et partage professionnel</span>
+                        </div>
+                    </label>
+                    <label class="format-option">
+                        <input type="radio" name="downloadFormat" value="xml">
+                        <div class="format-content">
+                            <div class="format-header">
+                                <i class="fas fa-code format-icon xml"></i>
+                                <span class="format-label">XML uniquement</span>
+                            </div>
+                            <span class="format-description">Données structurées pour import dans d'autres applications</span>
+                        </div>
+                    </label>
+                    <label class="format-option">
+                        <input type="radio" name="downloadFormat" value="both">
+                        <div class="format-content">
+                            <div class="format-header">
+                                <i class="fas fa-archive format-icon zip"></i>
+                                <span class="format-label">PDF + XML (ZIP)</span>
+                            </div>
+                            <span class="format-description">Les deux formats dans un fichier ZIP compressé</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('downloadFormatModal')">Annuler</button>
+                <button class="btn btn-primary" onclick="confirmDownload()">
+                    <i class="fas fa-download"></i>
+                    Télécharger
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="user_home.js"></script>
+</body>
+</html>

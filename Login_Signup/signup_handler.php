@@ -47,12 +47,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Récupérer l'ID nouvellement inséré
         $userId = $pdo->lastInsertId();
         $_SESSION['userId'] = $userId;
-        $_SESSION['userEmail'] = $email;
-
-        echo json_encode([
+        $_SESSION['userEmail'] = $email;        echo json_encode([
             'status' => 'success',
             'message' => 'Inscription réussie !',
-            'redirect' => '../Cv_generator/home.html'
+            'redirect' => '../Cv_generator/user_home.html'
         ]);
         exit();
     } catch (Exception $e) {
