@@ -1,0 +1,118 @@
+\documentclass{templates/academic1.cls}
+
+% Set personal information
+\name{John Doe}
+\course{Bachelor of Technology}
+\department{Computer Science \& Engineering}
+\institute{National Institute of Technology, Patna}
+\phone{9876543210}
+\emaila{john.doe@gmail.com}
+\emailb{john.cse@nitp.ac.in}
+\github{johndoe}
+\linkedin{john-doe-123}
+\logopath{logo.png} % Make sure you have logo.png in your directory
+
+\begin{document}
+
+% Create header
+\makeheader
+
+% Education Section
+\section{\textbf{Education}}
+\vspace{1mm}
+\educationtable{
+    B.Tech., CSE & National Institute of Technology, Patna & 8.5 CGPA & 2020-2024
+}{
+    Senior Secondary & ABC School, CBSE Board & 92\% & 2020
+}{
+    Secondary & XYZ School, CBSE Board & 95\% & 2018
+}
+\vspace{-4mm}
+
+% Experience Section
+\section{\textbf{Experience}}
+\vspace{-0.4mm}
+\resumeSubHeadingListStart
+
+\experienceentry{Software Development Intern}{https://www.google.com}{Mountain View, CA}{Google}{June 2023 - Aug 2023}
+\resumeItemListStart
+    \item Developed machine learning models for search ranking, improving relevance by 15\%
+    \item Implemented distributed systems using C++ and Python, handling 1M+ queries per second
+    \item Collaborated with cross-functional teams to optimize infrastructure performance
+    \item Presented findings to senior leadership, resulting in adoption across multiple products
+\resumeItemListEnd
+
+\experienceentry{Research Assistant}{https://www.nitp.ac.in}{Patna, India}{NIT Patna}{Jan 2023 - May 2023}
+\resumeItemListStart
+    \item Conducted research on deep learning applications in computer vision
+    \item Published paper in IEEE conference with 95\% accuracy on benchmark datasets
+    \item Mentored 5 junior students on machine learning fundamentals
+    \item Secured funding of ₹2,00,000 for research equipment and resources
+\resumeItemListEnd
+
+\resumeSubHeadingListEnd
+\vspace{-6mm}
+
+% Projects Section
+\section{\textbf{Projects}}
+\vspace{-0.4mm}
+\resumeSubHeadingListStart
+
+\projectentry{AI-Powered Code Review System}{Python, TensorFlow, Flask, React}{Oct 2023 - Dec 2023}{https://github.com/johndoe/code-review-ai}{
+    \item Developed an automated code review system using transformer models
+    \item Implemented real-time bug detection with 87\% accuracy rate
+    \item Created web interface serving 100+ daily active users
+    \item Integrated with GitHub API for seamless workflow integration
+}
+
+\projectentry{Distributed File Storage System}{Go, Docker, Kubernetes, MongoDB}{Aug 2023 - Sep 2023}{https://github.com/johndoe/distributed-storage}{
+    \item Built scalable file storage system handling 10TB+ data
+    \item Implemented data replication and fault tolerance mechanisms
+    \item Achieved 99.9\% uptime with automatic failover capabilities
+    \item Optimized for low latency with sub-100ms response times
+}
+
+\resumeSubHeadingListEnd
+\vspace{-8mm}
+
+% Skills Section
+\section{\textbf{Skills}}
+\vspace{-0.4mm}
+\resumeHeadingSkillStart
+\skillentry{Programming Languages}{C++, Python, Java, JavaScript, Go, SQL}
+\skillentry{Technologies}{TensorFlow, PyTorch, React, Node.js, Docker, Kubernetes}
+\skillentry{Tools}{Git, Jenkins, AWS, GCP, MongoDB, PostgreSQL}
+\resumeHeadingSkillEnd
+\vspace{-2mm}
+
+% Certifications Section
+\section{\textbf{Certifications}}
+\vspace{-0.4mm}
+\resumeSubHeadingListStart
+\resumePOR{Google Cloud Professional}{, \href{https://cloud.google.com/certification}{Cloud Architect}}{Dec 2023}
+\resumePOR{AWS Solutions Architect}{, \href{https://aws.amazon.com/certification}{Associate Level}}{Nov 2023}
+\resumePOR{TensorFlow Developer}{, \href{https://www.tensorflow.org/certificate}{Certificate}}{Oct 2023}
+\resumeSubHeadingListEnd
+\vspace{-6mm}
+
+% Achievements Section
+\section{\textbf{Achievements}}
+\vspace{-0.2mm}
+\resumeSubHeadingListStart
+\resumePOR{}{\href{https://example.com}{Winner, National Coding Championship 2023}}{}
+\resumePOR{}{\href{https://example.com}{Best Paper Award, IEEE Conference on AI 2023}}{}
+\resumePOR{}{\href{https://example.com}{Dean's List for Academic Excellence (2021-2023)}}{}
+\resumeSubHeadingListEnd
+\vspace{-6mm}
+
+% Positions of Responsibility Section
+\section{\textbf{Positions of Responsibility}}
+\vspace{-0.4mm}
+\resumeSubHeadingListStart
+\resumePOR{\href{https://example.com}{President}, }{Computer Science Society, NITP}{2023-2024}
+\resumePOR{\href{https://example.com}{Technical Head}, }{Coding Club, NITP}{2022-2023}
+\resumePOR{\href{https://example.com}{Mentor}, }{Google Summer of Code}{2023}
+\resumeSubHeadingListEnd
+\vspace{-5mm}
+
+\end{document}
