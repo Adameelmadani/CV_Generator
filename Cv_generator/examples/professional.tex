@@ -1,0 +1,68 @@
+\documentclass{templates/modern1}
+\author{John Doe}
+\title{John Doe's CV}
+
+\begin{document}
+    
+    \makeheader{Your Location}{youremail@yourdomain.com}{+1-234-567-8900}{https://yourwebsite.com}{https://linkedin.com/in/yourusername}{https://github.com/yourusername}
+
+    \section{Profil}
+    \begin{onecolentry}
+        Brief professional summary highlighting your key strengths and career objectives.
+    \end{onecolentry}
+
+    \section{Education}
+    \educationentry{BS}{Sept 2020 – May 2024}{University Name}{Computer Science}{
+        \item GPA: 3.8/4.0
+        \item Relevant Coursework: Data Structures, Algorithms, Software Engineering
+        \item Dean's List: Fall 2022, Spring 2023
+    }
+    
+    \section{Certificats}
+    \experienceentry{New York, NY}{June 2023 – Present}{Company Name}{Software Engineer}{
+        \item Developed and maintained web applications using React and Node.js
+        \item Improved application performance by 40\% through code optimization
+        \item Collaborated with cross-functional teams in Agile environment
+    }
+    
+    \section{Experience}
+    \experienceentry{New York, NY}{June 2023 – Present}{Company Name}{Software Engineer}{
+        \item Developed and maintained web applications using React and Node.js
+        \item Improved application performance by 40\% through code optimization
+        \item Collaborated with cross-functional teams in Agile environment
+    }
+
+    \vspace{0.2 cm}
+    
+    \experienceentry{Boston, MA}{June 2022 – Aug 2022}{Another Company}{Software Engineering Intern}{
+        \item Built RESTful APIs using Python and Flask
+        \item Implemented automated testing reducing bug reports by 25\%
+        \item Participated in code reviews and sprint planning meetings
+    }
+
+    \section{Projects}
+    \projectentry{\href{https://github.com/username/project}{github.com/username/project}}{Project Name}{
+        \item Description of what the project does and technologies used
+        \item Key achievements or metrics if applicable
+        \item Tools Used: Python, Django, PostgreSQL
+    }
+
+    \section{Skills}
+    \skillsentry{Programming Languages}{Python, JavaScript, Java, C++}
+    
+    \vspace{0.2 cm}
+    
+    \skillsentry{Technologies \& Tools}{React, Node.js, Git, Docker, AWS}
+
+    \vspace{0.2 cm}
+    
+    \skillsentry{Technologies \& Tools}{React, Node.js, Git, Docker, AWS}
+    
+    \section{Languages}
+        \begin{onecolentry}
+            \textbf{French:} B2 Level \hfill
+            \textbf{English:} C1 Level \hfill
+            \textbf{Arabic:} Native Language
+        \end{onecolentry}
+    
+\end{document}
