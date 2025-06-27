@@ -28,10 +28,16 @@ export default function SignUpPage() {
     marketingEmails: true,
   })
 
-  const [passwordStrength, setPasswordStrength] = useState({
+  // Fix the type of passwordStrength
+  const [passwordStrength, setPasswordStrength] = useState<{
+    score: number;
+    feedback: string[];
+  }>({
     score: 0,
     feedback: [],
   })
+
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   const searchParams = useSearchParams()
   const selectedPlan = searchParams.get("plan")
@@ -91,29 +97,44 @@ export default function SignUpPage() {
     e.preventDefault()
 
     if (formData.password !== formData.confirmPassword) {
-      alert("Passwords don't match")
-      return
+      setErrors({ confirmPassword: "Passwords don't match" });
+      return;
     }
 
     if (!formData.agreeToTerms) {
-      alert("Please agree to the terms and conditions")
-      return
+      setErrors({ agreeToTerms: "Please agree to the terms and conditions" });
+      return;
     }
 
     setIsLoading(true)
+    
+    try {
+      const response = await fetch('http://localhost/CV_Generator/backend/auth/signup.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...formData,
+          selectedPlan,
+          accountType
+        }),
+      });
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 2000))
+      const data = await response.json();
 
-    console.log("Sign up attempt:", { ...formData, selectedPlan, accountType })
-
-    // Redirect to homepage with signup success parameter
-    const redirectUrl = selectedPlan
-      ? `/?signup=success&plan=${selectedPlan}&user=new&type=${accountType}`
-      : `/?signup=success&user=new&type=${accountType}`
-
-    window.location.href = redirectUrl
-    setIsLoading(false)
+      if (data.success) {
+        window.location.href = data.redirect;
+      } else {
+        setErrors(data.errors);
+      }
+    } catch (error) {
+      setErrors({
+        general: 'An error occurred. Please try again.',
+      });
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {

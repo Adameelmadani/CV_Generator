@@ -13,6 +13,12 @@ import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 
 export default function LoginPage() {
+  // Add the errors state
+  const [errors, setErrors] = useState({
+    email: "",
+    password: "",
+    general: ""
+  })
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [formData, setFormData] = useState({
@@ -24,23 +30,40 @@ export default function LoginPage() {
   const searchParams = useSearchParams()
   const selectedPlan = searchParams.get("plan")
 
+  // Modified handleSubmit function for login page
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500))
-
-    console.log("Login attempt:", { ...formData, selectedPlan })
-
-    // Redirect to homepage with login success parameter
-    const redirectUrl = selectedPlan
-      ? `/?login=success&plan=${selectedPlan}&user=returning`
-      : "/?login=success&user=returning"
-
-    window.location.href = redirectUrl
-    setIsLoading(false)
-  }
+    e.preventDefault();
+    setIsLoading(true);
+    
+    try {
+      const response = await fetch('http://localhost/CV_Generator/backend/auth/login.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        window.location.href = data.redirect;
+      } else {
+        setErrors({
+          email: data.errors.email || '',
+          password: data.errors.password || '',
+          general: data.errors.general || '',
+        });
+      }
+    } catch (error) {
+      setErrors({
+        ...errors,
+        general: 'An error occurred. Please try again.',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target

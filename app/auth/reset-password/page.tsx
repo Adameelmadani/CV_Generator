@@ -183,44 +183,48 @@ export default function ResetPasswordPage() {
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (!validateForm()) {
-      return
+      return;
     }
 
-    setIsSubmitting(true)
-    setErrors((prev) => ({ ...prev, general: "" }))
+    setIsSubmitting(true);
+    setErrors((prev) => ({ ...prev, general: "" }));
 
     try {
-      // Simulate API call to reset password
-      await new Promise((resolve, reject) => {
-        setTimeout(() => {
-          // Simulate random success/failure for demo
-          if (Math.random() > 0.1) {
-            resolve(true)
-          } else {
-            reject(new Error("Failed to reset password"))
-          }
-        }, 2000)
-      })
-
-      console.log("Password reset successful:", {
-        token,
-        email,
-        newPassword: formData.password,
-      })
-
-      setIsSuccess(true)
+      const response = await fetch('http://localhost/CV_Generator/backend/auth/reset-password.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          token,
+          password: formData.password,
+          confirmPassword: formData.confirmPassword
+        }),
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        setIsSuccess(true);
+      } else {
+        setErrors({
+          ...errors,
+          ...data.errors,
+          general: data.errors.general || 'Failed to reset password'
+        });
+      }
     } catch (error) {
       setErrors((prev) => ({
         ...prev,
-        general: "Failed to reset password. Please try again.",
-      }))
+        general: 'An error occurred. Please try again.',
+      }));
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   const getPasswordStrengthColor = (): string => {
     if (passwordStrength.score <= 2) return "bg-red-500"

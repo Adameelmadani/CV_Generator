@@ -14,17 +14,45 @@ export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
+  const [errors, setErrors] = useState({
+    email: "",
+    general: ""
+  })
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
-
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500))
-
-    console.log("Password reset request for:", email)
-    setIsSubmitted(true)
-    setIsLoading(false)
+    setErrors({ email: "", general: "" })
+  
+    try {
+      const response = await fetch('http://localhost/CV_Generator/backend/auth/forgot-password.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      })
+      
+      const data = await response.json()
+      
+      if (data.success) {
+        setIsSubmitted(true)
+      } else {
+        // Fix the error handling here
+        setErrors({
+          email: data.errors?.email || '',
+          general: data.errors?.general || 'Failed to process request'
+        })
+      }
+    } catch (error) {
+      // Fix this to include all required properties
+      setErrors({
+        email: '',
+        general: 'An error occurred. Please try again.'
+      })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   if (isSubmitted) {
