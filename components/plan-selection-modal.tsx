@@ -79,18 +79,6 @@ export function PlanSelectionModal({ isOpen, onClose, onSelectPlan }: PlanSelect
   const handleSelectPlan = (planName: string) => {
     onSelectPlan(planName)
     onClose()
-
-    // Handle different flows based on plan selection
-    if (planName === "Start Free") {
-      // Free plan - go directly to CV builder without registration
-      window.location.href = "/builder"
-    } else if (planName === "Create Account") {
-      // Free account - redirect to signup page
-      window.location.href = "/auth/signup"
-    } else if (planName === "Go Premium") {
-      // Premium plan - redirect to signup with premium plan
-      window.location.href = "/auth/signup?plan=premium"
-    }
   }
 
   const getColorClasses = (color: string, popular: boolean) => {

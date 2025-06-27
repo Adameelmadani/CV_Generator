@@ -33,15 +33,12 @@ export default function LoginPage() {
 
     console.log("Login attempt:", { ...formData, selectedPlan })
 
-    // After successful login, redirect based on plan
-    if (selectedPlan && selectedPlan !== "free") {
-      // Redirect to payment/billing page for paid plans
-      window.location.href = `/billing?plan=${selectedPlan}`
-    } else {
-      // Redirect to CV builder
-      window.location.href = "/builder"
-    }
+    // Redirect to homepage with login success parameter
+    const redirectUrl = selectedPlan
+      ? `/?login=success&plan=${selectedPlan}&user=returning`
+      : "/?login=success&user=returning"
 
+    window.location.href = redirectUrl
     setIsLoading(false)
   }
 
@@ -55,7 +52,14 @@ export default function LoginPage() {
 
   const handleSocialLogin = (provider: string) => {
     console.log(`Login with ${provider}`)
-    // Handle social login
+    // Handle social login - redirect to homepage after successful login
+    setTimeout(() => {
+      const redirectUrl = selectedPlan
+        ? `/?login=success&plan=${selectedPlan}&user=returning&provider=${provider}`
+        : `/?login=success&user=returning&provider=${provider}`
+
+      window.location.href = redirectUrl
+    }, 1000)
   }
 
   return (

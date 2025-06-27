@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
-import { FileText, Eye, EyeOff, Mail, Lock, User, ArrowLeft, Check } from "lucide-react"
+import { FileText, Eye, EyeOff, Mail, Lock, User, ArrowLeft, Check, Building } from "lucide-react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 
@@ -17,6 +17,7 @@ export default function SignUpPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [accountType, setAccountType] = useState<"user" | "enterprise" | null>(null)
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -104,17 +105,14 @@ export default function SignUpPage() {
     // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 2000))
 
-    console.log("Sign up attempt:", { ...formData, selectedPlan })
+    console.log("Sign up attempt:", { ...formData, selectedPlan, accountType })
 
-    // After successful signup, redirect based on plan
-    if (selectedPlan && selectedPlan !== "free") {
-      // Redirect to payment/billing page for paid plans
-      window.location.href = `/billing?plan=${selectedPlan}`
-    } else {
-      // Redirect to CV builder for free plan
-      window.location.href = "/builder"
-    }
+    // Redirect to homepage with signup success parameter
+    const redirectUrl = selectedPlan
+      ? `/?signup=success&plan=${selectedPlan}&user=new&type=${accountType}`
+      : `/?signup=success&user=new&type=${accountType}`
 
+    window.location.href = redirectUrl
     setIsLoading(false)
   }
 
@@ -132,7 +130,14 @@ export default function SignUpPage() {
 
   const handleSocialSignUp = (provider: string) => {
     console.log(`Sign up with ${provider}`)
-    // Handle social sign up
+    // Handle social sign up - redirect to homepage after successful signup
+    setTimeout(() => {
+      const redirectUrl = selectedPlan
+        ? `/?signup=success&plan=${selectedPlan}&user=new&type=${accountType}&provider=${provider}`
+        : `/?signup=success&user=new&type=${accountType}&provider=${provider}`
+
+      window.location.href = redirectUrl
+    }, 1000)
   }
 
   const getPasswordStrengthColor = () => {
@@ -147,15 +152,129 @@ export default function SignUpPage() {
     return "Strong"
   }
 
+  // Account type selection step
+  if (!accountType) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+        <div className="w-full max-w-4xl">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <Link href="/" className="inline-flex items-center space-x-2 text-blue-600 hover:text-blue-700 mb-6">
+              <ArrowLeft className="h-4 w-4" />
+              <span className="text-sm font-medium">Back to home</span>
+            </Link>
+
+            <div className="flex items-center justify-center space-x-2 mb-4">
+              <div className="bg-blue-600 p-3 rounded-xl">
+                <FileText className="h-8 w-8 text-white" />
+              </div>
+              <span className="text-2xl font-bold text-gray-900">CVCraft</span>
+            </div>
+
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Choose Your Account Type</h1>
+            <p className="text-gray-600">Select the option that best fits your needs</p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            {/* Individual Account */}
+            <Card
+              className="cursor-pointer border-2 border-gray-200 hover:border-blue-500 hover:shadow-xl transition-all duration-300"
+              onClick={() => setAccountType("user")}
+            >
+              <CardHeader className="text-center pb-6">
+                <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <User className="h-8 w-8 text-blue-600" />
+                </div>
+                <CardTitle className="text-2xl font-bold">Individual User</CardTitle>
+                <CardDescription>Perfect for job seekers and professionals</CardDescription>
+              </CardHeader>
+
+              <CardContent className="space-y-4">
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-3">
+                    <Check className="h-4 w-4 text-green-500" />
+                    <span className="text-sm text-gray-700">Personal CV creation</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <Check className="h-4 w-4 text-green-500" />
+                    <span className="text-sm text-gray-700">Professional templates</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <Check className="h-4 w-4 text-green-500" />
+                    <span className="text-sm text-gray-700">AI-powered suggestions</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <Check className="h-4 w-4 text-green-500" />
+                    <span className="text-sm text-gray-700">Cloud storage</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <Check className="h-4 w-4 text-green-500" />
+                    <span className="text-sm text-gray-700">Multiple export formats</span>
+                  </div>
+                </div>
+
+                <Button className="w-full bg-blue-600 hover:bg-blue-700">Continue as Individual</Button>
+              </CardContent>
+            </Card>
+
+            {/* Enterprise Account */}
+            <Card
+              className="cursor-pointer border-2 border-gray-200 hover:border-purple-500 hover:shadow-xl transition-all duration-300"
+              onClick={() => setAccountType("enterprise")}
+            >
+              <CardHeader className="text-center pb-6">
+                <div className="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Building className="h-8 w-8 text-purple-600" />
+                </div>
+                <CardTitle className="text-2xl font-bold">Enterprise</CardTitle>
+                <CardDescription>For teams, agencies, and organizations</CardDescription>
+              </CardHeader>
+
+              <CardContent className="space-y-4">
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-3">
+                    <Check className="h-4 w-4 text-green-500" />
+                    <span className="text-sm text-gray-700">Team collaboration</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <Check className="h-4 w-4 text-green-500" />
+                    <span className="text-sm text-gray-700">Bulk CV creation</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <Check className="h-4 w-4 text-green-500" />
+                    <span className="text-sm text-gray-700">Custom branding</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <Check className="h-4 w-4 text-green-500" />
+                    <span className="text-sm text-gray-700">Admin dashboard</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <Check className="h-4 w-4 text-green-500" />
+                    <span className="text-sm text-gray-700">Priority support</span>
+                  </div>
+                </div>
+
+                <Button className="w-full bg-purple-600 hover:bg-purple-700">Continue as Enterprise</Button>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center space-x-2 text-blue-600 hover:text-blue-700 mb-6">
+          <button
+            onClick={() => setAccountType(null)}
+            className="inline-flex items-center space-x-2 text-blue-600 hover:text-blue-700 mb-6"
+          >
             <ArrowLeft className="h-4 w-4" />
-            <span className="text-sm font-medium">Back to home</span>
-          </Link>
+            <span className="text-sm font-medium">Back to account type</span>
+          </button>
 
           <div className="flex items-center justify-center space-x-2 mb-4">
             <div className="bg-blue-600 p-3 rounded-xl">
@@ -165,13 +284,23 @@ export default function SignUpPage() {
           </div>
 
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Create your account</h1>
-          <p className="text-gray-600">Start building professional CVs in minutes</p>
+          <p className="text-gray-600">
+            {accountType === "enterprise"
+              ? "Set up your enterprise account"
+              : "Start building professional CVs in minutes"}
+          </p>
         </div>
 
         <Card className="shadow-xl border-0">
           <CardHeader className="space-y-1 pb-6">
-            <CardTitle className="text-2xl font-bold text-center">Sign Up</CardTitle>
-            <CardDescription className="text-center">Join thousands of professionals who trust CVCraft</CardDescription>
+            <CardTitle className="text-2xl font-bold text-center">
+              {accountType === "enterprise" ? "Enterprise Sign Up" : "Sign Up"}
+            </CardTitle>
+            <CardDescription className="text-center">
+              {accountType === "enterprise"
+                ? "Create your enterprise account to manage your team"
+                : "Join thousands of professionals who trust CVCraft"}
+            </CardDescription>
           </CardHeader>
 
           <CardContent className="space-y-6">
@@ -186,7 +315,7 @@ export default function SignUpPage() {
               <div className="text-center">
                 <Badge className="bg-green-100 text-green-800 px-4 py-2">
                   <Check className="h-4 w-4 mr-2" />
-                  Start with Free Plan - No Credit Card Required
+                  {accountType === "enterprise" ? "Enterprise Plan" : "Start with Free Plan - No Credit Card Required"}
                 </Badge>
               </div>
             )}
