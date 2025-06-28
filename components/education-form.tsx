@@ -1,248 +1,197 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Plus, Trash2, GraduationCap } from "lucide-react"
+import { Plus, Trash2 } from "lucide-react"
 import type { Education } from "../types/cv"
-
-const educationSchema = z
-  .object({
-    degree: z.string().min(2, "Le diplôme est requis"),
-    institution: z.string().min(2, "L'établissement est requis"),
-    city: z.string().min(2, "La ville est requise"),
-    startDate: z.string().min(1, "La date de début est requise"),
-    endDate: z.string().optional(),
-    isCurrently: z.boolean(),
-    description: z.string().optional(),
-  })
-  .refine(
-    (data) => {
-      if (!data.isCurrently && !data.endDate) {
-        return false
-      }
-      return true
-    },
-    {
-      message: "La date de fin est requise si vous n'êtes pas actuellement en formation",
-      path: ["endDate"],
-    },
-  )
+import { v4 as uuidv4 } from 'uuid'
 
 interface EducationFormProps {
   initialData?: Education[]
   onSubmit: (data: Education[]) => void
-  onSkip?: () => void
+  onSkip: () => void
 }
 
 export default function EducationForm({ initialData = [], onSubmit, onSkip }: EducationFormProps) {
-  const [educations, setEducations] = useState<Education[]>(
-    initialData.length > 0
+  const [educations, setEducations] = useState<Education[]>(() => {
+    // Initialize with initialData or create one empty education entry
+    return initialData?.length > 0 
       ? initialData
-      : [
-          {
-            id: crypto.randomUUID(),
-            degree: "",
-            institution: "",
-            city: "",
-            startDate: "",
-            endDate: "",
-            isCurrently: false,
-            description: "",
-          },
-        ],
-  )
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    watch,
-    setValue,
-    reset,
-  } = useForm({
-    resolver: zodResolver(
-      z.object({
-        educations: z.array(educationSchema).optional(),
-      }),
-    ),
+      : [{ 
+          id: uuidv4(), 
+          degree: "", 
+          institution: "", 
+          city: "", 
+          startDate: "", 
+          endDate: "", 
+          isCurrently: false, 
+          description: "" 
+        }]
   })
 
-  // Synchroniser les données du formulaire avec le state
-  useEffect(() => {
-    reset({ educations })
-  }, [educations, reset])
+  // Fix 1: Properly handle checkbox changes
+  const handleCurrentlyStudying = (index: number, checked: boolean) => {
+    setEducations(prev => 
+      prev.map((edu, i) => 
+        i === index 
+          ? { ...edu, isCurrently: checked, endDate: checked ? "" : edu.endDate } 
+          : edu
+      )
+    )
+  }
 
+  // Fix 2: Properly handle field changes
+  const handleFieldChange = (index: number, field: keyof Education, value: string | boolean) => {
+    setEducations(prev =>
+      prev.map((edu, i) =>
+        i === index ? { ...edu, [field]: value } : edu
+      )
+    )
+  }
+
+  // Fix 3: Properly add new education without losing data
   const addEducation = () => {
-    const newEducation: Education = {
-      id: crypto.randomUUID(),
-      degree: "",
-      institution: "",
-      city: "",
-      startDate: "",
-      endDate: "",
-      isCurrently: false,
-      description: "",
-    }
-    setEducations([...educations, newEducation])
+    setEducations(prev => [
+      ...prev,
+      { 
+        id: uuidv4(), 
+        degree: "", 
+        institution: "", 
+        city: "", 
+        startDate: "", 
+        endDate: "", 
+        isCurrently: false, 
+        description: "" 
+      }
+    ])
   }
 
+  // Fix 4: Properly remove education without causing issues
   const removeEducation = (id: string) => {
-    if (educations.length > 1) {
-      const filtered = educations.filter((edu) => edu.id !== id)
-      setEducations(filtered)
-    }
+    setEducations(prev => prev.filter(edu => edu.id !== id))
   }
 
-  const handleCurrentlyChange = (index: number, checked: boolean) => {
-    const updated = [...educations]
-    updated[index].isCurrently = checked
-    if (checked) {
-      updated[index].endDate = ""
-    }
-    setEducations(updated)
-  }
-
-  const handleFormSubmit = (data: { educations: Education[] }) => {
-    // Ajouter les IDs aux données avant de les soumettre
-    const educationsWithIds =
-      data.educations?.map((edu, index) => ({
-        ...edu,
-        id: educations[index]?.id || crypto.randomUUID(),
-      })) || []
-    onSubmit(educationsWithIds)
+  // Fix 5: Add validation to ensure the form isn't submitted empty
+  const handleSubmit = () => {
+    // Filter out completely empty education entries
+    const validEducations = educations.filter(
+      edu => edu.degree || edu.institution || edu.city || edu.startDate || edu.description
+    )
+    onSubmit(validEducations)
   }
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <GraduationCap className="h-5 w-5" />
-          Formation
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
-          {educations.map((education, index) => (
-            <div key={education.id} className="border rounded-lg p-4 space-y-4">
-              <div className="flex justify-between items-center">
-                <h3 className="font-medium">Formation {index + 1}</h3>
-                {educations.length > 1 && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => removeEducation(education.id)}
-                    className="text-destructive hover:text-destructive"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                )}
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor={`degree-${index}`}>Diplôme *</Label>
-                  <Input
-                    id={`degree-${index}`}
-                    {...register(`educations.${index}.degree`)}
-                    placeholder="Master en Informatique"
-                  />
-                  {errors.educations?.[index]?.degree && (
-                    <p className="text-sm text-destructive">{errors.educations[index]?.degree?.message}</p>
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor={`institution-${index}`}>Établissement *</Label>
-                  <Input
-                    id={`institution-${index}`}
-                    {...register(`educations.${index}.institution`)}
-                    placeholder="Université de Paris"
-                  />
-                  {errors.educations?.[index]?.institution && (
-                    <p className="text-sm text-destructive">{errors.educations[index]?.institution?.message}</p>
-                  )}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor={`city-${index}`}>Ville *</Label>
-                  <Input id={`city-${index}`} {...register(`educations.${index}.city`)} placeholder="Paris" />
-                  {errors.educations?.[index]?.city && (
-                    <p className="text-sm text-destructive">{errors.educations[index]?.city?.message}</p>
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor={`startDate-${index}`}>Date de début *</Label>
-                  <Input id={`startDate-${index}`} type="date" {...register(`educations.${index}.startDate`)} />
-                  {errors.educations?.[index]?.startDate && (
-                    <p className="text-sm text-destructive">{errors.educations[index]?.startDate?.message}</p>
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor={`endDate-${index}`}>Date de fin</Label>
-                  <Input
-                    id={`endDate-${index}`}
-                    type="date"
-                    {...register(`educations.${index}.endDate`)}
-                    disabled={watch(`educations.${index}.isCurrently`)}
-                  />
-                  {errors.educations?.[index]?.endDate && (
-                    <p className="text-sm text-destructive">{errors.educations[index]?.endDate?.message}</p>
-                  )}
-                </div>
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id={`currently-${index}`}
-                  checked={watch(`educations.${index}.isCurrently`)}
-                  onCheckedChange={(checked) => handleCurrentlyChange(index, checked as boolean)}
-                />
-                <Label htmlFor={`currently-${index}`}>Je suis actuellement en formation</Label>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor={`description-${index}`}>Description (optionnel)</Label>
-                <Textarea
-                  id={`description-${index}`}
-                  {...register(`educations.${index}.description`)}
-                  placeholder="Décrivez les matières principales, projets réalisés, mentions obtenues..."
-                  className="min-h-[80px]"
-                />
-              </div>
-            </div>
-          ))}
-
-          <Button
-            type="button"
-            variant="outline"
-            onClick={addEducation}
-            className="w-full flex items-center gap-2 bg-transparent"
-          >
-            <Plus className="h-4 w-4" />
+      <CardContent className="pt-6 space-y-4">
+        <div className="flex justify-between items-center">
+          <h2 className="text-xl font-semibold">Formation académique</h2>
+          <Button onClick={addEducation} size="sm" variant="outline">
+            <Plus className="h-4 w-4 mr-2" />
             Ajouter une formation
           </Button>
+        </div>
 
-          <div className="flex gap-4">
-            {onSkip && (
-              <Button type="button" variant="outline" onClick={onSkip} className="flex-1 bg-transparent">
-                Passer cette étape
-              </Button>
-            )}
-            <Button type="submit" className={onSkip ? "flex-1" : "w-full"}>
-              Continuer
-            </Button>
+        {educations.map((edu, index) => (
+          <div key={edu.id} className="space-y-4 p-4 border rounded-md">
+            <div className="flex justify-between">
+              <h3 className="font-medium">Formation {index + 1}</h3>
+              {educations.length > 1 && (
+                <Button
+                  onClick={() => removeEducation(edu.id)}
+                  size="sm"
+                  variant="ghost"
+                  className="text-red-600 hover:text-red-700"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor={`degree-${edu.id}`}>Diplôme / Formation</Label>
+                <Input
+                  id={`degree-${edu.id}`}
+                  value={edu.degree}
+                  onChange={(e) => handleFieldChange(index, "degree", e.target.value)}
+                  placeholder="Master en Informatique"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor={`institution-${edu.id}`}>Établissement</Label>
+                <Input
+                  id={`institution-${edu.id}`}
+                  value={edu.institution}
+                  onChange={(e) => handleFieldChange(index, "institution", e.target.value)}
+                  placeholder="Université de Paris"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor={`city-${edu.id}`}>Ville</Label>
+                <Input
+                  id={`city-${edu.id}`}
+                  value={edu.city}
+                  onChange={(e) => handleFieldChange(index, "city", e.target.value)}
+                  placeholder="Paris, France"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor={`startDate-${edu.id}`}>Date de début</Label>
+                <Input
+                  id={`startDate-${edu.id}`}
+                  type="month"
+                  value={edu.startDate}
+                  onChange={(e) => handleFieldChange(index, "startDate", e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center space-x-2 mb-2">
+                  <Checkbox 
+                    id={`currently-${edu.id}`} 
+                    checked={edu.isCurrently} 
+                    onCheckedChange={(checked) => handleCurrentlyStudying(index, checked === true)}
+                  />
+                  <Label htmlFor={`currently-${edu.id}`}>Je suis actuellement en formation</Label>
+                </div>
+                {!edu.isCurrently && (
+                  <>
+                    <Label htmlFor={`endDate-${edu.id}`}>Date de fin</Label>
+                    <Input
+                      id={`endDate-${edu.id}`}
+                      type="month"
+                      value={edu.endDate}
+                      onChange={(e) => handleFieldChange(index, "endDate", e.target.value)}
+                    />
+                  </>
+                )}
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor={`description-${edu.id}`}>Description (optionnel)</Label>
+              <Textarea
+                id={`description-${edu.id}`}
+                value={edu.description}
+                onChange={(e) => handleFieldChange(index, "description", e.target.value)}
+                placeholder="Décrivez votre parcours, spécialisations, projets académiques..."
+                rows={3}
+              />
+            </div>
           </div>
-        </form>
+        ))}
+
+        <div className="flex justify-between pt-4">
+          <Button variant="outline" onClick={onSkip}>
+            Passer cette étape
+          </Button>
+          <Button onClick={handleSubmit}>
+            Continuer
+          </Button>
+        </div>
       </CardContent>
     </Card>
   )
