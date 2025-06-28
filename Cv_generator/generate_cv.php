@@ -86,7 +86,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             . "      <institution>". htmlspecialchars($education_university[$i]) . "</institution>\n"
                             . "      <field>"      . htmlspecialchars($education_field[$i])      . "</field>\n";
                 if (trim($education_details[$i]) !== "") {
-                    $xmlContent .= "      <description>" . htmlspecialchars($education_details[$i]) . "</description>\n";
+                    $xmlContent .= "      <description>" . $education_details[$i]. "</description>\n";
                 }
                 $xmlContent .= "    </degree>\n";
             }
@@ -105,7 +105,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             . "      <issuer>"  . htmlspecialchars($certificate_issuer[$i])  . "</issuer>\n"
                             . "      <location>". htmlspecialchars($certificate_location[$i]). "</location>\n";
                 if (trim($certificate_description[$i]) !== "") {
-                    $xmlContent .= "      <description>" . htmlspecialchars($certificate_description[$i]) . "</description>\n";
+                    $xmlContent .= "      <description>" . $certificate_description[$i] . "</description>\n";
                 }
                 $xmlContent .= "    </certificate>\n";
             }
@@ -123,7 +123,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             . "      <period>"     . htmlspecialchars($experience_dates[$i])       . "</period>\n"
                             . "      <company>"    . htmlspecialchars($experience_company[$i])     . "</company>\n"
                             . "      <position>"   . htmlspecialchars($experience_position[$i])    . "</position>\n"
-                            . "      <description>". htmlspecialchars($experience_description[$i]) . "</description>\n"
+                            . "      <description>". $experience_description[$i] . "</description>\n"
                             . "    </experience>\n";
             }
         }
@@ -141,7 +141,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     $xmlContent .= "      <link>"     . htmlspecialchars($project_link[$i])        . "</link>\n";
                 }
                 if (trim($project_description[$i]) !== "") {
-                    $xmlContent .= "      <description>" . htmlspecialchars($project_description[$i]) . "</description>\n";
+                    $xmlContent .= "      <description>" . $project_description[$i] . "</description>\n";
                 }
                 $xmlContent .= "    </project>\n";
             }
@@ -242,7 +242,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // $sectionHeader .= "\\definecolor{primaryColor}{RGB}{255, 0, 0}";
     $sectionHeader .= "\\begin{document}\n";
-    $sectionHeader .= "    \\placelastupdatedtext\n";
     $sectionHeader .= "    \\begin{header}\n";
     /* $sectionHeader .= "        % Photo and name in a minipage\n";
     $sectionHeader .= "        \\begin{minipage}{0.2\\textwidth}\n";
@@ -288,7 +287,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $dates = htmlspecialchars($education_dates[$i]);
         $university = htmlspecialchars($education_university[$i]);
         $field = htmlspecialchars($education_field[$i]);
-        $detail = htmlspecialchars($education_details[$i]);
+        $detail = $education_details[$i];
 
         $sectionEducation .= "    \\begin{onecolentry}\n";
         $sectionEducation .= "        \\textbf{" . $degree . "} \\hfill " . $dates . " \\\\\n";
@@ -313,7 +312,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $dates = htmlspecialchars($certificate_date[$i]);
         $orga = htmlspecialchars($certificate_issuer[$i]);
         $location = htmlspecialchars($certificate_location[$i]);
-        $description = htmlspecialchars($certificate_description[$i]);
+        $description = $certificate_description[$i];
 
         $sectionCertificat .= "    \\begin{onecolentry}\n";
         $sectionCertificat .= "        \\textbf{" . $name . "} \\hfill " . $dates . " \\\\\n";
@@ -337,19 +336,29 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $dates = htmlspecialchars($experience_dates[$i]);
         $company = htmlspecialchars($experience_company[$i]);
         $position = htmlspecialchars($experience_position[$i]);
-        $description = htmlspecialchars($experience_description[$i]);
+        $description = $experience_description[$i];
 
         $sectionExperience .= "    \\begin{onecolentry}\n";
         $sectionExperience .= "        \\textbf{" . $place . "} \\hfill " . $dates . " \\\\\n";
-        if (!empty($university)) {
+        if (!empty($company)) {
             $sectionExperience .= "        \\textit{" . $company . "}";
-            if (!empty($field)) {
+            if (!empty($position)) {
                 $sectionExperience .= " \\hfill " . $position;
             }
             $sectionExperience .= " \\\\\n";
         }
         if (!empty($description)) {
-            $sectionExperience .= "        " . $description . "\n";
+            // Séparer la description par les sauts de ligne et créer une liste
+            $descriptionLines = array_filter(array_map('trim', explode("\n", $description)));
+            if (!empty($descriptionLines)) {
+                $sectionExperience .= "        \\begin{itemize}\n";
+                foreach ($descriptionLines as $line) {
+                    if (!empty($line)) {
+                        $sectionExperience .= "            \\item " . $line . "\n";
+                    }
+                }
+                $sectionExperience .= "        \\end{itemize}\n";
+            }
         }
         $sectionExperience .= "    \\end{onecolentry}\n\n";
         $sectionExperience .= "    \\vspace{0.05 cm}\n\n";
@@ -361,7 +370,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     for ($i = 0; $i < count($project_name); $i++) {
         $title = htmlspecialchars($project_name[$i]);
         // $technologies = $projects_technologies[$i];
-        $description = htmlspecialchars($project_description[$i]);
+        $description = $project_description[$i];
         $github = htmlspecialchars($project_link[$i]);
         // $github_display = htmlspecialchars($projects_github_display[$i]);
 
@@ -381,7 +390,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $sectionProjects .= "        \\item \\textbf{Description}: " . $description . "\n";
             }
             if (!empty($github)) {
-                $sectionProjects .= "        \\item \\textbf{GitHub Link}: \\hrefWithoutArrow{" . $github . "}{\\footnotesize\\faGithub\\hspace*{0.1cm} ba3 }\n";
+                $sectionProjects .= "        \\item \\textbf{GitHub Link}: \\hrefWithoutArrow{" . $github . "}{\\footnotesize\\faGithub\\hspace*{0.1cm}" . $title . "}\n";
             }
             $sectionProjects .= "    \\end{itemize}\n";
         }
@@ -393,7 +402,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $sectionSkills = "    \\section{Skills}\n";
     for ($i = 0; $i < count($skill_category); $i++) {
         $category = htmlspecialchars($skill_category[$i]);
-        $item = htmlspecialchars($skill_items[$i]);
+        $item = $skill_items[$i];
 
         $sectionSkills .= "    \\begin{onecolentry}\n";
         $sectionSkills .= "        \\textbf{" . $category . ":} " . $item . "\n";
