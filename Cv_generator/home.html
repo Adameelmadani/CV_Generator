@@ -4,258 +4,499 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Europass CV Generator</title>
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="styles1.css">
   </head>
-  <body>    <div class="header">
-      <div class="user-info">
-        <span id="userEmail"></span>
-      </div>      <div class="header-actions">
-        <a href="user_home.html" class="btn-link" id="myCvsLink" style="display: none;">
-          Mes CV
-        </a>
-        <button
-          class="logout-btn"
-          onclick="logout()"
-          style="display: none"
-          id="logoutBtn"
-        >
-          Déconnexion
-        </button>
+  <body>
+    <div class="container">
+      <div class="header">
+        <div class="header-actions">
+          <a href="user_home.html" class="btn-link" id="myCvsLink" style="display: none;">
+            Mes CV
+          </a>
+          <button class="logout-btn" onclick="logout()" style="display: none" id="logoutBtn">
+            Déconnexion
+          </button>
+        </div>
+        <h2>Générateur de CV Moderne</h2>
+        <p>Créez votre CV professionnel en quelques étapes</p>
       </div>
+
+      <!-- Indicateur d'étapes -->
+      <div class="steps-indicator">
+        <div class="step active" data-step="1">
+          <div class="step-number">1</div>
+          <div class="step-title">Informations Personnelles</div>
+        </div>
+        <div class="step" data-step="2">
+          <div class="step-number">2</div>
+          <div class="step-title">Profil</div>
+        </div>
+        <div class="step" data-step="3">
+          <div class="step-number">3</div>
+          <div class="step-title">Formation</div>
+        </div>
+        <div class="step" data-step="4">
+          <div class="step-number">4</div>
+          <div class="step-title">Certificats</div>
+        </div>
+        <div class="step" data-step="5">
+          <div class="step-number">5</div>
+          <div class="step-title">Expérience</div>
+        </div>
+        <div class="step" data-step="6">
+          <div class="step-number">6</div>
+          <div class="step-title">Projets</div>
+        </div>
+        <div class="step" data-step="7">
+          <div class="step-number">7</div>
+          <div class="step-title">Compétences</div>
+        </div>
+        <div class="step" data-step="8">
+          <div class="step-number">8</div>
+          <div class="step-title">Langues</div>
+        </div>
+      </div>
+
+      <form id="cvForm" action="generate_cv_fixed.php" method="POST" enctype="multipart/form-data">
+        <div class="form-container">
+          <!-- Hidden field for CV editing -->
+          <input type="hidden" id="editing_cv_id" name="editing_cv_id" value="" />
+          
+          <!-- Étape 1: Informations Personnelles -->
+          <div class="step-content active" data-step="1">
+            <div class="section">
+              <h3>Informations Personnelles</h3>
+              <div class="two-column">
+                <input type="text" name="nom" placeholder="Nom *" required />
+                <input type="text" name="prenom" placeholder="Prénom *" required />
+              </div>
+              <input type="text" name="location" placeholder="Localisation (ex: Paris, France)" required />
+              <input type="email" name="email" placeholder="Email *" required />
+              <input type="tel" name="telephone" placeholder="Téléphone *" required />
+              <input type="text" name="website" placeholder="Site web (optionnel)" />
+              <input type="text" name="linkedin" placeholder="LinkedIn (optionnel)" />
+              <input type="text" name="github" placeholder="GitHub (optionnel)" />
+            </div>
+          </div>
+
+          <!-- Étape 2: Profil -->
+          <div class="step-content" data-step="2">
+            <div class="section">
+              <h3>Profil Professionnel</h3>
+              <textarea name="profil_description" placeholder="Résumé professionnel mettant en avant vos points forts et objectifs de carrière *" required></textarea>
+            </div>
+          </div>
+
+          <!-- Étape 3: Formation -->
+          <div class="step-content" data-step="3">
+            <div class="section">
+              <h3>Formation</h3>
+              <div id="education">
+                <div class="entry-item education-entry">
+                  <div class="two-column">
+                    <input type="text" name="education_degree[]" placeholder="Diplôme (ex: BS, Master, etc.)" />
+                    <input type="text" name="education_dates[]" placeholder="Dates (ex: Sept 2020 – Mai 2024)" />
+                  </div>
+                  <div class="two-column">
+                    <input type="text" name="education_university[]" placeholder="Université/École" />
+                    <input type="text" name="education_field[]" placeholder="Domaine d'études" />
+                  </div>
+                  <textarea name="education_details[]" placeholder="Détails (GPA, cours pertinents, distinctions, etc.)"></textarea>
+                  <button type="button" class="remove-btn" onclick="removeEducation(this)" style="display: none;">Supprimer</button>
+                </div>
+              </div>
+              <button type="button" class="add-btn" onclick="addEducation()">+ Ajouter une formation</button>
+            </div>
+          </div>
+
+          <!-- Étape 4: Certificats -->
+          <div class="step-content" data-step="4">
+            <div class="section">
+              <h3>Certificats</h3>
+              <div id="certificates">
+                <div class="entry-item certificate-entry">
+                  <div class="two-column">
+                    <input type="text" name="certificate_name[]" placeholder="Nom du certificat" />
+                    <input type="text" name="certificate_date[]" placeholder="Date d'obtention" />
+                  </div>
+                  <div class="two-column">
+                    <input type="text" name="certificate_issuer[]" placeholder="Organisme émetteur" />
+                    <input type="text" name="certificate_location[]" placeholder="Lieu" />
+                  </div>
+                  <textarea name="certificate_description[]" placeholder="Description du certificat"></textarea>
+                  <button type="button" class="remove-btn" onclick="removeCertificate(this)" style="display: none;">Supprimer</button>
+                </div>
+              </div>
+              <button type="button" class="add-btn" onclick="addCertificate()">+ Ajouter un certificat</button>
+            </div>
+          </div>
+
+          <!-- Étape 5: Expérience Professionnelle -->
+          <div class="step-content" data-step="5">
+            <div class="section">
+              <h3>Expérience Professionnelle</h3>
+              <div id="experiences">
+                <div class="entry-item experience-entry">
+                  <div class="two-column">
+                    <input type="text" name="experience_location[]" placeholder="Lieu (ex: New York, NY)" />
+                    <input type="text" name="experience_dates[]" placeholder="Dates (ex: Juin 2023 – Présent)" />
+                  </div>
+                  <div class="two-column">
+                    <input type="text" name="experience_company[]" placeholder="Entreprise" />
+                    <input type="text" name="experience_position[]" placeholder="Poste" />
+                  </div>
+                  <textarea name="experience_description[]" placeholder="Description des responsabilités et réalisations (une responsabilité par ligne)"></textarea>
+                  <button type="button" class="remove-btn" onclick="removeExperience(this)" style="display: none;">Supprimer</button>
+                </div>
+              </div>
+              <button type="button" class="add-btn" onclick="addExperience()">+ Ajouter une expérience</button>
+            </div>
+          </div>
+
+          <!-- Étape 6: Projets -->
+          <div class="step-content" data-step="6">
+            <div class="section">
+              <h3>Projets</h3>
+              <div id="projects">
+                <div class="entry-item project-entry">
+                  <div class="two-column">
+                    <input type="text" name="project_name[]" placeholder="Nom du projet" />
+                    <input type="text" name="project_link[]" placeholder="Lien (GitHub, site web, etc.)" />
+                  </div>
+                  <textarea name="project_description[]" placeholder="Description du projet, réalisations et technologies utilisées"></textarea>
+                  <button type="button" class="remove-btn" onclick="removeProject(this)" style="display: none;">Supprimer</button>
+                </div>
+              </div>
+              <button type="button" class="add-btn" onclick="addProject()">+ Ajouter un projet</button>
+            </div>
+          </div>
+
+          <!-- Étape 7: Compétences -->
+          <div class="step-content" data-step="7">
+            <div class="section">
+              <h3>Compétences</h3>
+              <div id="skills">
+                <div class="entry-item skill-entry">
+                  <input type="text" name="skill_category[]" placeholder="Catégorie (ex: Langages de programmation)" />
+                  <textarea name="skill_items[]" placeholder="Compétences (séparées par des virgules)"></textarea>
+                  <button type="button" class="remove-btn" onclick="removeSkill(this)" style="display: none;">Supprimer</button>
+                </div>
+              </div>
+              <button type="button" class="add-btn" onclick="addSkill()">+ Ajouter une catégorie de compétences</button>
+            </div>
+          </div>
+
+          <!-- Étape 8: Langues -->
+          <div class="step-content" data-step="8">
+            <div class="section">
+              <h3>Langues</h3>
+              <div id="languages">
+                <div class="entry-item language-entry">
+                  <div class="two-column">
+                    <input type="text" name="language_name[]" placeholder="Langue" />
+                    <select name="language_level[]">
+                      <option value="">Sélectionner le niveau</option>
+                      <option value="Native">Langue maternelle</option>
+                      <option value="C2">C2 - Maîtrise</option>
+                      <option value="C1">C1 - Autonome</option>
+                      <option value="B2">B2 - Avancé</option>
+                      <option value="B1">B1 - Intermédiaire</option>
+                      <option value="A2">A2 - Élémentaire</option>
+                      <option value="A1">A1 - Débutant</option>
+                    </select>
+                  </div>
+                  <button type="button" class="remove-btn" onclick="removeLanguage(this)" style="display: none;">Supprimer</button>
+                </div>
+              </div>
+              <button type="button" class="add-btn" onclick="addLanguage()">+ Ajouter une langue</button>
+              
+              <div class="section" style="margin-top: 40px;">
+                <h3>Format de téléchargement</h3>
+                <div class="format-selection">
+                  <label class="format-option">
+                    <input type="radio" name="format" value="pdf" checked>
+                    <div class="format-content">
+                      <span class="format-label">PDF uniquement</span>
+                      <span class="format-description">Télécharger seulement le CV au format PDF</span>
+                    </div>
+                  </label>
+                  <label class="format-option">
+                    <input type="radio" name="format" value="xml">
+                    <div class="format-content">
+                      <span class="format-label">XML uniquement</span>
+                      <span class="format-description">Télécharger seulement le CV au format XML</span>
+                    </div>
+                  </label>
+                  <label class="format-option">
+                    <input type="radio" name="format" value="both">
+                    <div class="format-content">
+                      <span class="format-label">PDF + XML (ZIP)</span>
+                      <span class="format-description">Télécharger les deux formats dans un fichier ZIP</span>
+                    </div>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Navigation des étapes -->
+        <div class="step-navigation">
+          <button type="button" class="nav-btn" id="prevBtn" onclick="changeStep(-1)" style="display: none">
+            ← Précédent
+          </button>
+          <div class="step-info">
+            <span id="currentStepText">Étape 1 sur 8</span>
+          </div>
+          <button type="button" class="nav-btn" id="nextBtn" onclick="changeStep(1)">
+            Suivant →
+          </button>
+          <button type="submit" class="nav-btn" id="submitBtn" style="display: none">
+            Générer CV
+          </button>
+        </div>
+      </form>
     </div>
 
-    <h2>Générateur de CV Europass</h2>
+    <script>
+      let currentStep = 1;
+      const totalSteps = 8;
 
-    <!-- Indicateur d'étapes -->
-    <div class="steps-indicator">
-      <div class="step active" data-step="1">
-        <div class="step-number">1</div>
-        <div class="step-title">Informations Personnelles</div>
-      </div>
-      <div class="step" data-step="2">
-        <div class="step-number">2</div>
-        <div class="step-title">Emploi Recherché</div>
-      </div>
-      <div class="step" data-step="3">
-        <div class="step-number">3</div>
-        <div class="step-title">Expérience</div>
-      </div>
-      <div class="step" data-step="4">
-        <div class="step-number">4</div>
-        <div class="step-title">Formation</div>
-      </div>
-      <div class="step" data-step="5">
-        <div class="step-number">5</div>
-        <div class="step-title">Langues</div>
-      </div>
-      <div class="step" data-step="6">
-        <div class="step-number">6</div>
-        <div class="step-title">Compétences</div>
-      </div>
-    </div>    <form
-      id="cvForm"
-      action="generate_cv.php"
-      method="POST"
-      enctype="multipart/form-data"
-    >
-      <!-- Hidden field for CV editing -->
-      <input type="hidden" id="editing_cv_id" name="editing_cv_id" value="" />
-      
-      <!-- Étape 1: Informations Personnelles -->
-      <div class="step-content active" data-step="1">
-        <div class="section">
-          <h3>Information Personnelle</h3>
-          <input type="text" name="nom" placeholder="Nom" required />
-          <input type="text" name="prenom" placeholder="Prénom" required />
-          <input type="date" name="date_naissance" required />
-          <input
-            type="text"
-            name="nationalite"
-            placeholder="Nationalité"
-            required
-          />
-          <input type="text" name="adresse" placeholder="Adresse" required />
-          <input type="email" name="email" placeholder="Email" required />
-          <input type="tel" name="telephone" placeholder="Téléphone" required />
-          <input type="url" name="linkedin" placeholder="LinkedIn" />
-          <textarea
-            class="description"
-            name="profil_description"
-            placeholder="Brève description personnelle"
-          ></textarea>
-        </div>
-      </div>
+      // Add form submission debugging
+      document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('cvForm');
+        
+        // Disable HTML5 validation for hidden fields
+        function updateRequiredFields() {
+          // Remove required from all fields first
+          document.querySelectorAll('input[required], textarea[required]').forEach(field => {
+            if (!field.closest('.step-content.active')) {
+              field.removeAttribute('required');
+            }
+          });
+        }
+        
+        form.addEventListener('submit', function(e) {
+          console.log('🔥 Form submission started!');
+          console.log('Form action:', this.action);
+          console.log('Form method:', this.method);
+          
+          // Check only the required fields that should be filled
+          const basicRequiredFields = [
+            'nom', 'prenom', 'location', 'email', 'telephone', 'profil_description'
+          ];
+          
+          let missingFields = [];
+          
+          basicRequiredFields.forEach(fieldName => {
+            const field = document.querySelector(`[name="${fieldName}"]`);
+            if (field && !field.value.trim()) {
+              missingFields.push(field.placeholder || fieldName);
+            }
+          });
+          
+          if (missingFields.length > 0) {
+            console.log('❌ Missing required fields:', missingFields);
+            alert('Veuillez remplir tous les champs obligatoires:\n' + missingFields.join('\n'));
+            e.preventDefault();
+            return false;
+          } else {
+            console.log('✅ All required fields filled');
+          }
+          
+          // Log form data
+          const formData = new FormData(this);
+          console.log('📋 Form data:');
+          for (let [key, value] of formData.entries()) {
+            console.log(`${key}: ${value}`);
+          }
+          
+          // Show loading message
+          const submitBtn = document.getElementById('submitBtn');
+          const originalText = submitBtn.innerHTML;
+          submitBtn.innerHTML = 'Génération en cours...';
+          submitBtn.disabled = true;
+          
+          // Reset button after download completes
+          resetButtonAfterDownload(submitBtn, originalText);
+          
+          console.log('🚀 Form submitting to:', this.action);
+        });
+      });
 
-      <!-- Étape 2: Emploi Recherché -->
-      <div class="step-content" data-step="2">
-        <div class="section">
-          <h3>Emploi Recherché</h3>
-          <input type="text" name="emploi_recherche" required />
-          <textarea
-            class="description"
-            name="emploi_description"
-            placeholder="Description de l'emploi recherché"
-          ></textarea>
-        </div>
-      </div>
+      function showStep(step) {
+        // Hide all step contents
+        document.querySelectorAll('.step-content').forEach(content => {
+          content.classList.remove('active');
+        });
+        
+        // Hide all step indicators
+        document.querySelectorAll('.step').forEach(stepEl => {
+          stepEl.classList.remove('active');
+        });
+        
+        // Show current step content and indicator
+        document.querySelector(`.step-content[data-step="${step}"]`).classList.add('active');
+        document.querySelector(`.step[data-step="${step}"]`).classList.add('active');
+        
+        // Update navigation buttons
+        document.getElementById('prevBtn').style.display = step === 1 ? 'none' : 'inline-block';
+        document.getElementById('nextBtn').style.display = step === totalSteps ? 'none' : 'inline-block';
+        document.getElementById('submitBtn').style.display = step === totalSteps ? 'inline-block' : 'none';
+        
+        // Update step text
+        document.getElementById('currentStepText').textContent = `Étape ${step} sur ${totalSteps}`;
+        
+        // Manage required attributes - only required for basic fields, not step-specific ones
+        document.querySelectorAll('input, textarea').forEach(field => {
+          const basicRequired = ['nom', 'prenom', 'location', 'email', 'telephone', 'profil_description'];
+          if (basicRequired.includes(field.name)) {
+            field.setAttribute('required', 'required');
+          } else {
+            field.removeAttribute('required');
+          }
+        });
+      }
 
-      <!-- Étape 3: Expérience Professionnelle -->
-      <div class="step-content" data-step="3">
-        <div class="section">
-          <h3>Expérience Professionnelle</h3>
-          <div id="experiences">
-            <div class="experience-entry">
-              <input
-                type="text"
-                name="experience_dates[]"
-                placeholder="Dates (De - À)"
-              />
-              <input
-                type="text"
-                name="experience_poste[]"
-                placeholder="Poste"
-              />
-              <input
-                type="text"
-                name="experience_employeur[]"
-                placeholder="Employeur"
-              />
-              <textarea
-                name="experience_description[]"
-                placeholder="Description des responsabilités"
-              ></textarea>
-            </div>
-          </div>
-          <button type="button" onclick="addExperience()">
-            + Ajouter une expérience
-          </button>
-        </div>
-      </div>
+      function changeStep(direction) {
+        const newStep = currentStep + direction;
+        if (newStep >= 1 && newStep <= totalSteps) {
+          currentStep = newStep;
+          showStep(currentStep);
+        }
+      }
 
-      <!-- Étape 4: Formation -->
-      <div class="step-content" data-step="4">
-        <div class="section">
-          <h3>Formation</h3>
-          <div id="education">
-            <div class="education-entry">
-              <input
-                type="text"
-                name="education_dates[]"
-                placeholder="Dates (De - À)"
-              />
-              <input
-                type="text"
-                name="education_diplome[]"
-                placeholder="Diplôme"
-              />
-              <input
-                type="text"
-                name="education_etablissement[]"
-                placeholder="Établissement"
-              />
-              <textarea
-                class="description"
-                name="education_description[]"
-                placeholder="Description de la formation"
-              ></textarea>
-            </div>
-          </div>
-          <button type="button" onclick="addEducation()">
-            + Ajouter une formation
-          </button>
-        </div>
-      </div>
+      // Dynamic form functions
+      function addEducation() {
+        const container = document.getElementById('education');
+        const newEntry = container.querySelector('.education-entry').cloneNode(true);
+        newEntry.querySelectorAll('input, textarea').forEach(input => input.value = '');
+        newEntry.querySelector('.remove-btn').style.display = 'inline-block';
+        container.appendChild(newEntry);
+      }
 
-      <!-- Étape 5: Langues -->
-      <div class="step-content" data-step="5">
-        <div class="section">
-          <h3>Langues</h3>
-          <div id="languages">
-            <div class="language-entry">
-              <input type="text" name="langue[]" placeholder="Langue" />
-              <select name="niveau[]">
-                <option value="A1">A1</option>
-                <option value="A2">A2</option>
-                <option value="B1">B1</option>
-                <option value="B2">B2</option>
-                <option value="C1">C1</option>
-                <option value="C2">C2</option>
-              </select>
-              <textarea
-                class="description"
-                name="language_description[]"
-                placeholder="Description de la langue (ex: compétences orales/écrites)"
-              ></textarea>
-            </div>
-          </div>
-          <button type="button" onclick="addLanguage()">
-            + Ajouter une langue
-          </button>
-        </div>
-      </div>      <!-- Étape 6: Compétences -->
-      <div class="step-content" data-step="6">
-        <div class="section">
-          <h3>Compétences</h3>
-          <textarea
-            name="competences_numeriques"
-            placeholder="Compétences numériques"
-            required
-          ></textarea>
-          <textarea
-            name="competences_autres"
-            placeholder="Autres compétences"
-            required
-          ></textarea>
-        </div>
-        <div class="section">
-          <h3>Format de téléchargement</h3>
-          <div class="format-selection">            <label class="format-option">
-              <input type="radio" name="format" value="pdf" checked>
-              <div class="format-content">
-                <span class="format-label">PDF uniquement</span>
-                <span class="format-description">Télécharger seulement le CV au format PDF</span>
-              </div>
-            </label>
-            <label class="format-option">
-              <input type="radio" name="format" value="xml">
-              <div class="format-content">
-                <span class="format-label">XML uniquement</span>
-                <span class="format-description">Télécharger seulement le CV au format XML</span>
-              </div>
-            </label>
-            <label class="format-option">
-              <input type="radio" name="format" value="both">
-              <div class="format-content">
-                <span class="format-label">PDF + XML (ZIP)</span>
-                <span class="format-description">Télécharger les deux formats dans un fichier ZIP</span>
-              </div>
-            </label>
-          </div>
-        </div>
-      </div>
+      function removeEducation(button) {
+        button.parentElement.remove();
+      }
 
-      <!-- Navigation des étapes -->
-      <div class="step-navigation">
-        <button
-          type="button"
-          id="prevBtn"
-          onclick="changeStep(-1)"
-          style="display: none"
-        >
-          ← Précédent
-        </button>
-        <div class="step-info">
-          <span id="currentStepText">Étape 1 sur 6</span>
-        </div>
-        <button type="button" id="nextBtn" onclick="changeStep(1)">
-          Suivant →
-        </button>
-        <button type="submit" id="submitBtn" style="display: none">
-          Générer CV Europass
-        </button>
-      </div>
-    </form>
+      function addCertificate() {
+        const container = document.getElementById('certificates');
+        const newEntry = container.querySelector('.certificate-entry').cloneNode(true);
+        newEntry.querySelectorAll('input, textarea').forEach(input => input.value = '');
+        newEntry.querySelector('.remove-btn').style.display = 'inline-block';
+        container.appendChild(newEntry);
+      }
 
-    <script src="form.js"></script>
+      function removeCertificate(button) {
+        button.parentElement.remove();
+      }
+
+      function addExperience() {
+        const container = document.getElementById('experiences');
+        const newEntry = container.querySelector('.experience-entry').cloneNode(true);
+        newEntry.querySelectorAll('input, textarea').forEach(input => input.value = '');
+        newEntry.querySelector('.remove-btn').style.display = 'inline-block';
+        container.appendChild(newEntry);
+      }
+
+      function removeExperience(button) {
+        button.parentElement.remove();
+      }
+
+      function addProject() {
+        const container = document.getElementById('projects');
+        const newEntry = container.querySelector('.project-entry').cloneNode(true);
+        newEntry.querySelectorAll('input, textarea').forEach(input => input.value = '');
+        newEntry.querySelector('.remove-btn').style.display = 'inline-block';
+        container.appendChild(newEntry);
+      }
+
+      function removeProject(button) {
+        button.parentElement.remove();
+      }
+
+      function addSkill() {
+        const container = document.getElementById('skills');
+        const newEntry = container.querySelector('.skill-entry').cloneNode(true);
+        newEntry.querySelectorAll('input, textarea').forEach(input => input.value = '');
+        newEntry.querySelector('.remove-btn').style.display = 'inline-block';
+        container.appendChild(newEntry);
+      }
+
+      function removeSkill(button) {
+        button.parentElement.remove();
+      }
+
+      function addLanguage() {
+        const container = document.getElementById('languages');
+        const newEntry = container.querySelector('.language-entry').cloneNode(true);
+        newEntry.querySelectorAll('input, select').forEach(input => {
+          if (input.tagName === 'SELECT') {
+            input.selectedIndex = 0;
+          } else {
+            input.value = '';
+          }
+        });
+        newEntry.querySelector('.remove-btn').style.display = 'inline-block';
+        container.appendChild(newEntry);
+      }
+
+      function removeLanguage(button) {
+        button.parentElement.remove();
+      }
+
+      function logout() {
+        // Logout functionality
+        console.log('Logout clicked');
+      }
+
+      // Function to reset button after file download
+      function resetButtonAfterDownload(button, originalText) {
+        // Method 1: Timer-based reset (fallback)
+        const resetTimer = setTimeout(() => {
+          console.log('🔄 Resetting button after timeout');
+          button.innerHTML = originalText;
+          button.disabled = false;
+        }, 5000); // Reset after 5 seconds
+        
+        // Method 2: Focus-based reset (when user returns to page after saving)
+        let focusResetDone = false;
+        const resetOnFocus = () => {
+          if (!focusResetDone) {
+            console.log('🔄 Resetting button after window focus');
+            clearTimeout(resetTimer);
+            button.innerHTML = originalText;
+            button.disabled = false;
+            focusResetDone = true;
+            window.removeEventListener('focus', resetOnFocus);
+          }
+        };
+        
+        // Listen for window focus (when user comes back after saving file)
+        setTimeout(() => {
+          window.addEventListener('focus', resetOnFocus);
+        }, 1000); // Small delay to avoid immediate focus detection
+        
+        // Method 3: Detection via document visibility change
+        const handleVisibilityChange = () => {
+          if (!document.hidden && !focusResetDone) {
+            console.log('🔄 Resetting button after visibility change');
+            clearTimeout(resetTimer);
+            button.innerHTML = originalText;
+            button.disabled = false;
+            focusResetDone = true;
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+            window.removeEventListener('focus', resetOnFocus);
+          }
+        };
+        
+        setTimeout(() => {
+          document.addEventListener('visibilitychange', handleVisibilityChange);
+        }, 1000);
+      }
+
+      // Initialize the form
+      showStep(1);
+    </script>
   </body>
 </html>

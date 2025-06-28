@@ -43,7 +43,7 @@
 \RequirePackage[default, type1]{sourcesanspro}
 
 % Color definitions
-\defincecolor{primaryColor}{RGB}{128, 0, 32}
+\defincecolor{primaryColor}{RGB}{0, 128, 128}
 
 % Basic settings
 \AtBeginEnvironment{adjustwidth}{\partopsep0pt}
