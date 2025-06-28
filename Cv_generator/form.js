@@ -327,12 +327,11 @@ async function loadCVForEdit(cvId) {
     console.log('🚀 Chargement du CV pour édition, ID:', cvId);
     
     try {
-        const response = await fetch('get_cv_for_edit.php', {
-            method: 'POST',
+        const response = await fetch(`get_edit_cv_data.php?cv_id=${cvId}`, {
+            method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ cv_id: cvId })
+            }
         });
         
         const result = await response.json();
@@ -340,7 +339,10 @@ async function loadCVForEdit(cvId) {
         
         if (result.status === 'success' && result.cv_data) {
             console.log('✓ Données CV récupérées avec succès');
-            populateFormWithCVData(result.cv_data);
+            // Mettre à jour le champ caché avec l'ID du CV en cours d'édition
+            setFieldValue('editing_cv_id', result.cv_id);
+            // Utiliser les données JSON pour peupler le formulaire
+            populateFormWithJSONData(result.cv_data);
         } else {
             console.error('✗ Erreur lors du chargement du CV:', result.message);
             alert('Erreur lors du chargement du CV: ' + (result.message || 'CV introuvable'));
@@ -350,6 +352,144 @@ async function loadCVForEdit(cvId) {
         console.error('✗ Erreur lors de la requête:', error);
         alert('Erreur lors du chargement du CV');
         window.location.href = 'user_home.html';
+    }
+}
+
+// Remplir le formulaire avec les données JSON du CV
+function populateFormWithJSONData(jsonData) {
+    console.log('🔍 Début de populateFormWithJSONData');
+    console.log('JSON reçu:', jsonData);
+    
+    try {
+        // Informations personnelles
+        if (jsonData.personalInfo) {
+            const personalInfo = jsonData.personalInfo;
+            console.log('✓ Section personalInfo trouvée dans JSON');
+            
+            setFieldValue('prenom', personalInfo.firstname || '');
+            setFieldValue('nom', personalInfo.lastname || '');
+            setFieldValue('email', personalInfo.email || '');
+            setFieldValue('telephone', personalInfo.phone || '');
+            setFieldValue('linkedin', personalInfo.linkedin || '');
+            setFieldValue('github', personalInfo.github || '');
+            setFieldValue('website', personalInfo.website || '');
+            setFieldValue('location', personalInfo.location || '');
+            setFieldValue('adresse', personalInfo.address || '');
+            setFieldValue('date_naissance', personalInfo.birthDate || '');
+            setFieldValue('nationalite', personalInfo.nationality || '');
+            setFieldValue('emploi_recherche', personalInfo.jobTitle || '');
+            setFieldValue('emploi_description', personalInfo.jobDescription || '');
+            setFieldValue('profil_description', personalInfo.profileDescription || '');
+        }
+        
+        // Expériences professionnelles
+        if (jsonData.experiences && jsonData.experiences.length > 0) {
+            console.log('✓ Chargement des expériences:', jsonData.experiences.length);
+            
+            // Nettoyer les expériences existantes
+            const experiencesContainer = document.getElementById('experiences');
+            experiencesContainer.innerHTML = '';
+            
+            jsonData.experiences.forEach((experience, index) => {
+                if (index === 0) {
+                    addExperience(); // Ajouter la première expérience
+                } else {
+                    addExperience(); // Ajouter des expériences supplémentaires
+                }
+                
+                const entries = document.querySelectorAll('#experiences .experience-entry');
+                const entry = entries[index];
+                if (entry) {
+                    entry.querySelector('input[name="experience_dates[]"]').value = experience.dates || '';
+                    entry.querySelector('input[name="experience_poste[]"]').value = experience.position || '';
+                    entry.querySelector('input[name="experience_employeur[]"]').value = experience.employer || '';
+                    entry.querySelector('textarea[name="experience_description[]"]').value = experience.description || '';
+                }
+            });
+        }
+        
+        // Formation
+        if (jsonData.education && jsonData.education.length > 0) {
+            console.log('✓ Chargement de la formation:', jsonData.education.length);
+            
+            // Nettoyer les formations existantes
+            const educationContainer = document.getElementById('education');
+            educationContainer.innerHTML = '';
+            
+            jsonData.education.forEach((education, index) => {
+                if (index === 0) {
+                    addEducation(); // Ajouter la première formation
+                } else {
+                    addEducation(); // Ajouter des formations supplémentaires
+                }
+                
+                const entries = document.querySelectorAll('#education .education-entry');
+                const entry = entries[index];
+                if (entry) {
+                    entry.querySelector('input[name="education_dates[]"]').value = education.dates || '';
+                    entry.querySelector('input[name="education_diplome[]"]').value = education.degree || '';
+                    entry.querySelector('input[name="education_etablissement[]"]').value = education.institution || '';
+                    entry.querySelector('textarea[name="education_description[]"]').value = education.description || '';
+                }
+            });
+        }
+        
+        // Langues
+        if (jsonData.languages && jsonData.languages.length > 0) {
+            console.log('✓ Chargement des langues:', jsonData.languages.length);
+            
+            // Nettoyer les langues existantes
+            const languagesContainer = document.getElementById('languages');
+            languagesContainer.innerHTML = '';
+            
+            jsonData.languages.forEach((language, index) => {
+                if (index === 0) {
+                    addLanguage(); // Ajouter la première langue
+                } else {
+                    addLanguage(); // Ajouter des langues supplémentaires
+                }
+                
+                const entries = document.querySelectorAll('#languages .language-entry');
+                const entry = entries[index];
+                if (entry) {
+                    entry.querySelector('input[name="langue[]"]').value = language.name || '';
+                    const levelSelect = entry.querySelector('select[name="niveau[]"]');
+                    if (levelSelect && language.level) {
+                        levelSelect.value = language.level;
+                    }
+                    entry.querySelector('textarea[name="language_description[]"]').value = language.description || '';
+                }
+            });
+        }
+        
+        // Compétences (si elles existent dans le JSON)
+        if (jsonData.skills && jsonData.skills.length > 0) {
+            console.log('✓ Chargement des compétences:', jsonData.skills.length);
+            // Convertir les compétences en format texte pour les champs existants
+            const digitalSkills = jsonData.skills.filter(skill => skill.type === 'digital' || !skill.type).map(skill => skill.name).join(', ');
+            const otherSkills = jsonData.skills.filter(skill => skill.type === 'other').map(skill => skill.name).join(', ');
+            
+            setFieldValue('competences_numeriques', digitalSkills);
+            setFieldValue('competences_autres', otherSkills);
+        }
+        
+        // Certificats (si ils existent dans le JSON)
+        if (jsonData.certificates && jsonData.certificates.length > 0) {
+            console.log('✓ Certificats trouvés:', jsonData.certificates.length);
+            // Traitement des certificats si nécessaire
+        }
+        
+        // Projets (si ils existent dans le JSON)
+        if (jsonData.projects && jsonData.projects.length > 0) {
+            console.log('✓ Projets trouvés:', jsonData.projects.length);
+            // Traitement des projets si nécessaire
+        }
+        
+        console.log('✅ Formulaire peuplé avec succès avec les données JSON');
+        
+    } catch (error) {
+        console.error('❌ Erreur lors du traitement des données JSON:', error);
+        alert('Erreur lors du chargement des données du CV');
     }
 }
 

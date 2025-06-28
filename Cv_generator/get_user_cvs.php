@@ -15,6 +15,9 @@ if (!isset($_SESSION['userId'])) {
 
 $userId = $_SESSION['userId'];
 
+// Debug: Log the user ID
+error_log("get_user_cvs.php: Fetching CVs for user ID: " . $userId);
+
 try {
     // Récupérer tous les CV de l'utilisateur
     $sql = "SELECT id, cv_name, xml_content, created_at, updated_at 
@@ -26,9 +29,17 @@ try {
     $stmt->execute([':user_id' => $userId]);
     $cvs = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
+    // Debug: Log the number of CVs found
+    error_log("get_user_cvs.php: Found " . count($cvs) . " CVs for user " . $userId);
+    
     echo json_encode([
         'status' => 'success',
-        'cvs' => $cvs
+        'cvs' => $cvs,
+        'debug' => [
+            'user_id' => $userId,
+            'cv_count' => count($cvs),
+            'query' => $sql
+        ]
     ]);
     
 } catch (Exception $e) {

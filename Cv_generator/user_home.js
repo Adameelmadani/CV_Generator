@@ -169,7 +169,7 @@ async function previewCV(cvId) {
 
 // Modifier un CV
 function editCV(cvId) {
-    window.location.href = `home.html?edit=${cvId}`;
+    window.location.href = `get_cv_for_edit.php?cv_id=${cvId}`;
 }
 
 // Télécharger un CV (fonction modifiée pour utiliser la modale de sélection)

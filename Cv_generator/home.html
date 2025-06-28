@@ -13,6 +13,12 @@
           <a href="user_home.html" class="btn-link" id="myCvsLink" style="display: none;">
             Mes CV
           </a>
+          <a href="user_home.html" class="btn-link" id="userHomeBtn">
+            Mes CV sauvegardés
+          </a>
+          <button class="btn-link" id="fillTestBtn" onclick="fillTestData()" style="background: #ff6b35; color: white;">
+            Fill Test Data
+          </button>
           <button class="logout-btn" onclick="logout()" style="display: none" id="logoutBtn">
             Déconnexion
           </button>
@@ -57,7 +63,7 @@
         </div>
       </div>
 
-      <form id="cvForm" action="generate_cv_fixed.php" method="POST" enctype="multipart/form-data">
+      <form id="cvForm" action="generate_cv.php" method="POST" enctype="multipart/form-data">
         <div class="form-container">
           <!-- Hidden field for CV editing -->
           <input type="hidden" id="editing_cv_id" name="editing_cv_id" value="" />
@@ -266,6 +272,32 @@
       document.addEventListener('DOMContentLoaded', function() {
         const form = document.getElementById('cvForm');
         
+        // Check if we're in edit mode
+        const urlParams = new URLSearchParams(window.location.search);
+        const editCvId = urlParams.get('edit');
+        
+        if (editCvId) {
+          console.log('🔧 Edit mode detected for CV ID:', editCvId);
+          loadCVForEdit(editCvId);
+          
+          // Update page title and header to indicate edit mode
+          document.title = 'CV Generator - Modification du CV';
+          const headerTitle = document.querySelector('.header h2');
+          if (headerTitle) {
+            headerTitle.textContent = 'Modification de votre CV';
+          }
+          const headerDescription = document.querySelector('.header p');
+          if (headerDescription) {
+            headerDescription.textContent = 'Modifiez les informations de votre CV existant';
+          }
+          
+          // Update submit button text
+          const submitBtn = document.getElementById('submitBtn');
+          if (submitBtn) {
+            submitBtn.innerHTML = '<i class="fas fa-save"></i> Mettre à jour le CV';
+          }
+        }
+        
         // Disable HTML5 validation for hidden fields
         function updateRequiredFields() {
           // Remove required from all fields first
@@ -448,6 +480,356 @@
       function logout() {
         // Logout functionality
         console.log('Logout clicked');
+      }
+
+      // Function to load CV data for editing
+      async function loadCVForEdit(cvId) {
+        try {
+          console.log('📥 Loading CV data for ID:', cvId);
+          
+          // Show loading indicator
+          const headerTitle = document.querySelector('.header h2');
+          if (headerTitle) {
+            headerTitle.textContent = 'Chargement du CV...';
+          }
+          
+          const response = await fetch(`get_cv_data.php?cv_id=${cvId}`);
+          const result = await response.json();
+          
+          if (result.status === 'success' && result.cv.data) {
+            console.log('✅ CV data loaded successfully:', result.cv.data);
+            
+            // Set the editing CV ID in the hidden field
+            const editingCvIdField = document.getElementById('editing_cv_id');
+            if (editingCvIdField) {
+              editingCvIdField.value = cvId;
+            }
+            
+            populateFormWithCVData(result.cv.data);
+          } else {
+            console.error('❌ Failed to load CV data:', result.message);
+            alert('Erreur lors du chargement du CV: ' + (result.message || 'Erreur inconnue'));
+            
+            // Redirect back to user home on error
+            window.location.href = 'user_home.html';
+          }
+        } catch (error) {
+          console.error('❌ Network error loading CV:', error);
+          alert('Erreur réseau lors du chargement du CV');
+          
+          // Redirect back to user home on error
+          window.location.href = 'user_home.html';
+        }
+      }
+
+      // Function to populate form with CV data
+      function populateFormWithCVData(cvData) {
+        console.log('📝 Populating form with CV data...');
+        
+        // Personal Information
+        if (cvData.personal_info) {
+          const personalInfo = cvData.personal_info;
+          setFieldValue('[name="nom"]', personalInfo.nom);
+          setFieldValue('[name="prenom"]', personalInfo.prenom);
+          setFieldValue('[name="location"]', personalInfo.location);
+          setFieldValue('[name="email"]', personalInfo.email);
+          setFieldValue('[name="telephone"]', personalInfo.telephone);
+          setFieldValue('[name="website"]', personalInfo.website);
+          setFieldValue('[name="linkedin"]', personalInfo.linkedin);
+          setFieldValue('[name="github"]', personalInfo.github);
+        }
+        
+        // Profile
+        if (cvData.profile) {
+          setFieldValue('[name="profil_description"]', cvData.profile.description);
+        }
+        
+        // Education
+        if (cvData.education && cvData.education.length > 0) {
+          populateEducation(cvData.education);
+        }
+        
+        // Certificates
+        if (cvData.certificates && cvData.certificates.length > 0) {
+          populateCertificates(cvData.certificates);
+        }
+        
+        // Experiences
+        if (cvData.experiences && cvData.experiences.length > 0) {
+          populateExperiences(cvData.experiences);
+        }
+        
+        // Projects
+        if (cvData.projects && cvData.projects.length > 0) {
+          populateProjects(cvData.projects);
+        }
+        
+        // Skills
+        if (cvData.skills && cvData.skills.length > 0) {
+          populateSkills(cvData.skills);
+        }
+        
+        // Languages
+        if (cvData.languages && cvData.languages.length > 0) {
+          populateLanguages(cvData.languages);
+        }
+        
+        console.log('✅ Form populated successfully');
+        
+        // Show success message to user
+        alert('CV chargé avec succès ! Vous pouvez maintenant modifier les informations.'); 
+      }
+
+      // Helper function to set field value safely
+      function setFieldValue(selector, value) {
+        const field = document.querySelector(selector);
+        if (field && value) {
+          field.value = value;
+        }
+      }
+
+      // Helper function to populate education entries
+      function populateEducation(educationData) {
+        const container = document.getElementById('education');
+        const existingEntries = container.querySelectorAll('.education-entry');
+        
+        educationData.forEach((edu, index) => {
+          let currentEntry;
+          
+          if (index < existingEntries.length) {
+            // Use existing entry
+            currentEntry = existingEntries[index];
+          } else {
+            // Add new entry
+            addEducation();
+            const entries = container.querySelectorAll('.education-entry');
+            currentEntry = entries[entries.length - 1];
+          }
+          
+          if (currentEntry) {
+            setFieldValueInEntry(currentEntry, '[name="education_degree[]"]', edu.degree);
+            setFieldValueInEntry(currentEntry, '[name="education_dates[]"]', edu.dates);
+            setFieldValueInEntry(currentEntry, '[name="education_university[]"]', edu.university);
+            setFieldValueInEntry(currentEntry, '[name="education_field[]"]', edu.field);
+            setFieldValueInEntry(currentEntry, '[name="education_details[]"]', edu.details);
+          }
+        });
+      }
+
+      // Helper function to populate certificates
+      function populateCertificates(certificatesData) {
+        const container = document.getElementById('certificates');
+        const existingEntries = container.querySelectorAll('.certificate-entry');
+        
+        certificatesData.forEach((cert, index) => {
+          let currentEntry;
+          
+          if (index < existingEntries.length) {
+            currentEntry = existingEntries[index];
+          } else {
+            addCertificate();
+            const entries = container.querySelectorAll('.certificate-entry');
+            currentEntry = entries[entries.length - 1];
+          }
+          
+          if (currentEntry) {
+            setFieldValueInEntry(currentEntry, '[name="certificate_name[]"]', cert.name);
+            setFieldValueInEntry(currentEntry, '[name="certificate_date[]"]', cert.date);
+            setFieldValueInEntry(currentEntry, '[name="certificate_issuer[]"]', cert.issuer);
+            setFieldValueInEntry(currentEntry, '[name="certificate_location[]"]', cert.location);
+            setFieldValueInEntry(currentEntry, '[name="certificate_description[]"]', cert.description);
+          }
+        });
+      }
+
+      // Helper function to populate experiences
+      function populateExperiences(experiencesData) {
+        const container = document.getElementById('experiences');
+        const existingEntries = container.querySelectorAll('.experience-entry');
+        
+        experiencesData.forEach((exp, index) => {
+          let currentEntry;
+          
+          if (index < existingEntries.length) {
+            currentEntry = existingEntries[index];
+          } else {
+            addExperience();
+            const entries = container.querySelectorAll('.experience-entry');
+            currentEntry = entries[entries.length - 1];
+          }
+          
+          if (currentEntry) {
+            setFieldValueInEntry(currentEntry, '[name="experience_location[]"]', exp.location);
+            setFieldValueInEntry(currentEntry, '[name="experience_dates[]"]', exp.dates);
+            setFieldValueInEntry(currentEntry, '[name="experience_company[]"]', exp.company);
+            setFieldValueInEntry(currentEntry, '[name="experience_position[]"]', exp.position);
+            setFieldValueInEntry(currentEntry, '[name="experience_description[]"]', exp.description);
+          }
+        });
+      }
+
+      // Helper function to populate projects
+      function populateProjects(projectsData) {
+        const container = document.getElementById('projects');
+        const existingEntries = container.querySelectorAll('.project-entry');
+        
+        projectsData.forEach((project, index) => {
+          let currentEntry;
+          
+          if (index < existingEntries.length) {
+            currentEntry = existingEntries[index];
+          } else {
+            addProject();
+            const entries = container.querySelectorAll('.project-entry');
+            currentEntry = entries[entries.length - 1];
+          }
+          
+          if (currentEntry) {
+            setFieldValueInEntry(currentEntry, '[name="project_name[]"]', project.name);
+            setFieldValueInEntry(currentEntry, '[name="project_link[]"]', project.link);
+            setFieldValueInEntry(currentEntry, '[name="project_description[]"]', project.description);
+          }
+        });
+      }
+
+      // Helper function to populate skills
+      function populateSkills(skillsData) {
+        const container = document.getElementById('skills');
+        const existingEntries = container.querySelectorAll('.skill-entry');
+        
+        skillsData.forEach((skill, index) => {
+          let currentEntry;
+          
+          if (index < existingEntries.length) {
+            currentEntry = existingEntries[index];
+          } else {
+            addSkill();
+            const entries = container.querySelectorAll('.skill-entry');
+            currentEntry = entries[entries.length - 1];
+          }
+          
+          if (currentEntry) {
+            setFieldValueInEntry(currentEntry, '[name="skill_category[]"]', skill.category);
+            setFieldValueInEntry(currentEntry, '[name="skill_items[]"]', skill.items);
+          }
+        });
+      }
+
+      // Helper function to populate languages
+      function populateLanguages(languagesData) {
+        const container = document.getElementById('languages');
+        const existingEntries = container.querySelectorAll('.language-entry');
+        
+        languagesData.forEach((lang, index) => {
+          let currentEntry;
+          
+          if (index < existingEntries.length) {
+            currentEntry = existingEntries[index];
+          } else {
+            addLanguage();
+            const entries = container.querySelectorAll('.language-entry');
+            currentEntry = entries[entries.length - 1];
+          }
+          
+          if (currentEntry) {
+            setFieldValueInEntry(currentEntry, '[name="language_name[]"]', lang.name);
+            const select = currentEntry.querySelector('[name="language_level[]"]');
+            if (select && lang.level) {
+              select.value = lang.level;
+            }
+          }
+        });
+      }
+
+      // Helper function to set field value within a specific entry
+      function setFieldValueInEntry(entry, selector, value) {
+        const field = entry.querySelector(selector);
+        if (field && value) {
+          field.value = value;
+        }
+      }
+
+      // Function to fill form with test data
+      function fillTestData() {
+        console.log('🔧 Filling form with test data...');
+        
+        // Personal Information
+        document.querySelector('[name="nom"]').value = 'Dupont';
+        document.querySelector('[name="prenom"]').value = 'Jean';
+        document.querySelector('[name="location"]').value = 'Paris, France';
+        document.querySelector('[name="email"]').value = 'jean.dupont@email.com';
+        document.querySelector('[name="telephone"]').value = '+33 1 23 45 67 89';
+        document.querySelector('[name="website"]').value = 'https://jeandupont.dev';
+        document.querySelector('[name="linkedin"]').value = 'https://linkedin.com/in/jeandupont';
+        document.querySelector('[name="github"]').value = 'https://github.com/jeandupont';
+        
+        // Professional Profile
+        document.querySelector('[name="profil_description"]').value = 'Développeur Full-Stack passionné avec 5 ans d\'expérience dans la création d\'applications web modernes. Expertise en JavaScript, React, Node.js et bases de données. Recherche de nouveaux défis techniques dans une équipe dynamique.';
+        
+        // Education
+        const eduDegree = document.querySelector('[name="education_degree[]"]');
+        const eduDates = document.querySelector('[name="education_dates[]"]');
+        const eduUniversity = document.querySelector('[name="education_university[]"]');
+        const eduField = document.querySelector('[name="education_field[]"]');
+        const eduDetails = document.querySelector('[name="education_details[]"]');
+        
+        if (eduDegree) eduDegree.value = 'Master en Informatique';
+        if (eduDates) eduDates.value = 'Sept 2018 – Juin 2020';
+        if (eduUniversity) eduUniversity.value = 'Université Pierre et Marie Curie';
+        if (eduField) eduField.value = 'Génie Logiciel';
+        if (eduDetails) eduDetails.value = 'Mention Bien - Spécialisation en développement web et architecture logicielle';
+        
+        // Experience
+        const expLocation = document.querySelector('[name="experience_location[]"]');
+        const expDates = document.querySelector('[name="experience_dates[]"]');
+        const expCompany = document.querySelector('[name="experience_company[]"]');
+        const expPosition = document.querySelector('[name="experience_position[]"]');
+        const expDescription = document.querySelector('[name="experience_description[]"]');
+        
+        if (expLocation) expLocation.value = 'Paris, France';
+        if (expDates) expDates.value = 'Jan 2021 – Présent';
+        if (expCompany) expCompany.value = 'TechCorp Solutions';
+        if (expPosition) expPosition.value = 'Développeur Full-Stack Senior';
+        if (expDescription) expDescription.value = 'Développement d\'applications web avec React et Node.js\nGestion d\'équipe de 3 développeurs juniors\nOptimisation des performances et de la sécurité\nMise en place de CI/CD avec Docker et Kubernetes';
+        
+        // Projects
+        const projectName = document.querySelector('[name="project_name[]"]');
+        const projectLink = document.querySelector('[name="project_link[]"]');
+        const projectDescription = document.querySelector('[name="project_description[]"]');
+        
+        if (projectName) projectName.value = 'E-Commerce Platform';
+        if (projectLink) projectLink.value = 'https://github.com/jeandupont/ecommerce-platform';
+        if (projectDescription) projectDescription.value = 'Plateforme e-commerce complète développée avec React, Node.js, MongoDB et Stripe. Fonctionnalités: gestion des produits, panier, paiements sécurisés, dashboard admin.';
+        
+        // Skills
+        const skillCategory = document.querySelector('[name="skill_category[]"]');
+        const skillItems = document.querySelector('[name="skill_items[]"]');
+        
+        if (skillCategory) skillCategory.value = 'Langages de programmation';
+        if (skillItems) skillItems.value = 'JavaScript, TypeScript, Python, Java, PHP, SQL';
+        
+        // Languages
+        const languageName = document.querySelector('[name="language_name[]"]');
+        const languageLevel = document.querySelector('[name="language_level[]"]');
+        
+        if (languageName) languageName.value = 'Français';
+        if (languageLevel) languageLevel.value = 'Native';
+        
+        // Certificates
+        const certName = document.querySelector('[name="certificate_name[]"]');
+        const certDate = document.querySelector('[name="certificate_date[]"]');
+        const certIssuer = document.querySelector('[name="certificate_issuer[]"]');
+        const certLocation = document.querySelector('[name="certificate_location[]"]');
+        const certDescription = document.querySelector('[name="certificate_description[]"]');
+        
+        if (certName) certName.value = 'AWS Certified Developer';
+        if (certDate) certDate.value = 'Mars 2023';
+        if (certIssuer) certIssuer.value = 'Amazon Web Services';
+        if (certLocation) certLocation.value = 'En ligne';
+        if (certDescription) certDescription.value = 'Certification professionnelle en développement d\'applications sur AWS';
+        
+        console.log('✅ Test data filled successfully!');
+        alert('Formulaire rempli avec des données de test !');
       }
 
       // Function to reset button after file download

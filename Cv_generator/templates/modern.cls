@@ -42,9 +42,6 @@
 
 \RequirePackage[default, type1]{sourcesanspro}
 
-% Color definitions
-\defincecolor{primaryColor}{RGB}{112, 128, 144}
-
 % Basic settings
 \AtBeginEnvironment{adjustwidth}{\partopsep0pt}
 \pagestyle{empty}

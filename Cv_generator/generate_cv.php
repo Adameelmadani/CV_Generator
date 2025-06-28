@@ -13,7 +13,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $website = htmlspecialchars($_POST['website'] ?? '');
     $linkedin = htmlspecialchars($_POST['linkedin'] ?? '');
     $github = htmlspecialchars($_POST['github'] ?? '');
-    $profil = htmlspecialchars($_POST['profil_description'] ?? '');
+    $profil = $_POST['profil_description'] ?? '';
     
     // Education arrays
     $education_degree = $_POST['education_degree'] ?? [];
@@ -52,205 +52,195 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $format = $_POST['format'] ?? 'pdf';
 
 
-// Generate XML content
-$xmlContent  = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-$xmlContent .= "<cv>\n";
+    // Generate XML content
+    $xmlContent  = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+    $xmlContent .= "<cv>\n";
 
-// ── Personal Information ──
-$xmlContent .= "  <personalInfo>\n";
-$xmlContent .= "    <firstname>"   . $prenom    . "</firstname>\n";
-$xmlContent .= "    <lastname>"    . $nom       . "</lastname>\n";
-$xmlContent .= "    <email>"       . $email     . "</email>\n";
-$xmlContent .= "    <phone>"       . $telephone . "</phone>\n";
-if ($website)  $xmlContent .= "    <website>"   . $website   . "</website>\n";
-if ($linkedin) $xmlContent .= "    <linkedin>"  . $linkedin  . "</linkedin>\n";
-if ($profil)   $xmlContent .= "    <profileDescription>" . $profil . "</profileDescription>\n";
-$xmlContent .= "  </personalInfo>\n\n";
+    // ── Personal Information ──
+    $xmlContent .= "  <personalInfo>\n";
+    $xmlContent .= "    <firstname>"   . htmlspecialchars($prenom)    . "</firstname>\n";
+    $xmlContent .= "    <lastname>"    . htmlspecialchars($nom)       . "</lastname>\n";
+    $xmlContent .= "    <location>"    . htmlspecialchars($location)  . "</location>\n";
+    $xmlContent .= "    <email>"       . htmlspecialchars($email)     . "</email>\n";
+    $xmlContent .= "    <phone>"       . htmlspecialchars($telephone) . "</phone>\n";
+    if ($website)  $xmlContent .= "    <website>"   . htmlspecialchars($website)   . "</website>\n";
+    if ($linkedin) $xmlContent .= "    <linkedin>"  . htmlspecialchars($linkedin)  . "</linkedin>\n";
+    if ($github)   $xmlContent .= "    <github>"    . htmlspecialchars($github)    . "</github>\n";
+    $xmlContent .= "  </personalInfo>\n\n";
 
-// ── Education ──
-$xmlContent .= "  <education>\n";
-for ($i = 0; $i < count($education_dates); $i++) {
-    $xmlContent .= "    <degree>\n"
-                 . "      <title>"      . htmlspecialchars($education_degree[$i])    . "</title>\n"
-                 . "      <period>"     . htmlspecialchars($education_dates[$i])     . "</period>\n"
-                 . "      <institution>". htmlspecialchars($education_university[$i]) . "</institution>\n"
-                 . "      <field>"      . htmlspecialchars($education_field[$i])      . "</field>\n";
-    if (trim($education_details[$i]) !== "") {
-        $xmlContent .= "      <description>" . htmlspecialchars($education_details[$i]) . "</description>\n";
+    // ── Professional Profile ──
+    if ($profil) {
+        $xmlContent .= "  <profil>\n";
+        $xmlContent .= "    <description>" . htmlspecialchars($profil) . "</description>\n";
+        $xmlContent .= "  </profil>\n\n";
     }
-    $xmlContent .= "    </degree>\n";
-}
-$xmlContent .= "  </education>\n\n";
 
-// ── Experiences ──
-$xmlContent .= "  <experiences>\n";
-for ($i = 0; $i < count($experience_dates); $i++) {
-    $xmlContent .= "    <experience>\n"
-                 . "      <location>"   . htmlspecialchars($experience_location[$i])    . "</location>\n"
-                 . "      <period>"     . htmlspecialchars($experience_dates[$i])       . "</period>\n"
-                 . "      <position>"   . htmlspecialchars($experience_position[$i])    . "</position>\n"
-                 . "      <company>"    . htmlspecialchars($experience_company[$i])     . "</company>\n"
-                 . "      <description>". htmlspecialchars($experience_description[$i]) . "</description>\n"
-                 . "    </experience>\n";
-}
-$xmlContent .= "  </experiences>\n\n";
-
-// ── Projects ──
-$xmlContent .= "  <projects>\n";
-for ($i = 0; $i < count($project_name); $i++) {
-    $xmlContent .= "    <project>\n"
-                 . "      <name>"       . htmlspecialchars($project_name[$i])        . "</name>\n";
-    if (trim($project_link[$i]) !== "") {
-        $xmlContent .= "      <link>"     . htmlspecialchars($project_link[$i])        . "</link>\n";
+    // ── Education ──
+    if (!empty($education_degree)) {
+        $xmlContent .= "  <education>\n";
+        for ($i = 0; $i < count($education_dates); $i++) {
+            if (!empty($education_degree[$i]) || !empty($education_dates[$i])) {
+                $xmlContent .= "    <degree>\n"
+                            . "      <title>"      . htmlspecialchars($education_degree[$i])    . "</title>\n"
+                            . "      <period>"     . htmlspecialchars($education_dates[$i])     . "</period>\n"
+                            . "      <institution>". htmlspecialchars($education_university[$i]) . "</institution>\n"
+                            . "      <field>"      . htmlspecialchars($education_field[$i])      . "</field>\n";
+                if (trim($education_details[$i]) !== "") {
+                    $xmlContent .= "      <description>" . htmlspecialchars($education_details[$i]) . "</description>\n";
+                }
+                $xmlContent .= "    </degree>\n";
+            }
+        }
+        $xmlContent .= "  </education>\n\n";
     }
-    if (trim($project_description[$i]) !== "") {
-        $xmlContent .= "      <description>" . htmlspecialchars($project_description[$i]) . "</description>\n";
+
+    // ── Certificates ──
+    if (!empty($certificate_name)) {
+        $xmlContent .= "  <certificates>\n";
+        for ($i = 0; $i < count($certificate_name); $i++) {
+            if (!empty($certificate_name[$i])) {
+                $xmlContent .= "    <certificate>\n"
+                            . "      <name>"    . htmlspecialchars($certificate_name[$i])    . "</name>\n"
+                            . "      <date>"    . htmlspecialchars($certificate_date[$i])    . "</date>\n"
+                            . "      <issuer>"  . htmlspecialchars($certificate_issuer[$i])  . "</issuer>\n"
+                            . "      <location>". htmlspecialchars($certificate_location[$i]). "</location>\n";
+                if (trim($certificate_description[$i]) !== "") {
+                    $xmlContent .= "      <description>" . htmlspecialchars($certificate_description[$i]) . "</description>\n";
+                }
+                $xmlContent .= "    </certificate>\n";
+            }
+        }
+        $xmlContent .= "  </certificates>\n\n";
     }
-    $xmlContent .= "    </project>\n";
-}
-$xmlContent .= "  </projects>\n\n";
 
-// ── Skills ──
-$xmlContent .= "  <skills>\n";
-for ($i = 0; $i < count($skill_items); $i++) {
-    $xmlContent .= "    <skill>\n"
-                 . "      <category>" . htmlspecialchars($skill_category[$i]) . "</category>\n"
-                 . "      <item>"     . htmlspecialchars($skill_items[$i])    . "</item>\n"
-                 . "    </skill>\n";
-}
-$xmlContent .= "  </skills>\n\n";
-
-// ── Languages ──
-$xmlContent .= "  <languages>\n";
-for ($i = 0; $i < count($language_name); $i++) {
-    $xmlContent .= "    <language>\n"
-                 . "      <name>"  . htmlspecialchars($language_name[$i])  . "</name>\n"
-                 . "      <level>" . htmlspecialchars($language_level[$i]) . "</level>\n"
-                 . "    </language>\n";
-}
-$xmlContent .= "  </languages>\n\n";
-
-// ── Certificates ──
-$xmlContent .= "  <certificates>\n";
-for ($i = 0; $i < count($certificate_name); $i++) {
-    $xmlContent .= "    <certificate>\n"
-                 . "      <name>"    . htmlspecialchars($certificate_name[$i])    . "</name>\n"
-                 . "      <date>"    . htmlspecialchars($certificate_date[$i])    . "</date>\n"
-                 . "      <issuer>"  . htmlspecialchars($certificate_issuer[$i])  . "</issuer>\n"
-                 . "      <location>". htmlspecialchars($certificate_location[$i]). "</location>\n";
-    if (trim($certificate_description[$i]) !== "") {
-        $xmlContent .= "      <description>" . htmlspecialchars($certificate_description[$i]) . "</description>\n";
+    // ── Experiences ──
+    if (!empty($experience_location)) {
+        $xmlContent .= "  <experiences>\n";
+        for ($i = 0; $i < count($experience_dates); $i++) {
+            if (!empty($experience_location[$i]) || !empty($experience_dates[$i])) {
+                $xmlContent .= "    <experience>\n"
+                            . "      <location>"   . htmlspecialchars($experience_location[$i])    . "</location>\n"
+                            . "      <period>"     . htmlspecialchars($experience_dates[$i])       . "</period>\n"
+                            . "      <company>"    . htmlspecialchars($experience_company[$i])     . "</company>\n"
+                            . "      <position>"   . htmlspecialchars($experience_position[$i])    . "</position>\n"
+                            . "      <description>". htmlspecialchars($experience_description[$i]) . "</description>\n"
+                            . "    </experience>\n";
+            }
+        }
+        $xmlContent .= "  </experiences>\n\n";
     }
-    $xmlContent .= "    </certificate>\n";
-}
-$xmlContent .= "  </certificates>\n\n";
 
-// ── Close root element ──
-$xmlContent .= "</cv>";
+    // ── Projects ──
+    if (!empty($project_name)) {
+        $xmlContent .= "  <projects>\n";
+        for ($i = 0; $i < count($project_name); $i++) {
+            if (!empty($project_name[$i])) {
+                $xmlContent .= "    <project>\n"
+                            . "      <name>"       . htmlspecialchars($project_name[$i])        . "</name>\n";
+                if (trim($project_link[$i]) !== "") {
+                    $xmlContent .= "      <link>"     . htmlspecialchars($project_link[$i])        . "</link>\n";
+                }
+                if (trim($project_description[$i]) !== "") {
+                    $xmlContent .= "      <description>" . htmlspecialchars($project_description[$i]) . "</description>\n";
+                }
+                $xmlContent .= "    </project>\n";
+            }
+        }
+        $xmlContent .= "  </projects>\n\n";
+    }
+
+    // ── Skills ──
+    if (!empty($skill_category)) {
+        $xmlContent .= "  <skills>\n";
+        for ($i = 0; $i < count($skill_items); $i++) {
+            if (!empty($skill_category[$i]) && !empty($skill_items[$i])) {
+                $xmlContent .= "    <skill>\n"
+                            . "      <category>" . htmlspecialchars($skill_category[$i]) . "</category>\n"
+                            . "      <item>"     . htmlspecialchars($skill_items[$i])    . "</item>\n"
+                            . "    </skill>\n";
+            }
+        }
+        $xmlContent .= "  </skills>\n\n";
+    }
+
+    // ── Languages ──
+    if (!empty($language_name)) {
+        $xmlContent .= "  <languages>\n";
+        for ($i = 0; $i < count($language_name); $i++) {
+            if (!empty($language_name[$i]) && !empty($language_level[$i])) {
+                $xmlContent .= "    <language>\n"
+                            . "      <name>"  . htmlspecialchars($language_name[$i])  . "</name>\n"
+                            . "      <level>" . htmlspecialchars($language_level[$i]) . "</level>\n"
+                            . "    </language>\n";
+            }
+        }
+        $xmlContent .= "  </languages>\n\n";
+    }
+
+    // ── Close root element ──
+    $xmlContent .= "</cv>";
 
     
     // Save XML file locally
     $xmlFile = "cv_" . $nom . "_" . $prenom . ".xml";
     file_put_contents($xmlFile, $xmlContent);    // Save CV to database if user is logged in
     if (isset($_SESSION['userId']) && !empty($_SESSION['userId'])) {
-        try {
-            // Prepare all form data for database storage
-            $formData = [
-                'nom' => $nom,
-                'prenom' => $prenom,
-                'location' => $location,
-                'email' => $email,
-                'telephone' => $telephone,
-                'website' => $website,
-                'linkedin' => $linkedin,
-                'github' => $github,
-                'profil_description' => $profil,
-                'education_degree' => $education_degree,
-                'education_dates' => $education_dates,
-                'education_university' => $education_university,
-                'education_field' => $education_field,
-                'education_details' => $education_details,
-                'experience_location' => $experience_location,
-                'experience_dates' => $experience_dates,
-                'experience_company' => $experience_company,
-                'experience_position' => $experience_position,
-                'experience_description' => $experience_description,
-                'project_name' => $project_name,
-                'project_link' => $project_link,
-                'project_description' => $project_description,
-                'skill_category' => $skill_category,
-                'skill_items' => $skill_items,
-                'language_name' => $language_name,
-                'language_level' => $language_level,
-                'certificate_name' => $certificate_name,
-                'certificate_date' => $certificate_date,
-                'certificate_issuer' => $certificate_issuer,
-                'certificate_location' => $certificate_location,
-                'certificate_description' => $certificate_description,
-                'format' => $format
-            ];
-            
-            $formDataJson = json_encode($formData);
-            
+        error_log("generate_cv.php: User is logged in, saving to database. User ID: " . $_SESSION['userId']);
+        try { 
             if ($editingCVId) {
                 // Mode édition : mettre à jour le CV existant
-                $updateSql = "UPDATE user_cvs SET xml_content = :xml_content, form_data = :form_data, updated_at = CURRENT_TIMESTAMP WHERE id = :cv_id AND user_id = :user_id";
+                $updateSql = "UPDATE user_cvs SET xml_content = :xml_content, updated_at = CURRENT_TIMESTAMP WHERE id = :cv_id AND user_id = :user_id";
                 $updateStmt = $pdo->prepare($updateSql);
                 $updateStmt->execute([
                     ':xml_content' => $xmlContent,
-                    ':form_data' => $formDataJson,
                     ':cv_id' => $editingCVId,
                     ':user_id' => $_SESSION['userId']
                 ]);
             } else {
                 // Mode création : créer un nouveau CV
                 $cvName = "CV_" . $nom . "_" . $prenom . "_" . date('Y-m-d_H-i-s');
+                
+                // Debug: Log CV creation attempt
+                error_log("generate_cv.php: Creating new CV with name: " . $cvName . " for user: " . $_SESSION['userId']);
+                
                 // Insert new CV
-                $insertSql = "INSERT INTO user_cvs (user_id, cv_name, xml_content, form_data) VALUES (:user_id, :cv_name, :xml_content, :form_data)";
+                $insertSql = "INSERT INTO user_cvs (user_id, cv_name, xml_content) VALUES (:user_id, :cv_name, :xml_content)";
                 $insertStmt = $pdo->prepare($insertSql);
-                $insertStmt->execute([
+                $result = $insertStmt->execute([
                     ':user_id' => $_SESSION['userId'],
                     ':cv_name' => $cvName,
-                    ':xml_content' => $xmlContent,
-                    ':form_data' => $formDataJson
+                    ':xml_content' => $xmlContent
                 ]);
+                
+                // Debug: Log result
+                if ($result) {
+                    $insertedId = $pdo->lastInsertId();
+                    error_log("generate_cv.php: CV successfully saved with ID: " . $insertedId);
+                } else {
+                    error_log("generate_cv.php: Failed to save CV");
+                }
             }
         } catch (Exception $e) {
             // Log error but continue with file generation
             error_log("Erreur lors de la sauvegarde du CV en base : " . $e->getMessage());
         }
+    } else {
+        error_log("generate_cv.php: User not logged in, CV not saved to database");
     }
-    $latexClass = "modern1";
-    $srcCls     = __DIR__ . "/templates/{$latexClass}.cls";
-    $dstCls     = __DIR__ . "/{$latexClass}.cls";
+    $latexClass = "templates/modern";
 
-    if (!file_exists($srcCls)) {
-        echo "<p style='color: red;'>❌ Template class file not found: templates/{$latexClass}.cls</p>";
-        echo "<p>Available files in templates directory:</p>";
-        if (is_dir(__DIR__ . "/templates")) {
-            $files = scandir(__DIR__ . "/templates");
-            echo "<ul>";
-            foreach ($files as $file) {
-                if ($file != '.' && $file != '..') {
-                    echo "<li>$file</li>";
-                }
-            }
-            echo "</ul>";
-        } else {
-            echo "<p>Templates directory not found!</p>";
-        }
-        echo "<br><a href='home.html'>← Back to Form</a>";
-        echo "</body></html>";
-        exit();
-    }
-    copy($srcCls, $dstCls);
     // $sectionHeader = "\\documentclass{templates/" . $template . "}\n";
-    $sectionHeader = "\\documentclass{modern1}\n";
+    $sectionHeader = "\\documentclass{" . $latexClass . "}\n";
     $sectionHeader .= "\\hypersetup{\n";
     $sectionHeader .= "    pdftitle={" . $nom . "'s CV},\n";
     $sectionHeader .= "    pdfauthor={" . $nom . "},\n";
     $sectionHeader .= "    pdfcreator={" . $nom . "}\n";
-    $sectionHeader .= "}\n\n"; 
+    $sectionHeader .= "}\n\n";
+
+    // Color definitions
+    $sectionHeader .= "\\definecolor{primaryColor}{RGB}{255, 0, 0}";
+
+    // $sectionHeader .= "\\definecolor{primaryColor}{RGB}{255, 0, 0}";
     $sectionHeader .= "\\begin{document}\n";
     $sectionHeader .= "    \\placelastupdatedtext\n";
     $sectionHeader .= "    \\begin{header}\n";
@@ -286,10 +276,10 @@ $xmlContent .= "</cv>";
     $sectionHeader .= "    \\end{header}\n\n";
     $sectionHeader .= "    \\vspace{0.1 cm}\n\n";
 
-    $sectionProfil = "\\section{Profil}\n";
-    $sectionProfil .= "    \\begin{onecolentry}\n";
+    $sectionProfil = "     \\section{Profil}\n";
+    $sectionProfil .= "        \\begin{onecolentry}\n";
     $sectionProfil .= "        " . $profil;
-    $sectionProfil .= "    \\end{onecolentry}\n";
+    $sectionProfil .= "        \\end{onecolentry}\n";
 
     // Education Section
     $sectionEducation = "    \\section{Education}\n";
@@ -314,6 +304,31 @@ $xmlContent .= "</cv>";
         }
         $sectionEducation .= "    \\end{onecolentry}\n\n";
         $sectionEducation .= "    \\vspace{0.05 cm}\n\n";
+    }
+
+    // Certificat Section
+    $sectionCertificat = "    \\section{Certificats}\n";
+    for ($i = 0; $i < count($certificate_name); $i++) {
+        $name = htmlspecialchars($certificate_name[$i]);
+        $dates = htmlspecialchars($certificate_date[$i]);
+        $orga = htmlspecialchars($certificate_issuer[$i]);
+        $location = htmlspecialchars($certificate_location[$i]);
+        $description = htmlspecialchars($certificate_description[$i]);
+
+        $sectionCertificat .= "    \\begin{onecolentry}\n";
+        $sectionCertificat .= "        \\textbf{" . $name . "} \\hfill " . $dates . " \\\\\n";
+        if (!empty($university)) {
+            $sectionCertificat .= "        \\textit{" . $orga . "}";
+            if (!empty($field)) {
+                $sectionCertificat .= " \\hfill " . $location;
+            }
+            $sectionCertificat .= " \\\\\n";
+        }
+        if (!empty($detail)) {
+            $sectionCertificat .= "        " . $description . "\n";
+        }
+        $sectionCertificat .= "    \\end{onecolentry}\n\n";
+        $sectionCertificat .= "    \\vspace{0.05 cm}\n\n";
     }
     // Experience Section
     $sectionExperience = "    \\section{Experience}\n";
@@ -401,7 +416,7 @@ $xmlContent .= "</cv>";
 
     $sectionFooter = "\\end{document}";
 
-    $latexContent = $sectionHeader . $sectionEducation . $sectionProjects . $sectionExperience . $sectionSkills . $sectionLanguages . $sectionFooter;
+    $latexContent = $sectionHeader . $sectionProfil . $sectionEducation . $sectionCertificat . $sectionProjects . $sectionExperience . $sectionSkills . $sectionLanguages . $sectionFooter;
 
 // Write LaTeX file
 $texFile = "CV_" . $nom . "_" . $prenom . ".tex";
