@@ -746,3 +746,244 @@ textarea {
   transform: translateX(5px);
   transition: all 0.3s ease;
 }
+
+/* Customization section styles */
+.customization-options {
+  background: #f8f9fa;
+  padding: 25px;
+  border-radius: 15px;
+  margin-top: 20px;
+}
+
+.color-picker-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.color-picker {
+  width: 60px;
+  height: 60px;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+}
+
+.color-picker:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+}
+
+.color-presets {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.color-preset {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 3px solid transparent;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.color-preset:hover {
+  transform: scale(1.1);
+  border-color: #fff;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.color-preset.selected {
+  border-color: #fff;
+  transform: scale(1.2);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+.color-preset.selected::after {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-weight: bold;
+  font-size: 14px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
+.color-preview {
+  margin-top: 25px;
+  padding: 20px;
+  background: white;
+  border-radius: 10px;
+  border: 1px solid #e9ecef;
+}
+
+.color-preview h4 {
+  margin-bottom: 15px;
+  color: #495057;
+  font-size: 1.1em;
+}
+
+.preview-elements {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.preview-header {
+  padding: 15px 20px;
+  border-radius: 10px;
+  color: white;
+  font-weight: 600;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.preview-section h5 {
+  margin: 0 0 10px 0;
+  padding-bottom: 5px;
+  font-size: 1.1em;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.preview-section p {
+  margin: 0;
+  color: #6c757d;
+  font-size: 0.9em;
+}
+
+.help-text {
+  font-size: 0.85em;
+  color: #6c757d;
+  font-style: italic;
+  margin-top: 8px;
+  display: block;
+}
+
+.section-description {
+  color: #6c757d;
+  font-size: 0.95em;
+  margin-bottom: 20px;
+  font-style: italic;
+}
+
+/* Personalization Panel (Outside Form) */
+.personalization-panel {
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  margin-bottom: 20px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.panel-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  color: white;
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.panel-header:hover {
+  background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%) !important;
+}
+
+.panel-header h3 {
+  margin: 0;
+  font-size: 1.1em;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.panel-toggle {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.2em;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.panel-toggle.collapsed {
+  transform: rotate(-90deg);
+}
+
+.panel-content {
+  padding: 20px;
+  max-height: 300px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.panel-content.collapsed {
+  max-height: 0;
+  padding: 0 20px;
+}
+
+.color-section {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.color-section label {
+  font-weight: 600;
+  color: #495057;
+  font-size: 1em;
+}
+
+/* Update existing color picker styles for the new context */
+.personalization-panel .color-picker-container {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.personalization-panel .color-picker {
+  width: 50px;
+  height: 50px;
+  flex-shrink: 0;
+}
+
+.personalization-panel .color-presets {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.personalization-panel .color-preset {
+  width: 35px;
+  height: 35px;
+}
+
+.personalization-panel .help-text {
+  font-size: 0.85em;
+  color: #6c757d;
+  font-style: italic;
+}
+
+/* Responsive design for personalization panel */
+@media (max-width: 768px) {
+  .personalization-panel .color-picker-container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+  
+  .personalization-panel .color-presets {
+    justify-content: flex-start;
+  }
+}

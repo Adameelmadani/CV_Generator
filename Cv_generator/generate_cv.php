@@ -50,11 +50,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $certificate_description = $_POST['certificate_description'] ?? [];
     
     $format = $_POST['format'] ?? 'pdf';
+    
+    // Extract customization options
+    $primaryColor = $_POST['primary_color'] ?? '#667eea';
 
 
     // Generate XML content
     $xmlContent  = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
     $xmlContent .= "<cv>\n";
+
+    // ── Personalization ──
+    $xmlContent .= "  <personalization>\n";
+    $xmlContent .= "    <primaryColor>" . htmlspecialchars($primaryColor) . "</primaryColor>\n";
+    $xmlContent .= "  </personalization>\n\n";
 
     // ── Personal Information ──
     $xmlContent .= "  <personalInfo>\n";
@@ -238,7 +246,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $sectionHeader .= "}\n\n";
 
     // Color definitions
-    $sectionHeader .= "\\definecolor{primaryColor}{RGB}{255, 0, 0}";
+    // Convert hex color to RGB for LaTeX
+    $primaryColorRGB = hexToRgb($primaryColor);
+    $sectionHeader .= "\\definecolor{primaryColor}{RGB}{" . $primaryColorRGB['r'] . ", " . $primaryColorRGB['g'] . ", " . $primaryColorRGB['b'] . "}\n\n";
 
     // $sectionHeader .= "\\definecolor{primaryColor}{RGB}{255, 0, 0}";
     $sectionHeader .= "\\begin{document}\n";
@@ -543,5 +553,23 @@ if (!file_exists($pdfFile)) {
     }
 
     exit();
+}
+
+// Function to convert hex color to RGB array for LaTeX
+function hexToRgb($hex) {
+    // Remove # if present
+    $hex = str_replace('#', '', $hex);
+    
+    // Convert hex to RGB
+    if (strlen($hex) == 6) {
+        return [
+            'r' => hexdec(substr($hex, 0, 2)),
+            'g' => hexdec(substr($hex, 2, 2)),
+            'b' => hexdec(substr($hex, 4, 2))
+        ];
+    }
+    
+    // Default to blue if invalid hex
+    return ['r' => 102, 'g' => 126, 'b' => 234];
 }
 ?>

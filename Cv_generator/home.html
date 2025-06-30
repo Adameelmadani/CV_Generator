@@ -68,12 +68,57 @@
 
       <!-- Main Content with Preview -->
       <div class="main-content">
+        <!-- Personalization Panel (Outside Form) -->
+        <div class="personalization-panel">
+          <div class="panel-header">
+            <h3><i class="fas fa-palette"></i> Personnalisation</h3>
+            <button type="button" class="panel-toggle" onclick="togglePersonalizationPanel()">
+              <i class="fas fa-chevron-down"></i>
+            </button>
+          </div>
+          <div class="panel-content">
+            <div class="color-section">
+              <label for="primary_color_external">Couleur principale</label>
+              <div class="color-picker-container">
+                <input type="color" id="primary_color_external" value="#667eea" class="color-picker">
+                <div class="color-presets">
+                  <div class="color-preset" data-color="#667eea" style="background-color: #667eea;" title="Bleu (défaut)"></div>
+                  <div class="color-preset" data-color="#ff6b35" style="background-color: #ff6b35;" title="Orange"></div>
+                  <div class="color-preset" data-color="#28a745" style="background-color: #28a745;" title="Vert"></div>
+                  <div class="color-preset" data-color="#dc3545" style="background-color: #dc3545;" title="Rouge"></div>
+                  <div class="color-preset" data-color="#6f42c1" style="background-color: #6f42c1;" title="Violet"></div>
+                  <div class="color-preset" data-color="#fd7e14" style="background-color: #fd7e14;" title="Orange foncé"></div>
+                  <div class="color-preset" data-color="#20c997" style="background-color: #20c997;" title="Turquoise"></div>
+                  <div class="color-preset" data-color="#6c757d" style="background-color: #6c757d;" title="Gris"></div>
+                </div>
+              </div>
+              <small class="help-text">Modifiez la couleur en temps réel et voyez le résultat dans l'aperçu</small>
+              
+              <!-- Small color preview in personalization panel -->
+              <div class="color-preview">
+                <h4>Aperçu des couleurs</h4>
+                <div class="preview-elements">
+                  <div class="preview-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <span>En-tête du CV</span>
+                  </div>
+                  <div class="preview-section">
+                    <h5 style="color: #667eea; border-bottom: 2px solid #667eea;">Section du CV</h5>
+                    <p>Contenu de la section avec la couleur sélectionnée</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Form Section -->
         <div class="form-section">
           <form id="cvForm" action="generate_cv.php" method="POST" enctype="multipart/form-data">
             <div class="form-container">
               <!-- Hidden field for CV editing -->
               <input type="hidden" id="editing_cv_id" name="editing_cv_id" value="" />
+              <!-- Hidden field for color synchronization -->
+              <input type="hidden" id="primary_color" name="primary_color" value="#667eea" />
           
           <!-- Étape 1: Informations Personnelles -->
           <div class="step-content active" data-step="1">
@@ -1122,6 +1167,9 @@
         // Generate preview HTML
         const previewHTML = generatePreviewHTML(formData);
         previewContainer.innerHTML = previewHTML;
+        
+        // Apply color customization
+        updatePreviewColors();
       }
 
       function generatePreviewHTML(formData) {
@@ -1154,9 +1202,9 @@
             <div class="preview-contact">
               <div>${location}</div>
               <div>${email} • ${telephone}</div>
-              ${website ? `<div>Site web: ${website}</div>` : ''}
-              ${linkedin ? `<div>LinkedIn: ${linkedin}</div>` : ''}
-              ${github ? `<div>GitHub: ${github}</div>` : ''}
+              ${website ? `<div><a href="${website}" style="color: #667eea;">Site web: ${website}</a></div>` : ''}
+              ${linkedin ? `<div><a href="${linkedin}" style="color: #667eea;">LinkedIn: ${linkedin}</a></div>` : ''}
+              ${github ? `<div><a href="${github}" style="color: #667eea;">GitHub: ${github}</a></div>` : ''}
             </div>
           </div>
         `;
@@ -1165,7 +1213,7 @@
         if (profil) {
           html += `
             <div class="preview-section">
-              <h3>Profil</h3>
+              <h3 style="color: #667eea; border-bottom: 2px solid #667eea;">Profil</h3>
               <div>${profil}</div>
             </div>
           `;
@@ -1176,7 +1224,7 @@
         if (educationHTML) {
           html += `
             <div class="preview-section">
-              <h3>Formation</h3>
+              <h3 style="color: #667eea; border-bottom: 2px solid #667eea;">Formation</h3>
               ${educationHTML}
             </div>
           `;
@@ -1187,7 +1235,7 @@
         if (certificatesHTML) {
           html += `
             <div class="preview-section">
-              <h3>Certificats</h3>
+              <h3 style="color: #667eea; border-bottom: 2px solid #667eea;">Certificats</h3>
               ${certificatesHTML}
             </div>
           `;
@@ -1198,7 +1246,7 @@
         if (experienceHTML) {
           html += `
             <div class="preview-section">
-              <h3>Expérience</h3>
+              <h3 style="color: #667eea; border-bottom: 2px solid #667eea;">Expérience</h3>
               ${experienceHTML}
             </div>
           `;
@@ -1209,7 +1257,7 @@
         if (projectsHTML) {
           html += `
             <div class="preview-section">
-              <h3>Projets</h3>
+              <h3 style="color: #667eea; border-bottom: 2px solid #667eea;">Projets</h3>
               ${projectsHTML}
             </div>
           `;
@@ -1220,7 +1268,7 @@
         if (skillsHTML) {
           html += `
             <div class="preview-section">
-              <h3>Compétences</h3>
+              <h3 style="color: #667eea; border-bottom: 2px solid #667eea;">Compétences</h3>
               ${skillsHTML}
             </div>
           `;
@@ -1231,7 +1279,7 @@
         if (languagesHTML) {
           html += `
             <div class="preview-section">
-              <h3>Langues</h3>
+              <h3 style="color: #667eea; border-bottom: 2px solid #667eea;">Langues</h3>
               ${languagesHTML}
             </div>
           `;
@@ -1489,6 +1537,7 @@
       function initializeEnhancedFeatures() {
         initializeKeyboardShortcuts();
         initializeAutoSave();
+        initializeColorPicker();
         
         // Show keyboard shortcuts hint
         const previewBtn = document.getElementById('previewToggleBtn');
@@ -1505,6 +1554,154 @@
       
       // Initialize the form
       showStep(1);
+    </script>
+    <script>
+      // ============ COLOR CUSTOMIZATION FUNCTIONALITY ============
+      
+      function initializeColorPicker() {
+        const externalColorPicker = document.getElementById('primary_color_external');
+        const hiddenColorInput = document.getElementById('primary_color');
+        const colorPresets = document.querySelectorAll('.personalization-panel .color-preset');
+        
+        // Set initial color
+        updateColorPreview(externalColorPicker.value);
+        
+        // External color picker change event
+        externalColorPicker.addEventListener('change', function() {
+          const color = this.value;
+          hiddenColorInput.value = color; // Sync with hidden form field
+          updateColorPreview(color);
+          updatePresetSelection(color);
+          schedulePreviewUpdate(100);
+        });
+        
+        externalColorPicker.addEventListener('input', function() {
+          const color = this.value;
+          hiddenColorInput.value = color; // Sync with hidden form field
+          updateColorPreview(color);
+          updatePresetSelection(color);
+          schedulePreviewUpdate(50); // Faster for real-time dragging
+        });
+        
+        // Color preset click events
+        colorPresets.forEach(preset => {
+          preset.addEventListener('click', function() {
+            const color = this.getAttribute('data-color');
+            externalColorPicker.value = color;
+            hiddenColorInput.value = color; // Sync with hidden form field
+            updateColorPreview(color);
+            updatePresetSelection(color);
+            schedulePreviewUpdate(100);
+          });
+        });
+        
+        // Initialize preset selection
+        updatePresetSelection(externalColorPicker.value);
+      }
+      
+      function togglePersonalizationPanel() {
+        const panelContent = document.querySelector('.panel-content');
+        const toggleIcon = document.querySelector('.panel-toggle i');
+        
+        panelContent.classList.toggle('collapsed');
+        toggleIcon.classList.toggle('fa-chevron-down');
+        toggleIcon.classList.toggle('fa-chevron-up');
+        
+        // Update button rotation
+        const toggleBtn = document.querySelector('.panel-toggle');
+        toggleBtn.classList.toggle('collapsed');
+      }
+      
+      function updateColorPreview(color) {
+        // Only update the small preview in the personalization panel
+        const previewHeader = document.querySelector('.personalization-panel .preview-header');
+        const previewSectionH5 = document.querySelector('.personalization-panel .preview-section h5');
+        
+        if (previewHeader) {
+          // Convert hex to RGB for gradient
+          const rgb = hexToRgb(color);
+          if (rgb) {
+            previewHeader.style.background = `linear-gradient(135deg, ${color} 0%, ${darkenColor(color, 20)} 100%)`;
+          }
+        }
+        
+        if (previewSectionH5) {
+          previewSectionH5.style.color = color;
+          previewSectionH5.style.borderBottomColor = color;
+        }
+      }
+      
+      function updatePresetSelection(selectedColor) {
+        const colorPresets = document.querySelectorAll('.personalization-panel .color-preset');
+        colorPresets.forEach(preset => {
+          if (preset.getAttribute('data-color') === selectedColor) {
+            preset.classList.add('selected');
+          } else {
+            preset.classList.remove('selected');
+          }
+        });
+      }
+      
+      function hexToRgb(hex) {
+        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? {
+          r: parseInt(result[1], 16),
+          g: parseInt(result[2], 16),
+          b: parseInt(result[3], 16)
+        } : null;
+      }
+      
+      function darkenColor(hex, percent) {
+        const rgb = hexToRgb(hex);
+        if (!rgb) return hex;
+        
+        const factor = (100 - percent) / 100;
+        const r = Math.round(rgb.r * factor);
+        const g = Math.round(rgb.g * factor);
+        const b = Math.round(rgb.b * factor);
+        
+        return `rgb(${r}, ${g}, ${b})`;
+      }
+      
+      // Update the real-time preview to use selected color (ONLY CV PREVIEW)
+      function updatePreviewColors() {
+        const selectedColor = document.getElementById('primary_color_external')?.value || 
+                             document.getElementById('primary_color')?.value || '#667eea';
+        const previewContainer = document.querySelector('.cv-preview');
+        
+        if (previewContainer) {
+          // Update ONLY the CV preview content, not UI elements
+          const previewName = previewContainer.querySelector('.preview-name');
+          if (previewName) {
+            previewName.style.color = selectedColor;
+          }
+          
+          // Update section headers in CV preview only
+          const sectionHeaders = previewContainer.querySelectorAll('.preview-section h3');
+          sectionHeaders.forEach(header => {
+            header.style.color = selectedColor;
+            header.style.borderBottomColor = selectedColor;
+          });
+          
+          // Update contact info icons/links in CV preview
+          const contactLinks = previewContainer.querySelectorAll('.preview-contact a, .preview-contact span[style*="color"]');
+          contactLinks.forEach(link => {
+            link.style.color = selectedColor;
+          });
+          
+          // Update any accent elements in CV preview
+          const accentElements = previewContainer.querySelectorAll('.preview-accent, .preview-highlight');
+          accentElements.forEach(element => {
+            element.style.color = selectedColor;
+            element.style.borderColor = selectedColor;
+          });
+        }
+      }
+
+      // Initialize color picker on DOMContentLoaded
+      document.addEventListener('DOMContentLoaded', function() {
+        initializeColorPicker();
+      });
     </script>
   </body>
 </html>
