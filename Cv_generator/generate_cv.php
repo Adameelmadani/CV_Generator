@@ -251,7 +251,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $sectionHeader .= "        \\begin{minipage}{0.8\\textwidth}\n";
     $sectionHeader .= "            \\raggedright\n";
     $sectionHeader .= "            \\fontsize{22 pt}{22 pt}\n";
-    $sectionHeader .= "            \\textbf{" . $nom . "}\n\n";
+    $sectionHeader .= "            \\textbf{" . $nom . " " . $prenom . "}\n\n";
     $sectionHeader .= "            \\vspace{0.1 cm}\n\n";
     $sectionHeader .= "            \\normalsize\n";
     $sectionHeader .= "            \\mbox{{\\footnotesize\\faMapMarker*}\\hspace*{0.1cm}" . $location . "}%\n";
@@ -280,8 +280,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $sectionProfil .= "        " . $profil;
     $sectionProfil .= "        \\end{onecolentry}\n";
 
-    // Education Section
-    $sectionEducation = "    \\section{Education}\n";
+    // Formation Section
+    $sectionEducation = "    \\section{Formation}\n";
     for ($i = 0; $i < count($education_degree); $i++) {
         $degree = htmlspecialchars($education_degree[$i]);
         $dates = htmlspecialchars($education_dates[$i]);
@@ -330,7 +330,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $sectionCertificat .= "    \\vspace{0.05 cm}\n\n";
     }
     // Experience Section
-    $sectionExperience = "    \\section{Experience}\n";
+    $sectionExperience = "    \\section{Expérience}\n";
     for ($i = 0; $i < count($experience_location); $i++) {
         $place = htmlspecialchars($experience_location[$i]);
         $dates = htmlspecialchars($experience_dates[$i]);
@@ -366,7 +366,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $sectionExperience .= "\n";
 
     // Project Section
-    $sectionProjects = "    \\section{Projects}\n";
+    $sectionProjects = "    \\section{Projets}\n";
     for ($i = 0; $i < count($project_name); $i++) {
         $title = htmlspecialchars($project_name[$i]);
         // $technologies = $projects_technologies[$i];
@@ -399,7 +399,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     // Skills Section
-    $sectionSkills = "    \\section{Skills}\n";
+    $sectionSkills = "    \\section{Compétences}\n";
     for ($i = 0; $i < count($skill_category); $i++) {
         $category = htmlspecialchars($skill_category[$i]);
         $item = $skill_items[$i];
@@ -411,7 +411,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     // Languages Section
-    $sectionLanguages = "    \\section{Languages}\n";
+    $sectionLanguages = "    \\section{Langues}\n";
     $sectionLanguages .= "    \\begin{onecolentry}\n";
     $lang_items = [];
     for ($i = 0; $i < count($language_name); $i++) {
@@ -425,7 +425,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     $sectionFooter = "\\end{document}";
 
-    $latexContent = $sectionHeader . $sectionProfil . $sectionEducation . $sectionCertificat . $sectionProjects . $sectionExperience . $sectionSkills . $sectionLanguages . $sectionFooter;
+    $latexContent = $sectionHeader . $sectionProfil . $sectionEducation . $sectionCertificat . $sectionExperience . $sectionProjects . $sectionSkills . $sectionLanguages . $sectionFooter;
 
 // Write LaTeX file
 $texFile = "CV_" . $nom . "_" . $prenom . ".tex";

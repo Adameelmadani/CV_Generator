@@ -19,6 +19,9 @@
           <button class="btn-link" id="fillTestBtn" onclick="fillTestData()" style="background: #ff6b35; color: white;">
             Fill Test Data
           </button>
+          <button class="btn-link" id="previewToggleBtn" onclick="togglePreview()" style="background: #28a745; color: white;">
+            <i class="fas fa-eye"></i> Aperçu
+          </button>
           <button class="logout-btn" onclick="logout()" style="display: none" id="logoutBtn">
             Déconnexion
           </button>
@@ -63,10 +66,14 @@
         </div>
       </div>
 
-      <form id="cvForm" action="generate_cv.php" method="POST" enctype="multipart/form-data">
-        <div class="form-container">
-          <!-- Hidden field for CV editing -->
-          <input type="hidden" id="editing_cv_id" name="editing_cv_id" value="" />
+      <!-- Main Content with Preview -->
+      <div class="main-content">
+        <!-- Form Section -->
+        <div class="form-section">
+          <form id="cvForm" action="generate_cv.php" method="POST" enctype="multipart/form-data">
+            <div class="form-container">
+              <!-- Hidden field for CV editing -->
+              <input type="hidden" id="editing_cv_id" name="editing_cv_id" value="" />
           
           <!-- Étape 1: Informations Personnelles -->
           <div class="step-content active" data-step="1">
@@ -271,13 +278,45 @@
       </form>
     </div>
 
+    <!-- Live Preview Section -->
+    <div class="preview-section" id="previewSection" style="display: none;">
+      <div class="preview-header">
+        <h3><i class="fas fa-eye"></i> Aperçu en temps réel</h3>
+        <div class="preview-controls">
+          <div class="preview-status" id="previewStatus">
+            <i class="fas fa-circle" style="color: #28a745;"></i>
+            <span>Synchronisé</span>
+          </div>
+          <button type="button" class="preview-toggle-btn" onclick="togglePreview()">
+            <i class="fas fa-times"></i> Fermer
+          </button>
+        </div>
+      </div>
+      <div class="preview-container">
+        <div class="cv-preview" id="cvPreview">
+          <div class="preview-placeholder">
+            <i class="fas fa-file-alt"></i>
+            <p>Commencez à remplir le formulaire pour voir l'aperçu de votre CV</p>
+            <small>Raccourci: Ctrl+P pour basculer l'aperçu</small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
     <script>
       let currentStep = 1;
       const totalSteps = 8;
+      let previewVisible = false;
 
       // Add form submission debugging
       document.addEventListener('DOMContentLoaded', function() {
         const form = document.getElementById('cvForm');
+        
+        // Initialize live preview
+        initializeLivePreview();
         
         // Check if we're in edit mode
         const urlParams = new URLSearchParams(window.location.search);
@@ -412,10 +451,12 @@
         newEntry.querySelectorAll('input, textarea').forEach(input => input.value = '');
         newEntry.querySelector('.remove-btn').style.display = 'inline-block';
         container.appendChild(newEntry);
+        triggerPreviewUpdate();
       }
 
       function removeEducation(button) {
         button.parentElement.remove();
+        triggerPreviewUpdate();
       }
 
       function addCertificate() {
@@ -424,10 +465,12 @@
         newEntry.querySelectorAll('input, textarea').forEach(input => input.value = '');
         newEntry.querySelector('.remove-btn').style.display = 'inline-block';
         container.appendChild(newEntry);
+        triggerPreviewUpdate();
       }
 
       function removeCertificate(button) {
         button.parentElement.remove();
+        triggerPreviewUpdate();
       }
 
       function addExperience() {
@@ -436,10 +479,12 @@
         newEntry.querySelectorAll('input, textarea').forEach(input => input.value = '');
         newEntry.querySelector('.remove-btn').style.display = 'inline-block';
         container.appendChild(newEntry);
+        triggerPreviewUpdate();
       }
 
       function removeExperience(button) {
         button.parentElement.remove();
+        triggerPreviewUpdate();
       }
 
       function addProject() {
@@ -448,10 +493,12 @@
         newEntry.querySelectorAll('input, textarea').forEach(input => input.value = '');
         newEntry.querySelector('.remove-btn').style.display = 'inline-block';
         container.appendChild(newEntry);
+        triggerPreviewUpdate();
       }
 
       function removeProject(button) {
         button.parentElement.remove();
+        triggerPreviewUpdate();
       }
 
       function addSkill() {
@@ -460,10 +507,12 @@
         newEntry.querySelectorAll('input, textarea').forEach(input => input.value = '');
         newEntry.querySelector('.remove-btn').style.display = 'inline-block';
         container.appendChild(newEntry);
+        triggerPreviewUpdate();
       }
 
       function removeSkill(button) {
         button.parentElement.remove();
+        triggerPreviewUpdate();
       }
 
       function addLanguage() {
@@ -478,10 +527,12 @@
         });
         newEntry.querySelector('.remove-btn').style.display = 'inline-block';
         container.appendChild(newEntry);
+        triggerPreviewUpdate();
       }
 
       function removeLanguage(button) {
         button.parentElement.remove();
+        triggerPreviewUpdate();
       }
 
       function logout() {
@@ -884,6 +935,574 @@
         }, 1000);
       }
 
+      // ============ LIVE PREVIEW FUNCTIONALITY (OVERLEAF-STYLE) ============
+      
+      let previewUpdateTimeout;
+      let isPreviewUpdating = false;
+      
+      function initializeLivePreview() {
+        // Add event listeners to all form inputs
+        const form = document.getElementById('cvForm');
+        
+        // Real-time input listening (faster response like Overleaf)
+        form.addEventListener('input', handleRealTimeInput);
+        form.addEventListener('change', handleFormChange);
+        form.addEventListener('paste', handleFormChange);
+        form.addEventListener('keyup', handleRealTimeInput);
+        
+        // Listen for dynamic content changes (when adding/removing sections)
+        const observer = new MutationObserver((mutations) => {
+          let shouldUpdate = false;
+          mutations.forEach(mutation => {
+            if (mutation.type === 'childList' && 
+                (mutation.addedNodes.length > 0 || mutation.removedNodes.length > 0)) {
+              shouldUpdate = true;
+            }
+          });
+          if (shouldUpdate) {
+            schedulePreviewUpdate(100);
+          }
+        });
+        
+        observer.observe(form, {
+          childList: true,
+          subtree: true,
+          attributes: false
+        });
+        
+        // Initialize preview if form has data
+        if (previewVisible) {
+          updatePreview();
+        }
+      }
+      
+      function handleRealTimeInput(e) {
+        // Add typing indicator
+        const formGroup = e.target.closest('.form-group');
+        if (formGroup) {
+          formGroup.classList.add('typing');
+          setTimeout(() => {
+            formGroup.classList.remove('typing');
+          }, 1000);
+        }
+        
+        // Detect which section is being edited and highlight it
+        const editingSection = detectEditingSection(e.target);
+        if (editingSection) {
+          setTimeout(() => {
+            highlightPreviewSection(editingSection);
+          }, 500); // Delay to allow preview update first
+        }
+        
+        // Immediate update for short text inputs
+        if (e.target.type === 'text' || e.target.type === 'email' || e.target.type === 'tel') {
+          schedulePreviewUpdate(150); // Very fast like Overleaf
+        } else {
+          schedulePreviewUpdate(300);
+        }
+      }
+      
+      function handleFormChange(e) {
+        // Immediate update for dropdowns, checkboxes, etc.
+        schedulePreviewUpdate(50);
+      }
+      
+      function schedulePreviewUpdate(delay = 200) {
+        if (!previewVisible) return;
+        
+        // Show that preview is out of sync
+        const previewStatus = document.getElementById('previewStatus');
+        if (previewStatus && !isPreviewUpdating) {
+          previewStatus.className = 'preview-status updating';
+          previewStatus.innerHTML = '<i class="fas fa-clock"></i><span>En attente...</span>';
+        }
+        
+        clearTimeout(previewUpdateTimeout);
+        previewUpdateTimeout = setTimeout(() => {
+          updatePreviewWithIndicator();
+        }, delay);
+      }
+      
+      function updatePreviewWithIndicator() {
+        if (isPreviewUpdating) return;
+        
+        isPreviewUpdating = true;
+        const previewHeader = document.querySelector('.preview-header h3');
+        const previewContainer = document.querySelector('.preview-container');
+        const cvPreview = document.querySelector('.cv-preview');
+        const previewStatus = document.getElementById('previewStatus');
+        const originalText = previewHeader.innerHTML;
+        
+        // Update status indicator
+        previewStatus.className = 'preview-status updating';
+        previewStatus.innerHTML = '<i class="fas fa-sync fa-spin"></i><span>Compilation...</span>';
+        
+        // Show updating indicator like Overleaf
+        previewHeader.innerHTML = '<i class="fas fa-sync fa-spin"></i> Mise à jour...';
+        previewHeader.className = 'updating';
+        previewContainer.classList.add('updating');
+        cvPreview.classList.add('updating');
+        
+        // Simulate compilation time (like Overleaf)
+        setTimeout(() => {
+          updatePreview();
+          
+          // Update status to success
+          previewStatus.className = 'preview-status success';
+          previewStatus.innerHTML = '<i class="fas fa-check"></i><span>Synchronisé</span>';
+          
+          // Show success indicator in header briefly
+          previewHeader.innerHTML = '<i class="fas fa-check"></i> Aperçu mis à jour';
+          previewHeader.className = 'success';
+          
+          // Remove updating classes
+          previewContainer.classList.remove('updating');
+          cvPreview.classList.remove('updating');
+          
+          // Reset header to original after brief moment
+          setTimeout(() => {
+            previewHeader.innerHTML = originalText;
+            previewHeader.className = '';
+            
+            // Reset status to normal after delay
+            setTimeout(() => {
+              previewStatus.className = 'preview-status';
+              previewStatus.innerHTML = '<i class="fas fa-circle"></i><span>Synchronisé</span>';
+              isPreviewUpdating = false;
+            }, 1000);
+          }, 800);
+        }, 200); // Slightly longer to show the animation
+      }
+
+      function togglePreview() {
+        const previewSection = document.getElementById('previewSection');
+        const toggleBtn = document.getElementById('previewToggleBtn');
+        
+        previewVisible = !previewVisible;
+        
+        if (previewVisible) {
+          previewSection.style.display = 'block';
+          toggleBtn.innerHTML = '<i class="fas fa-eye-slash"></i> Masquer';
+          toggleBtn.style.background = '#dc3545';
+          
+          // Initialize live preview immediately
+          initializeLivePreview();
+          
+          // Immediate first update with indicator
+          updatePreviewWithIndicator();
+          
+          // Auto-scroll to show preview
+          setTimeout(() => {
+            previewSection.scrollIntoView({ 
+              behavior: 'smooth', 
+              block: 'start' 
+            });
+          }, 100);
+          
+        } else {
+          previewSection.style.display = 'none';
+          toggleBtn.innerHTML = '<i class="fas fa-eye"></i> Aperçu';
+          toggleBtn.style.background = '#28a745';
+          
+          // Clear any pending updates
+          clearTimeout(previewUpdateTimeout);
+          isPreviewUpdating = false;
+        }
+      }
+
+      function updatePreview() {
+        if (!previewVisible) return;
+        
+        const previewContainer = document.getElementById('cvPreview');
+        if (!previewContainer) return;
+        
+        // Get form data
+        const formData = new FormData(document.getElementById('cvForm'));
+        
+        // Generate preview HTML
+        const previewHTML = generatePreviewHTML(formData);
+        previewContainer.innerHTML = previewHTML;
+      }
+
+      function generatePreviewHTML(formData) {
+        const nom = formData.get('nom') || '[Nom]';
+        const prenom = formData.get('prenom') || '[Prénom]';
+        const location = formData.get('location') || '[Localisation]';
+        const email = formData.get('email') || '[Email]';
+        const telephone = formData.get('telephone') || '[Téléphone]';
+        const website = formData.get('website');
+        const linkedin = formData.get('linkedin');
+        const github = formData.get('github');
+        const profil = formData.get('profil_description') || '';
+        
+        // Check if we have any data to show
+        const hasBasicData = nom !== '[Nom]' || prenom !== '[Prénom]' || location !== '[Localisation]' || 
+                            email !== '[Email]' || telephone !== '[Téléphone]' || profil;
+        
+        if (!hasBasicData) {
+          return `
+            <div class="preview-placeholder">
+              <i class="fas fa-file-alt"></i>
+              <p>Commencez à remplir le formulaire pour voir l'aperçu de votre CV</p>
+            </div>
+          `;
+        }
+        
+        let html = `
+          <div class="preview-header-section">
+            <div class="preview-name">${prenom} ${nom}</div>
+            <div class="preview-contact">
+              <div>${location}</div>
+              <div>${email} • ${telephone}</div>
+              ${website ? `<div>Site web: ${website}</div>` : ''}
+              ${linkedin ? `<div>LinkedIn: ${linkedin}</div>` : ''}
+              ${github ? `<div>GitHub: ${github}</div>` : ''}
+            </div>
+          </div>
+        `;
+        
+        // Profile section
+        if (profil) {
+          html += `
+            <div class="preview-section">
+              <h3>Profil</h3>
+              <div>${profil}</div>
+            </div>
+          `;
+        }
+        
+        // Education section
+        const educationHTML = generateEducationPreview(formData);
+        if (educationHTML) {
+          html += `
+            <div class="preview-section">
+              <h3>Formation</h3>
+              ${educationHTML}
+            </div>
+          `;
+        }
+        
+        // Certificates section
+        const certificatesHTML = generateCertificatesPreview(formData);
+        if (certificatesHTML) {
+          html += `
+            <div class="preview-section">
+              <h3>Certificats</h3>
+              ${certificatesHTML}
+            </div>
+          `;
+        }
+        
+        // Experience section
+        const experienceHTML = generateExperiencePreview(formData);
+        if (experienceHTML) {
+          html += `
+            <div class="preview-section">
+              <h3>Expérience</h3>
+              ${experienceHTML}
+            </div>
+          `;
+        }
+        
+        // Projects section
+        const projectsHTML = generateProjectsPreview(formData);
+        if (projectsHTML) {
+          html += `
+            <div class="preview-section">
+              <h3>Projets</h3>
+              ${projectsHTML}
+            </div>
+          `;
+        }
+        
+        // Skills section
+        const skillsHTML = generateSkillsPreview(formData);
+        if (skillsHTML) {
+          html += `
+            <div class="preview-section">
+              <h3>Compétences</h3>
+              ${skillsHTML}
+            </div>
+          `;
+        }
+        
+        // Languages section
+        const languagesHTML = generateLanguagesPreview(formData);
+        if (languagesHTML) {
+          html += `
+            <div class="preview-section">
+              <h3>Langues</h3>
+              ${languagesHTML}
+            </div>
+          `;
+        }
+        
+        return html;
+      }
+
+      function generateEducationPreview(formData) {
+        const degrees = formData.getAll('education_degree[]');
+        const dates = formData.getAll('education_dates[]');
+        const universities = formData.getAll('education_university[]');
+        const fields = formData.getAll('education_field[]');
+        const details = formData.getAll('education_details[]');
+        
+        let html = '';
+        
+        for (let i = 0; i < degrees.length; i++) {
+          if (degrees[i] || dates[i] || universities[i]) {
+            html += `
+              <div class="preview-entry">
+                <div class="preview-entry-header">
+                  <span><strong>${degrees[i] || '[Diplôme]'}</strong></span>
+                  <span>${dates[i] || '[Dates]'}</span>
+                </div>
+                ${universities[i] || fields[i] ? `
+                  <div class="preview-entry-details">
+                    ${universities[i] || '[Université]'}${fields[i] ? ' • ' + fields[i] : ''}
+                  </div>
+                ` : ''}
+                ${details[i] ? `<div class="preview-description">${details[i]}</div>` : ''}
+              </div>
+            `;
+          }
+        }
+        
+        return html;
+      }
+
+      function generateCertificatesPreview(formData) {
+        const names = formData.getAll('certificate_name[]');
+        const dates = formData.getAll('certificate_date[]');
+        const issuers = formData.getAll('certificate_issuer[]');
+        const locations = formData.getAll('certificate_location[]');
+        const descriptions = formData.getAll('certificate_description[]');
+        
+        let html = '';
+        
+        for (let i = 0; i < names.length; i++) {
+          if (names[i]) {
+            html += `
+              <div class="preview-entry">
+                <div class="preview-entry-header">
+                  <span><strong>${names[i]}</strong></span>
+                  <span>${dates[i] || '[Date]'}</span>
+                </div>
+                ${issuers[i] || locations[i] ? `
+                  <div class="preview-entry-details">
+                    ${issuers[i] || '[Organisme]'}${locations[i] ? ' • ' + locations[i] : ''}
+                  </div>
+                ` : ''}
+                ${descriptions[i] ? `<div class="preview-description">${descriptions[i]}</div>` : ''}
+              </div>
+            `;
+          }
+        }
+        
+        return html;
+      }
+
+      function generateExperiencePreview(formData) {
+        const locations = formData.getAll('experience_location[]');
+        const dates = formData.getAll('experience_dates[]');
+        const companies = formData.getAll('experience_company[]');
+        const positions = formData.getAll('experience_position[]');
+        const descriptions = formData.getAll('experience_description[]');
+        
+        let html = '';
+        
+        for (let i = 0; i < locations.length; i++) {
+          if (locations[i] || companies[i] || positions[i]) {
+            html += `
+              <div class="preview-entry">
+                <div class="preview-entry-header">
+                  <span><strong>${locations[i] || '[Lieu]'}</strong></span>
+                  <span>${dates[i] || '[Dates]'}</span>
+                </div>
+                ${companies[i] || positions[i] ? `
+                  <div class="preview-entry-details">
+                    ${companies[i] || '[Entreprise]'}${positions[i] ? ' • ' + positions[i] : ''}
+                  </div>
+                ` : ''}
+                ${descriptions[i] ? `
+                  <div class="preview-description">
+                    <ul>
+                      ${descriptions[i].split('\n').filter(line => line.trim()).map(line => `<li>${line.trim()}</li>`).join('')}
+                    </ul>
+                  </div>
+                ` : ''}
+              </div>
+            `;
+          }
+        }
+        
+        return html;
+      }
+
+      function generateProjectsPreview(formData) {
+        const names = formData.getAll('project_name[]');
+        const links = formData.getAll('project_link[]');
+        const descriptions = formData.getAll('project_description[]');
+        
+        let html = '';
+        
+        for (let i = 0; i < names.length; i++) {
+          if (names[i]) {
+            html += `
+              <div class="preview-entry">
+                <div class="preview-entry-header">
+                  <span><strong>${names[i]}</strong></span>
+                </div>
+                ${descriptions[i] ? `<div class="preview-description">${descriptions[i]}</div>` : ''}
+                ${links[i] ? `<div class="preview-description"><em>Lien: ${links[i]}</em></div>` : ''}
+              </div>
+            `;
+          }
+        }
+        
+        return html;
+      }
+
+      function generateSkillsPreview(formData) {
+        const categories = formData.getAll('skill_category[]');
+        const items = formData.getAll('skill_items[]');
+        
+        let html = '';
+        
+        for (let i = 0; i < categories.length; i++) {
+          if (categories[i] && items[i]) {
+            html += `
+              <div class="preview-entry">
+                <div class="preview-skills-grid">
+                  <strong>${categories[i]}:</strong> ${items[i]}
+                </div>
+              </div>
+            `;
+          }
+        }
+        
+        return html;
+      }
+
+      function generateLanguagesPreview(formData) {
+        const names = formData.getAll('language_name[]');
+        const levels = formData.getAll('language_level[]');
+        
+        let html = '';
+        const languageEntries = [];
+        
+        for (let i = 0; i < names.length; i++) {
+          if (names[i] && levels[i]) {
+            languageEntries.push(`<strong>${names[i]}:</strong> ${levels[i]}`);
+          }
+        }
+        
+        if (languageEntries.length > 0) {
+          html = `
+            <div class="preview-entry">
+              <div class="preview-languages-list">
+                ${languageEntries.join(' • ')}
+              </div>
+            </div>
+          `;
+        }
+        
+        return html;
+      }
+
+      // Debounce function to limit update frequency
+      function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+          const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+          };
+          clearTimeout(timeout);
+          timeout = setTimeout(later, wait);
+        };
+      }
+
+      // Update existing functions to trigger preview updates
+      const originalAddFunctions = {
+        addEducation: typeof addEducation !== 'undefined' ? addEducation : null,
+        addCertificate: typeof addCertificate !== 'undefined' ? addCertificate : null,
+        addExperience: typeof addExperience !== 'undefined' ? addExperience : null,
+        addProject: typeof addProject !== 'undefined' ? addProject : null,
+        addSkill: typeof addSkill !== 'undefined' ? addSkill : null,
+        addLanguage: typeof addLanguage !== 'undefined' ? addLanguage : null
+      };
+
+      // Update existing functions to trigger preview updates
+      function triggerPreviewUpdate() {
+        schedulePreviewUpdate(100);
+      }
+
+      // ============ END LIVE PREVIEW FUNCTIONALITY ============
+
+      // ============ KEYBOARD SHORTCUTS (OVERLEAF-STYLE) ============
+      
+      function initializeKeyboardShortcuts() {
+        document.addEventListener('keydown', function(e) {
+          // Ctrl/Cmd + P to toggle preview (like Overleaf)
+          if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+            e.preventDefault();
+            togglePreview();
+          }
+          
+          // Ctrl/Cmd + Enter to compile/update preview
+          if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+            e.preventDefault();
+            if (previewVisible) {
+              updatePreviewWithIndicator();
+            }
+          }
+          
+          // Escape to close preview
+          if (e.key === 'Escape' && previewVisible) {
+            togglePreview();
+          }
+        });
+      }
+      
+      // ============ AUTO-SAVE FUNCTIONALITY ============
+      
+      let autoSaveTimeout;
+      
+      function scheduleAutoSave() {
+        clearTimeout(autoSaveTimeout);
+        autoSaveTimeout = setTimeout(() => {
+          if (typeof autoSaveForm === 'function') {
+            autoSaveForm();
+          }
+        }, 5000); // Auto-save every 5 seconds of inactivity
+      }
+      
+      function initializeAutoSave() {
+        const form = document.getElementById('cvForm');
+        form.addEventListener('input', scheduleAutoSave);
+        form.addEventListener('change', scheduleAutoSave);
+      }
+      
+      // ============ ENHANCED FORM INITIALIZATION ============
+      
+      function initializeEnhancedFeatures() {
+        initializeKeyboardShortcuts();
+        initializeAutoSave();
+        
+        // Show keyboard shortcuts hint
+        const previewBtn = document.getElementById('previewToggleBtn');
+        if (previewBtn) {
+          previewBtn.title = 'Aperçu en temps réel (Ctrl+P)';
+        }
+      }
+      
+      // Initialize all enhanced features when DOM is ready
+      document.addEventListener('DOMContentLoaded', function() {
+        // ...existing code...
+        initializeEnhancedFeatures();
+      });
+      
       // Initialize the form
       showStep(1);
     </script>
