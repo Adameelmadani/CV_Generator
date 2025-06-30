@@ -164,13 +164,15 @@ export default function HomePage() {
                     Commencer maintenant
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    className="bg-white text-gray-700 border-gray-300 text-lg px-8 py-3"
-                  >
-                    Voir les modèles
-                  </Button>
+                  <Link href="/builder">
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      className="bg-white text-gray-700 border-gray-300 text-lg px-8 py-3"
+                    >
+                      Voir les modèles
+                    </Button>
+                  </Link>
                 </div>
               </div>
 

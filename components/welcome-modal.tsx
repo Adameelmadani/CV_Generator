@@ -10,7 +10,7 @@ interface WelcomeModalProps {
   userName?: string
 }
 
-export function WelcomeModal({ isOpen, onClose, userName = "User" }: WelcomeModalProps) {
+export function WelcomeModal({ isOpen, onClose, userName = "Utilisateur" }: WelcomeModalProps) {
   const handleCreateNew = () => {
     onClose()
     window.location.href = "/cv-choice"
@@ -29,16 +29,16 @@ export function WelcomeModal({ isOpen, onClose, userName = "User" }: WelcomeModa
           className="absolute right-4 top-4 z-10 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
         >
           <X className="h-4 w-4" />
-          <span className="sr-only">Close</span>
+          <span className="sr-only">Fermer</span>
         </button>
 
         <div className="grid lg:grid-cols-2 min-h-[500px]">
-          {/* Left Side - Content */}
+          {/* Côté gauche - Contenu */}
           <div className="p-12 flex flex-col justify-center space-y-8 bg-white">
             <div className="space-y-6">
-              <h1 className="text-5xl font-bold text-gray-900">Hello {userName}</h1>
+              <h1 className="text-5xl font-bold text-gray-900">Bonjour {userName}</h1>
               <p className="text-xl text-gray-600 leading-relaxed">
-                Continue your job search and select the option that suits you best.
+                Continuez votre recherche d’emploi et sélectionnez l’option qui vous convient le mieux.
               </p>
             </div>
 
@@ -50,7 +50,7 @@ export function WelcomeModal({ isOpen, onClose, userName = "User" }: WelcomeModa
                 className="w-full justify-start py-6 text-lg border-2 border-gray-300 hover:border-blue-500 hover:bg-blue-50 h-auto"
               >
                 <Plus className="h-6 w-6 mr-4" />
-                <span>Create New CV</span>
+                <span>Créer un nouveau CV</span>
               </Button>
 
               <Button
@@ -59,29 +59,29 @@ export function WelcomeModal({ isOpen, onClose, userName = "User" }: WelcomeModa
                 className="w-full justify-start py-6 text-lg bg-teal-600 hover:bg-teal-700 h-auto"
               >
                 <Edit className="h-6 w-6 mr-4" />
-                <span>Finish My CV</span>
+                <span>Continuer mon CV</span>
               </Button>
             </div>
 
             <div className="text-center text-sm text-gray-500">
-              <p>You can always change your option later</p>
+              <p>Vous pouvez toujours changer d’option plus tard</p>
             </div>
           </div>
 
-          {/* Right Side - CV Preview */}
+          {/* Côté droit - Aperçu CV */}
           <div className="bg-gradient-to-br from-blue-50 to-indigo-100 p-12 flex items-center justify-center">
             <div className="relative">
-              {/* CV Template Mockup */}
+              {/* Modèle de CV */}
               <div className="bg-white rounded-lg shadow-xl p-8 w-80 h-96 border">
                 <div className="space-y-4">
-                  {/* Header */}
+                  {/* En-tête */}
                   <div className="text-center border-b pb-4">
                     <div className="w-16 h-16 bg-gray-200 rounded-full mx-auto mb-3"></div>
                     <h3 className="font-bold text-lg text-gray-900">John Doe</h3>
-                    <p className="text-sm text-gray-600">Software Engineer</p>
+                    <p className="text-sm text-gray-600">Ingénieur Logiciel</p>
                   </div>
 
-                  {/* Content sections */}
+                  {/* Sections du contenu */}
                   <div className="space-y-3">
                     <div>
                       <div className="h-3 bg-blue-200 rounded w-20 mb-2"></div>
@@ -111,9 +111,9 @@ export function WelcomeModal({ isOpen, onClose, userName = "User" }: WelcomeModa
                 </div>
               </div>
 
-              {/* Professional badge */}
+              {/* Badge professionnel */}
               <div className="absolute -top-3 -right-3 bg-green-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
-                Professional
+                Professionnel
               </div>
             </div>
           </div>

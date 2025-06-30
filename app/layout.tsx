@@ -3,7 +3,7 @@ import './globals.css'
 
 export const metadata: Metadata = {
   title: 'CV Craft',
-  description: 'Generating CVs',
+  description: '',
   generator: '',
 }
 

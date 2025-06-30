@@ -16,16 +16,20 @@ export function PlanSelectionModal({ isOpen, onClose, onSelectPlan }: PlanSelect
       name: "Start Free",
       price: 0,
       period: "forever",
-      description: "Get started immediately with basic CV creation",
+      description: "Commencez immédiatement avec la création de CV de base",
       features: [
-        "1 basic CV template",
-        "Standard PDF export",
-        "Basic customization",
-        "Instant access",
-        "No registration required",
+        "1 modèle de CV basique",
+        "Exportation PDF standard",
+        "Personnalisation de base",
+        "Accès instantané",
+        "Aucune inscription requise",
       ],
-      limitations: ["Limited to 1 template", "CVCraft watermark included", "No advanced features", "No cloud storage"],
-      buttonText: "Start Creating Now",
+      limitations: [
+        "Limité à 1 modèle",
+        "Pas de fonctionnalités avancées",
+        "Pas de stockage cloud",
+      ],
+      buttonText: "Commencer maintenant",
       buttonVariant: "default" as const,
       popular: false,
       icon: FileText,
@@ -35,17 +39,18 @@ export function PlanSelectionModal({ isOpen, onClose, onSelectPlan }: PlanSelect
       name: "Create Account",
       price: 0,
       period: "free",
-      description: "Sign up for free to unlock more features and save your work",
+      description: "Inscrivez-vous gratuitement pour débloquer plus de fonctionnalités et enregistrer votre travail",
       features: [
-        "3 professional templates",
-        "Cloud storage for your CVs",
-        "Multiple export formats",
-        "Save and edit anytime",
-        "Email support",
-        "No watermark",
+        "3 modèles professionnels",
+        "Stockage cloud pour vos CV",
+        "Multiples formats d’exportation",
+        "Enregistrement et édition à tout moment",
       ],
-      limitations: ["Limited to 3 CVs per month", "Basic templates only", "Standard support"],
-      buttonText: "Create Free Account",
+      limitations: [
+        "Limité à 3 CV par mois",
+        "Modèles de base uniquement",
+      ],
+      buttonText: "Créer un compte gratuit",
       buttonVariant: "default" as const,
       popular: true,
       icon: Users,
@@ -54,21 +59,18 @@ export function PlanSelectionModal({ isOpen, onClose, onSelectPlan }: PlanSelect
     {
       name: "Go Premium",
       price: 9.99,
-      period: "month",
-      description: "Unlock all premium features for professional CV creation",
+      period: "mois",
+      description: "Débloquez toutes les fonctionnalités premium pour créer un CV professionnel",
       features: [
-        "50+ premium templates",
-        "ATS-optimized designs",
-        "Cover letter builder",
-        "Unlimited CV creation",
-        "Advanced customization",
-        "Priority support",
-        "Analytics dashboard",
-        "LinkedIn integration",
-        "AI-powered suggestions",
+        "50+ modèles premium",
+        "Designs optimisés ATS",
+        "Création de CV illimitée",
+        "Personnalisation avancée",
+        "Assistance prioritaire",
+        "Suggestions alimentées par l’IA",
       ],
       limitations: [],
-      buttonText: "Go Premium Now",
+      buttonText: "Passer en Premium",
       buttonVariant: "default" as const,
       popular: false,
       icon: Crown,
@@ -106,9 +108,9 @@ export function PlanSelectionModal({ isOpen, onClose, onSelectPlan }: PlanSelect
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-center text-2xl font-bold mb-2">Choose How to Get Started</DialogTitle>
+          <DialogTitle className="text-center text-2xl font-bold mb-2">Choisissez comment commencer</DialogTitle>
           <p className="text-center text-gray-600 mb-6">
-            Select the option that best fits your needs and start creating your professional CV
+            Sélectionnez l’option qui correspond le mieux à vos besoins et commencez à créer votre CV professionnel
           </p>
         </DialogHeader>
 
@@ -125,7 +127,7 @@ export function PlanSelectionModal({ isOpen, onClose, onSelectPlan }: PlanSelect
               >
                 {plan.popular && (
                   <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                    <Badge className="bg-green-600 text-white px-3 py-1">RECOMMENDED</Badge>
+                    <Badge className="bg-green-600 text-white px-3 py-1">RECOMMANDÉ</Badge>
                   </div>
                 )}
 
@@ -140,7 +142,7 @@ export function PlanSelectionModal({ isOpen, onClose, onSelectPlan }: PlanSelect
 
                   <div className="mb-3">
                     {plan.price === 0 ? (
-                      <span className="text-3xl font-bold text-gray-900">Free</span>
+                      <span className="text-3xl font-bold text-gray-900">Gratuit</span>
                     ) : (
                       <>
                         <span className="text-3xl font-bold text-gray-900">${plan.price}</span>
@@ -162,7 +164,7 @@ export function PlanSelectionModal({ isOpen, onClose, onSelectPlan }: PlanSelect
 
                 {/* Features List */}
                 <div className="space-y-3">
-                  <h4 className="font-semibold text-gray-900 text-sm">What's included:</h4>
+                  <h4 className="font-semibold text-gray-900 text-sm">Ce qui est inclus :</h4>
                   {plan.features.map((feature, index) => (
                     <div key={index} className="flex items-start space-x-3">
                       <Check className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
@@ -172,7 +174,7 @@ export function PlanSelectionModal({ isOpen, onClose, onSelectPlan }: PlanSelect
 
                   {plan.limitations.length > 0 && (
                     <div className="pt-3 border-t border-gray-200 mt-4">
-                      <h4 className="font-semibold text-gray-900 text-sm mb-2">Limitations:</h4>
+                      <h4 className="font-semibold text-gray-900 text-sm mb-2">Limitations :</h4>
                       {plan.limitations.map((limitation, index) => (
                         <div key={index} className="flex items-start space-x-3 mb-2">
                           <X className="h-4 w-4 text-gray-400 mt-0.5 flex-shrink-0" />
@@ -185,14 +187,6 @@ export function PlanSelectionModal({ isOpen, onClose, onSelectPlan }: PlanSelect
               </div>
             )
           })}
-        </div>
-
-        {/* Footer Note */}
-        <div className="text-center mt-8 text-sm text-gray-500">
-          <p>
-            You can always upgrade your plan later.{" "}
-            <button className="text-blue-600 hover:underline">Learn more</button>
-          </p>
         </div>
       </DialogContent>
     </Dialog>

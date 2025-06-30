@@ -36,10 +36,8 @@ export function CVChoiceModal({ isOpen, onClose }: CVChoiceModalProps) {
   }
 
   const handleFiles = (files: FileList) => {
-    console.log("Files uploaded:", files)
-    // Handle file upload logic here
+    console.log("Fichiers importés :", files)
     onClose()
-    // Redirect to CV builder with imported data
     window.location.href = "/builder"
   }
 
@@ -66,7 +64,7 @@ export function CVChoiceModal({ isOpen, onClose }: CVChoiceModalProps) {
           className="absolute right-4 top-4 z-10 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
         >
           <X className="h-4 w-4" />
-          <span className="sr-only">Close</span>
+          <span className="sr-only">Fermer</span>
         </button>
 
         <div className="p-8">
@@ -77,12 +75,12 @@ export function CVChoiceModal({ isOpen, onClose }: CVChoiceModalProps) {
               </div>
               <span className="text-2xl font-bold text-gray-900">CVCraft</span>
             </div>
-            <DialogTitle className="text-3xl font-bold text-gray-900 mb-2">Import Your CV</DialogTitle>
-            <p className="text-gray-600 text-lg">Drag and drop your file or browse your documents</p>
+            <DialogTitle className="text-3xl font-bold text-gray-900 mb-2">Importer votre CV</DialogTitle>
+            <p className="text-gray-600 text-lg">Glissez-déposez votre fichier ou parcourez vos documents</p>
           </DialogHeader>
 
           <div className="space-y-8">
-            {/* Upload Area */}
+            {/* Zone d'import */}
             <div
               className={`border-2 border-dashed rounded-xl p-12 text-center transition-all duration-300 ${
                 dragActive ? "border-blue-500 bg-blue-50" : "border-gray-300 hover:border-blue-400 hover:bg-blue-50"
@@ -98,8 +96,8 @@ export function CVChoiceModal({ isOpen, onClose }: CVChoiceModalProps) {
                 </div>
 
                 <div className="space-y-2">
-                  <p className="text-xl font-medium text-gray-900">Drag and drop your CV here</p>
-                  <p className="text-gray-600">or click to select a file</p>
+                  <p className="text-xl font-medium text-gray-900">Glissez et déposez votre CV ici</p>
+                  <p className="text-gray-600">ou cliquez pour sélectionner un fichier</p>
                 </div>
 
                 <input
@@ -117,31 +115,31 @@ export function CVChoiceModal({ isOpen, onClose }: CVChoiceModalProps) {
                   onClick={handleBrowseFiles}
                 >
                   <Upload className="h-5 w-5 mr-2" />
-                  Browse Files
+                  Parcourir les fichiers
                 </Button>
               </div>
             </div>
 
-            {/* Supported formats */}
+            {/* Formats supportés */}
             <div className="text-center">
               <p className="text-sm text-gray-600 mb-4">
-                <strong>Supported formats:</strong> DOC, DOCX, PDF, HTM, RTF, TXT
+                <strong>Formats pris en charge :</strong> XML
               </p>
             </div>
 
-            {/* Divider */}
+            {/* Séparateur */}
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-300" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-white text-gray-500 font-medium">OR</span>
+                <span className="px-4 bg-white text-gray-500 font-medium">OU</span>
               </div>
             </div>
 
-            {/* Create new CV option */}
+            {/* Option de création */}
             <div className="text-center space-y-4">
-              <p className="text-lg text-gray-700">Prefer to start from scratch?</p>
+              <p className="text-lg text-gray-700">Vous préférez commencer de zéro ?</p>
               <Button
                 variant="outline"
                 size="lg"
@@ -149,17 +147,17 @@ export function CVChoiceModal({ isOpen, onClose }: CVChoiceModalProps) {
                 onClick={handleCreateNew}
               >
                 <Plus className="h-5 w-5 mr-2" />
-                Create New CV
+                Créer un nouveau CV
               </Button>
             </div>
 
-            {/* Action buttons */}
+            {/* Boutons d'action */}
             <div className="flex gap-4 pt-6">
               <Button variant="outline" className="flex-1" onClick={onClose}>
-                Cancel
+                Annuler
               </Button>
               <Button className="flex-1 bg-blue-600 hover:bg-blue-700" onClick={handleBrowseFiles}>
-                Continue
+                Continuer
                 <ArrowRight className="h-5 w-5 ml-2" />
               </Button>
             </div>

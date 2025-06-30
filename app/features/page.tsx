@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -19,101 +20,104 @@ import {
   Cloud,
   Target,
   Sparkles,
+  Menu,
+  X,
 } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 
 export default function FeaturesPage() {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const features = [
     {
       icon: Palette,
-      title: "50+ Professional Templates",
-      description: "Choose from a vast collection of ATS-optimized templates designed by career experts",
+      title: "50+ Modèles Professionnels",
+      description: "Choisissez parmi une vaste collection de modèles optimisés pour les ATS conçus par des experts en carrière",
       category: "Design",
       color: "blue",
     },
     {
       icon: Bot,
-      title: "AI-Powered Suggestions",
-      description: "Get intelligent recommendations for content, formatting, and optimization",
-      category: "AI",
+      title: "Suggestions Optimisées par IA",
+      description: "Obtenez des recommandations intelligentes pour le contenu, la mise en forme et l'optimisation",
+      category: "IA",
       color: "purple",
     },
     {
       icon: Target,
-      title: "ATS Optimization",
-      description: "Ensure your CV passes Applicant Tracking Systems with our optimization engine",
-      category: "Optimization",
+      title: "Optimisation ATS",
+      description: "Assurez-vous que votre CV passe les systèmes de suivi des candidatures avec notre moteur d'optimisation",
+      category: "Optimisation",
       color: "green",
     },
     {
       icon: Download,
-      title: "Multiple Export Formats",
-      description: "Export to PDF, Word, HTML, or share with a custom link",
+      title: "Formats d'Exportation Multiples",
+      description: "Exportez en PDF, Word, HTML ou partagez via un lien personnalisé",
       category: "Export",
       color: "orange",
     },
     {
       icon: BarChart3,
-      title: "Analytics Dashboard",
-      description: "Track views, downloads, and engagement with detailed analytics",
-      category: "Analytics",
+      title: "Tableau de Bord Analytique",
+      description: "Suivez les vues, téléchargements et engagements avec des analyses détaillées",
+      category: "Analytiques",
       color: "indigo",
     },
     {
       icon: Cloud,
-      title: "Cloud Storage & Sync",
-      description: "Access your CVs from anywhere with automatic cloud synchronization",
-      category: "Storage",
+      title: "Stockage Cloud & Synchronisation",
+      description: "Accédez à vos CV de n'importe où avec synchronisation automatique dans le cloud",
+      category: "Stockage",
       color: "cyan",
     },
     {
       icon: Users,
-      title: "Team Collaboration",
-      description: "Work together with team members on CV creation and reviews",
+      title: "Collaboration d'Équipe",
+      description: "Travaillez ensemble avec les membres de l'équipe sur la création et les revues de CV",
       category: "Collaboration",
       color: "pink",
     },
     {
       icon: Smartphone,
-      title: "Mobile Responsive",
-      description: "Create and edit CVs on any device with our responsive design",
+      title: "Responsive Mobile",
+      description: "Créez et modifiez des CV sur n'importe quel appareil avec notre design responsive",
       category: "Mobile",
       color: "emerald",
     },
     {
       icon: Shield,
-      title: "Enterprise Security",
-      description: "Bank-level security with SSL encryption and GDPR compliance",
-      category: "Security",
+      title: "Sécurité Entreprise",
+      description: "Sécurité bancaire avec chiffrement SSL et conformité RGPD",
+      category: "Sécurité",
       color: "red",
     },
   ]
 
   const benefits = [
     {
-      title: "Save Time",
-      description: "Create professional CVs in minutes, not hours",
+      title: "Gagnez du Temps",
+      description: "Créez des CV professionnels en minutes, pas en heures",
       icon: Zap,
-      stats: "5x faster than traditional methods",
+      stats: "5x plus rapide que les méthodes traditionnelles",
     },
     {
-      title: "Increase Success Rate",
-      description: "ATS-optimized templates improve your chances",
+      title: "Augmentez votre Taux de Réussite",
+      description: "Les modèles optimisés pour ATS améliorent vos chances",
       icon: Target,
-      stats: "95% pass rate through ATS systems",
+      stats: "95% de taux de passage via les systèmes ATS",
     },
     {
-      title: "Professional Quality",
-      description: "Designer-quality templates that impress recruiters",
+      title: "Qualité Professionnelle",
+      description: "Des modèles de qualité professionnelle qui impressionnent les recruteurs",
       icon: Star,
-      stats: "Used by 500K+ professionals",
+      stats: "Utilisé par plus de 500K professionnels",
     },
     {
-      title: "Always Updated",
-      description: "Stay current with latest CV trends and best practices",
+      title: "Toujours à Jour",
+      description: "Restez à jour avec les dernières tendances CV et meilleures pratiques",
       icon: Sparkles,
-      stats: "Monthly template updates",
+      stats: "Mises à jour mensuelles des modèles",
     },
   ]
 
@@ -135,65 +139,89 @@ export default function FeaturesPage() {
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-50 to-white">
       {/* Header */}
-      <header className="px-4 lg:px-6 h-16 flex items-center border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto flex items-center justify-between">
+      <header className="border-b sticky top-0 bg-white z-50">
+        <div className="container mx-auto flex h-16 items-center justify-between px-4 lg:px-6">
           <Link href="/" className="flex items-center space-x-2">
             <div className="bg-blue-600 p-2 rounded-lg">
               <FileText className="h-6 w-6 text-white" />
             </div>
             <span className="text-xl font-bold text-gray-900">CVCraft</span>
           </Link>
-          <nav className="hidden md:flex items-center space-x-6">
+          <nav className="hidden lg:flex items-center space-x-6">
             <Link href="/" className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors">
-              Home
+              Accueil
             </Link>
             <Link href="/features" className="text-sm font-medium text-blue-600 font-semibold">
-              Features
+              Fonctionnalités
             </Link>
             <Link href="/templates" className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors">
-              Templates
+              Modèles
             </Link>
             <Link href="/pricing" className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors">
-              Pricing
+              Tarifs
             </Link>
             <Link href="/resources" className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors">
-              Resources
+              Ressources
             </Link>
             <Link href="/auth/login">
               <Button variant="outline" className="bg-white text-gray-700 border-gray-300">
-                Sign In
+                Se connecter
               </Button>
             </Link>
             <Link href="/auth/signup">
-              <Button className="bg-blue-600 hover:bg-blue-700">Get Started</Button>
+              <Button className="bg-blue-600 hover:bg-blue-700">S'inscrire</Button>
             </Link>
           </nav>
+          <div className="lg:hidden">
+            <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+              {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              <span className="sr-only">Toggle menu</span>
+            </Button>
+          </div>
         </div>
+        {isMobileMenuOpen && (
+          <div className="lg:hidden bg-white border-t">
+            <nav className="flex flex-col space-y-2 p-4">
+              <Link href="/" className="text-base font-medium text-gray-700 hover:text-blue-600 py-2">Accueil</Link>
+              <Link href="/features" className="text-base font-medium text-blue-600 py-2">Fonctionnalités</Link>
+              <Link href="/templates" className="text-base font-medium text-gray-700 hover:text-blue-600 py-2">Modèles</Link>
+              <Link href="/pricing" className="text-base font-medium text-gray-700 hover:text-blue-600 py-2">Tarifs</Link>
+              <Link href="/resources" className="text-base font-medium text-gray-700 hover:text-blue-600 py-2">Ressources</Link>
+              <div className="border-t my-2"></div>
+              <div className="flex flex-col space-y-2">
+                <Link href="/auth/login">
+                  <Button variant="outline" className="w-full bg-white text-gray-700 border-gray-300">
+                    Se connecter
+                  </Button>
+                </Link>
+                <Link href="/auth/signup">
+                  <Button className="w-full bg-blue-600 hover:bg-blue-700">S'inscrire</Button>
+                </Link>
+              </div>
+            </nav>
+          </div>
+        )}
       </header>
 
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="py-20 lg:py-32">
+        <section className="py-12 lg:py-16">
           <div className="container mx-auto px-4 lg:px-6">
             <div className="grid lg:grid-cols-2 gap-12 items-center">
               <div className="space-y-8">
                 <div className="space-y-4">
-                  <Badge variant="secondary" className="bg-blue-100 text-blue-700 hover:bg-blue-100">
-                    🚀 Powerful Features
-                  </Badge>
                   <h1 className="text-4xl lg:text-6xl font-bold text-gray-900 leading-tight">
-                    Everything You Need to <span className="text-blue-600">Stand Out</span>
+                    Tout ce dont vous avez besoin pour <span className="text-blue-600">vous démarquer</span>
                   </h1>
                   <p className="text-xl text-gray-600 leading-relaxed">
-                    From AI-powered suggestions to ATS optimization, CVCraft provides all the tools you need to create a
-                    winning CV that gets you hired.
+                    Des suggestions optimisées par IA à l'optimisation ATS, CVCraft fournit tous les outils nécessaires pour créer un CV gagnant qui vous permettra d'être embauché.
                   </p>
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-4">
                   <Link href="/builder">
-                    <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-lg px-8 py-3">
-                      Try All Features Free
+                    <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-lg px-6 py-3">
+                      Essayez toutes les fonctionnalités gratuitement
                       <ArrowRight className="ml-2 h-5 w-5" />
                     </Button>
                   </Link>
@@ -201,21 +229,21 @@ export default function FeaturesPage() {
                     <Button
                       variant="outline"
                       size="lg"
-                      className="bg-white text-gray-700 border-gray-300 text-lg px-8 py-3"
+                      className="bg-white text-gray-700 border-gray-300 text-lg px-3 py-3"
                     >
-                      View Pricing
+                      Voir les tarifs
                     </Button>
                   </Link>
                 </div>
               </div>
 
               <div className="relative">
-                <div className="bg-white rounded-2xl shadow-2xl p-8">
+                <div className="bg-white rounded-2xl shadow-2xl p-8 transform rotate-2 hover:rotate-0 transition-transform duration-300">
                   <Image
-                    src="/placeholder.svg?height=500&width=400"
-                    alt="CVCraft Features Dashboard"
+                    src="/img2.png?height=400&width=400"
+                    alt="Tableau de bord des fonctionnalités CVCraft"
                     width={400}
-                    height={500}
+                    height={400}
                     className="rounded-lg"
                   />
                 </div>
@@ -228,9 +256,9 @@ export default function FeaturesPage() {
         <section className="py-20 bg-gray-50">
           <div className="container mx-auto px-4 lg:px-6">
             <div className="text-center space-y-4 mb-16">
-              <h2 className="text-3xl lg:text-4xl font-bold text-gray-900">Comprehensive Feature Set</h2>
+              <h2 className="text-3xl lg:text-4xl font-bold text-gray-900">Ensemble Complet de Fonctionnalités</h2>
               <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                Every feature is designed to help you create the perfect CV and land your dream job
+                Chaque fonctionnalité est conçue pour vous aider à créer le CV parfait et à décrocher l'emploi de vos rêves
               </p>
             </div>
 
@@ -267,9 +295,9 @@ export default function FeaturesPage() {
         <section className="py-20">
           <div className="container mx-auto px-4 lg:px-6">
             <div className="text-center space-y-4 mb-16">
-              <h2 className="text-3xl lg:text-4xl font-bold text-gray-900">Why Professionals Choose CVCraft</h2>
+              <h2 className="text-3xl lg:text-4xl font-bold text-gray-900">Pourquoi les Professionnels Choisissent CVCraft</h2>
               <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                Real benefits that make a difference in your career success
+                Des avantages réels qui font la différence dans la réussite de votre carrière
               </p>
             </div>
 
@@ -296,37 +324,33 @@ export default function FeaturesPage() {
           <div className="container mx-auto px-4 lg:px-6">
             <div className="grid lg:grid-cols-2 gap-12 items-center">
               <div className="space-y-6">
-                <Badge variant="secondary" className="bg-purple-100 text-purple-700">
-                  AI-Powered
-                </Badge>
                 <h2 className="text-3xl lg:text-4xl font-bold text-gray-900">
-                  Smart Suggestions That Make a Difference
+                  Des Suggestions Intelligentes qui Font la Différence
                 </h2>
                 <p className="text-xl text-gray-600">
-                  Our AI analyzes your content and provides intelligent suggestions for improvements, ensuring your CV
-                  stands out to both ATS systems and human recruiters.
+                  Notre IA analyse votre contenu et fournit des suggestions intelligentes d'amélioration, garantissant que votre CV se démarque auprès des systèmes ATS et des recruteurs.
                 </p>
                 <ul className="space-y-3">
                   <li className="flex items-center space-x-3">
                     <CheckCircle className="h-5 w-5 text-green-500" />
-                    <span>Content optimization suggestions</span>
+                    <span>Suggestions d'optimisation de contenu</span>
                   </li>
                   <li className="flex items-center space-x-3">
                     <CheckCircle className="h-5 w-5 text-green-500" />
-                    <span>Keyword recommendations</span>
+                    <span>Recommandations de mots-clés</span>
                   </li>
                   <li className="flex items-center space-x-3">
                     <CheckCircle className="h-5 w-5 text-green-500" />
-                    <span>Industry-specific advice</span>
+                    <span>Conseils spécifiques à l'industrie</span>
                   </li>
                   <li className="flex items-center space-x-3">
                     <CheckCircle className="h-5 w-5 text-green-500" />
-                    <span>Real-time feedback</span>
+                    <span>Retour en temps réel</span>
                   </li>
                 </ul>
                 <Link href="/builder">
-                  <Button className="bg-purple-600 hover:bg-purple-700">
-                    Try AI Features
+                  <Button className="bg-purple-600 hover:bg-purple-700 mt-2">
+                    Essayer les fonctionnalités IA
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </Link>
@@ -334,7 +358,7 @@ export default function FeaturesPage() {
               <div className="relative">
                 <Image
                   src="/placeholder.svg?height=400&width=500"
-                  alt="AI-powered suggestions"
+                  alt="Suggestions optimisées par IA"
                   width={500}
                   height={400}
                   className="rounded-lg shadow-lg"
@@ -348,9 +372,9 @@ export default function FeaturesPage() {
         <section className="py-20 bg-blue-600">
           <div className="container mx-auto px-4 lg:px-6 text-center">
             <div className="max-w-3xl mx-auto space-y-8">
-              <h2 className="text-3xl lg:text-4xl font-bold text-white">Ready to Experience All Features?</h2>
+              <h2 className="text-3xl lg:text-4xl font-bold text-white">Prêt à Découvrir Toutes les Fonctionnalités ?</h2>
               <p className="text-xl text-blue-100">
-                Start with our free plan and explore all the powerful features that will transform your job search
+                Commencez avec notre plan gratuit et explorez toutes les fonctionnalités puissantes qui transformeront votre recherche d'emploi
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link href="/builder">
@@ -359,7 +383,7 @@ export default function FeaturesPage() {
                     variant="secondary"
                     className="bg-white text-blue-600 hover:bg-gray-100 text-lg px-8 py-3"
                   >
-                    Start Free Today
+                    Commencer Gratuitement Aujourd'hui
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </Link>
@@ -369,7 +393,7 @@ export default function FeaturesPage() {
                     variant="outline"
                     className="border-white text-white hover:bg-white hover:text-blue-600 text-lg px-8 py-3"
                   >
-                    View All Plans
+                    Voir Tous les Plans
                   </Button>
                 </Link>
               </div>
@@ -390,91 +414,43 @@ export default function FeaturesPage() {
                 <span className="text-xl font-bold">CVCraft</span>
               </div>
               <p className="text-gray-400">
-                Create professional CVs that get you hired. Trusted by professionals worldwide.
+                Créez des CV professionnels qui captent l'attention des recruteurs grâce à notre plateforme intuitive.
               </p>
             </div>
 
             <div>
-              <h3 className="font-semibold mb-4">Product</h3>
+              <h3 className="font-semibold mb-4">Produit</h3>
               <ul className="space-y-2 text-gray-400">
-                <li>
-                  <Link href="/templates" className="hover:text-white transition-colors">
-                    Templates
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/features" className="hover:text-white transition-colors">
-                    Features
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/pricing" className="hover:text-white transition-colors">
-                    Pricing
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/examples" className="hover:text-white transition-colors">
-                    Examples
-                  </Link>
-                </li>
+                <li><Link href="#" className="hover:text-white transition-colors">Modèles</Link></li>
+                <li><Link href="#" className="hover:text-white transition-colors">Fonctionnalités</Link></li>
+                <li><Link href="#" className="hover:text-white transition-colors">Tarifs</Link></li>
+                <li><Link href="#" className="hover:text-white transition-colors">Exemples</Link></li>
               </ul>
             </div>
 
             <div>
               <h3 className="font-semibold mb-4">Support</h3>
               <ul className="space-y-2 text-gray-400">
-                <li>
-                  <Link href="/help" className="hover:text-white transition-colors">
-                    Help Center
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/contact" className="hover:text-white transition-colors">
-                    Contact Us
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/resources" className="hover:text-white transition-colors">
-                    CV Tips
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/blog" className="hover:text-white transition-colors">
-                    Career Advice
-                  </Link>
-                </li>
+                <li><Link href="#" className="hover:text-white transition-colors">Centre d’aide</Link></li>
+                <li><Link href="#" className="hover:text-white transition-colors">Nous contacter</Link></li>
+                <li><Link href="#" className="hover:text-white transition-colors">Conseils CV</Link></li>
+                <li><Link href="#" className="hover:text-white transition-colors">Conseils carrière</Link></li>
               </ul>
             </div>
 
             <div>
-              <h3 className="font-semibold mb-4">Company</h3>
+              <h3 className="font-semibold mb-4">Entreprise</h3>
               <ul className="space-y-2 text-gray-400">
-                <li>
-                  <Link href="/about" className="hover:text-white transition-colors">
-                    About
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/blog" className="hover:text-white transition-colors">
-                    Blog
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/privacy" className="hover:text-white transition-colors">
-                    Privacy
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/terms" className="hover:text-white transition-colors">
-                    Terms
-                  </Link>
-                </li>
+                <li><Link href="#" className="hover:text-white transition-colors">À propos</Link></li>
+                <li><Link href="#" className="hover:text-white transition-colors">Blog</Link></li>
+                <li><Link href="#" className="hover:text-white transition-colors">Confidentialité</Link></li>
+                <li><Link href="#" className="hover:text-white transition-colors">Conditions</Link></li>
               </ul>
             </div>
           </div>
 
           <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
-            <p>&copy; {new Date().getFullYear()} CVCraft. All rights reserved.</p>
+            <p>&copy; {new Date().getFullYear()} CVCraft. Tous droits réservés.</p>
           </div>
         </div>
       </footer>
