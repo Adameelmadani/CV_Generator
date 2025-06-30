@@ -58,7 +58,11 @@ try {
                         'telephone' => (string)$xml->personalInfo->phone ?? '',
                         'website' => (string)$xml->personalInfo->website ?? '',
                         'linkedin' => (string)$xml->personalInfo->linkedin ?? '',
-                        'github' => (string)$xml->personalInfo->github ?? ''
+                        'github' => (string)$xml->personalInfo->github ?? '',
+                        'photo' => (string)$xml->personalInfo->photo ?? ''
+                    ],
+                    'personalization' => [
+                        'primary_color' => (string)$xml->personalization->primaryColor ?? '#667eea'
                     ],
                     'profile' => [
                         'description' => (string)$xml->profil->description ?? ''
@@ -88,7 +92,7 @@ try {
                 if (isset($xml->certificates->certificate)) {
                     foreach ($xml->certificates->certificate as $cert) {
                         $cvData['certificates'][] = [
-                            'name' => (string)$cert->n ?? '',
+                            'name' => (string)$cert->name ?? '',
                             'date' => (string)$cert->date ?? '',
                             'issuer' => (string)$cert->issuer ?? '',
                             'location' => (string)$cert->location ?? '',
@@ -114,7 +118,7 @@ try {
                 if (isset($xml->projects->project)) {
                     foreach ($xml->projects->project as $project) {
                         $cvData['projects'][] = [
-                            'name' => (string)$project->n ?? '',
+                            'name' => (string)$project->name ?? '',
                             'link' => (string)$project->link ?? '',
                             'description' => (string)$project->description ?? ''
                         ];
@@ -135,7 +139,7 @@ try {
                 if (isset($xml->languages->language)) {
                     foreach ($xml->languages->language as $lang) {
                         $cvData['languages'][] = [
-                            'name' => (string)$lang->n ?? '',
+                            'name' => (string)$lang->name ?? '',
                             'level' => (string)$lang->level ?? ''
                         ];
                     }

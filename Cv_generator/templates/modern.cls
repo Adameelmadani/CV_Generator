@@ -30,6 +30,8 @@
 \RequirePackage{ifthen}
 \RequirePackage{needspace}
 \RequirePackage{iftex}
+\RequirePackage{graphicx}
+\RequirePackage{tikz}
 
 % Font handling for different engines
 \ifPDFTeX

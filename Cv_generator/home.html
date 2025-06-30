@@ -64,59 +64,22 @@
           <div class="step-number">8</div>
           <div class="step-title">Langues</div>
         </div>
+        <div class="step" data-step="9">
+          <div class="step-number">9</div>
+          <div class="step-title">Personnalisation</div>
+        </div>
       </div>
 
       <!-- Main Content with Preview -->
       <div class="main-content">
-        <!-- Personalization Panel (Outside Form) -->
-        <div class="personalization-panel">
-          <div class="panel-header">
-            <h3><i class="fas fa-palette"></i> Personnalisation</h3>
-            <button type="button" class="panel-toggle" onclick="togglePersonalizationPanel()">
-              <i class="fas fa-chevron-down"></i>
-            </button>
-          </div>
-          <div class="panel-content">
-            <div class="color-section">
-              <label for="primary_color_external">Couleur principale</label>
-              <div class="color-picker-container">
-                <input type="color" id="primary_color_external" value="#667eea" class="color-picker">
-                <div class="color-presets">
-                  <div class="color-preset" data-color="#667eea" style="background-color: #667eea;" title="Bleu (défaut)"></div>
-                  <div class="color-preset" data-color="#ff6b35" style="background-color: #ff6b35;" title="Orange"></div>
-                  <div class="color-preset" data-color="#28a745" style="background-color: #28a745;" title="Vert"></div>
-                  <div class="color-preset" data-color="#dc3545" style="background-color: #dc3545;" title="Rouge"></div>
-                  <div class="color-preset" data-color="#6f42c1" style="background-color: #6f42c1;" title="Violet"></div>
-                  <div class="color-preset" data-color="#fd7e14" style="background-color: #fd7e14;" title="Orange foncé"></div>
-                  <div class="color-preset" data-color="#20c997" style="background-color: #20c997;" title="Turquoise"></div>
-                  <div class="color-preset" data-color="#6c757d" style="background-color: #6c757d;" title="Gris"></div>
-                </div>
-              </div>
-              <small class="help-text">Modifiez la couleur en temps réel et voyez le résultat dans l'aperçu</small>
-              
-              <!-- Small color preview in personalization panel -->
-              <div class="color-preview">
-                <h4>Aperçu des couleurs</h4>
-                <div class="preview-elements">
-                  <div class="preview-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                    <span>En-tête du CV</span>
-                  </div>
-                  <div class="preview-section">
-                    <h5 style="color: #667eea; border-bottom: 2px solid #667eea;">Section du CV</h5>
-                    <p>Contenu de la section avec la couleur sélectionnée</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
         <!-- Form Section -->
         <div class="form-section">
           <form id="cvForm" action="generate_cv.php" method="POST" enctype="multipart/form-data">
             <div class="form-container">
               <!-- Hidden field for CV editing -->
               <input type="hidden" id="editing_cv_id" name="editing_cv_id" value="" />
+              <!-- Hidden field for existing photo path when editing -->
+              <input type="hidden" id="existing_photo_path" name="existing_photo_path" value="" />
               <!-- Hidden field for color synchronization -->
               <input type="hidden" id="primary_color" name="primary_color" value="#667eea" />
           
@@ -124,6 +87,19 @@
           <div class="step-content active" data-step="1">
             <div class="section">
               <h3>Informations Personnelles</h3>
+              
+              <!-- Photo upload section -->
+              <div class="photo-upload-section">
+                <label for="photo-upload" class="photo-upload-label">
+                  <div class="photo-preview" id="photo-preview">
+                    <i class="fas fa-camera"></i>
+                    <span>Ajouter une photo (optionnel)</span>
+                  </div>
+                </label>
+                <input type="file" id="photo-upload" name="photo" accept="image/*" style="display: none;" onchange="handlePhotoUpload(this)" />
+                <button type="button" class="remove-photo-btn" id="remove-photo-btn" onclick="removePhoto()" style="display: none;">Supprimer la photo</button>
+              </div>
+              
               <div class="two-column">
                 <input type="text" name="nom" placeholder="Nom *" required />
                 <input type="text" name="prenom" placeholder="Prénom *" required />
@@ -267,6 +243,31 @@
                 </div>
               </div>
               <button type="button" class="add-btn" onclick="addLanguage()">+ Ajouter une langue</button>
+            </div>
+          </div>
+
+          <!-- Étape 9: Personnalisation -->
+          <div class="step-content" data-step="9">
+            <div class="section">
+              <h3><i class="fas fa-palette"></i> Personnalisation</h3>
+              
+              <div class="color-section">
+                <label for="primary_color_external">Couleur principale</label>
+                <div class="color-picker-container">
+                  <input type="color" id="primary_color_external" value="#667eea" class="color-picker">
+                  <div class="color-presets">
+                    <div class="color-preset" data-color="#667eea" style="background-color: #667eea;" title="Bleu (défaut)"></div>
+                    <div class="color-preset" data-color="#ff6b35" style="background-color: #ff6b35;" title="Orange"></div>
+                    <div class="color-preset" data-color="#28a745" style="background-color: #28a745;" title="Vert"></div>
+                    <div class="color-preset" data-color="#dc3545" style="background-color: #dc3545;" title="Rouge"></div>
+                    <div class="color-preset" data-color="#6f42c1" style="background-color: #6f42c1;" title="Violet"></div>
+                    <div class="color-preset" data-color="#fd7e14" style="background-color: #fd7e14;" title="Orange foncé"></div>
+                    <div class="color-preset" data-color="#20c997" style="background-color: #20c997;" title="Turquoise"></div>
+                    <div class="color-preset" data-color="#6c757d" style="background-color: #6c757d;" title="Gris"></div>
+                  </div>
+                </div>
+                <small class="help-text">Modifiez la couleur en temps réel et voyez le résultat dans l'aperçu</small>
+              </div>
               
               <div class="section" style="margin-top: 40px;">
                 <h3>Format de téléchargement</h3>
@@ -353,8 +354,114 @@
 
     <script>
       let currentStep = 1;
-      const totalSteps = 8;
+      const totalSteps = 9;
       let previewVisible = false;
+
+      // Photo upload functions
+      function handlePhotoUpload(input) {
+        const file = input.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            const preview = document.getElementById('photo-preview');
+            const removeBtn = document.getElementById('remove-photo-btn');
+            const existingPhotoField = document.getElementById('existing_photo_path');
+            
+            // Clear existing photo path since we're uploading a new one
+            if (existingPhotoField) {
+              existingPhotoField.value = '';
+            }
+            
+            // Create img element
+            const img = document.createElement('img');
+            img.src = e.target.result;
+            
+            // Clear existing content and add image
+            preview.innerHTML = '';
+            preview.appendChild(img);
+            preview.classList.add('has-image');
+            
+            // Show remove button
+            removeBtn.style.display = 'inline-block';
+            
+            // Update preview if visible
+            if (previewVisible) {
+              updatePreview();
+            }
+          };
+          reader.readAsDataURL(file);
+        }
+      }
+
+      function removePhoto() {
+        const preview = document.getElementById('photo-preview');
+        const removeBtn = document.getElementById('remove-photo-btn');
+        const fileInput = document.getElementById('photo-upload');
+        const existingPhotoField = document.getElementById('existing_photo_path');
+        
+        // Reset preview
+        preview.innerHTML = '<i class="fas fa-camera"></i><span>Ajouter une photo (optionnel)</span>';
+        preview.classList.remove('has-image');
+        
+        // Hide remove button
+        removeBtn.style.display = 'none';
+        
+        // Clear file input
+        fileInput.value = '';
+        
+        // Clear existing photo path
+        if (existingPhotoField) {
+          existingPhotoField.value = '';
+        }
+        
+        // Update preview if visible
+        if (previewVisible) {
+          updatePreview();
+        }
+      }
+
+      // Function to load and display existing photo when editing a CV
+      function loadExistingPhoto(photoPath) {
+        if (!photoPath) return;
+        
+        const preview = document.getElementById('photo-preview');
+        const removeBtn = document.getElementById('remove-photo-btn');
+        const existingPhotoField = document.getElementById('existing_photo_path');
+        
+        // Set the existing photo path in the hidden field
+        if (existingPhotoField) {
+          existingPhotoField.value = photoPath;
+        }
+        
+        // Create img element with the existing photo
+        const img = document.createElement('img');
+        img.src = photoPath;
+        img.onerror = function() {
+          console.warn('Failed to load existing photo:', photoPath);
+          // Reset to default state if image fails to load
+          preview.innerHTML = '<i class="fas fa-camera"></i><span>Ajouter une photo (optionnel)</span>';
+          preview.classList.remove('has-image');
+          removeBtn.style.display = 'none';
+          if (existingPhotoField) {
+            existingPhotoField.value = '';
+          }
+        };
+        img.onload = function() {
+          console.log('✅ Existing photo loaded successfully:', photoPath);
+          // Clear existing content and add image
+          preview.innerHTML = '';
+          preview.appendChild(img);
+          preview.classList.add('has-image');
+          
+          // Show remove button
+          removeBtn.style.display = 'inline-block';
+          
+          // Update preview if visible
+          if (previewVisible) {
+            updatePreview();
+          }
+        };
+      }
 
       // Add form submission debugging
       document.addEventListener('DOMContentLoaded', function() {
@@ -640,6 +747,22 @@
           setFieldValue('[name="website"]', personalInfo.website);
           setFieldValue('[name="linkedin"]', personalInfo.linkedin);
           setFieldValue('[name="github"]', personalInfo.github);
+          
+          // Handle photo if exists
+          if (personalInfo.photo) {
+            loadExistingPhoto(personalInfo.photo);
+          }
+        }
+        
+        // Personalization (color)
+        if (cvData.personalization && cvData.personalization.primary_color) {
+          const colorPicker = document.getElementById('primary_color_external');
+          const hiddenColorInput = document.getElementById('primary_color');
+          if (colorPicker && hiddenColorInput) {
+            colorPicker.value = cvData.personalization.primary_color;
+            hiddenColorInput.value = cvData.personalization.primary_color;
+            updateColorPreview(cvData.personalization.primary_color);
+          }
         }
         
         // Profile
@@ -1196,15 +1319,33 @@
           `;
         }
         
+        // Get photo if uploaded
+        const photoPreview = document.getElementById('photo-preview');
+        const hasPhoto = photoPreview && photoPreview.classList.contains('has-image');
+        let photoSrc = '';
+        if (hasPhoto) {
+          const img = photoPreview.querySelector('img');
+          if (img) {
+            photoSrc = img.src;
+          }
+        }
+        
         let html = `
           <div class="preview-header-section">
-            <div class="preview-name">${prenom} ${nom}</div>
-            <div class="preview-contact">
-              <div>${location}</div>
-              <div>${email} • ${telephone}</div>
-              ${website ? `<div><a href="${website}" style="color: #667eea;">Site web: ${website}</a></div>` : ''}
-              ${linkedin ? `<div><a href="${linkedin}" style="color: #667eea;">LinkedIn: ${linkedin}</a></div>` : ''}
-              ${github ? `<div><a href="${github}" style="color: #667eea;">GitHub: ${github}</a></div>` : ''}
+            ${hasPhoto ? `
+            <div class="preview-photo">
+              <img src="${photoSrc}" alt="Photo de profil" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-right: 20px; margin-bottom: 10px;" />
+            </div>
+            ` : ''}
+            <div class="preview-info">
+              <div class="preview-name">${prenom} ${nom}</div>
+              <div class="preview-contact">
+                <div>${location}</div>
+                <div>${email} • ${telephone}</div>
+                ${website ? `<div><a href="${website}" style="color: #667eea;">Site web: ${website}</a></div>` : ''}
+                ${linkedin ? `<div><a href="${linkedin}" style="color: #667eea;">LinkedIn: ${linkedin}</a></div>` : ''}
+                ${github ? `<div><a href="${github}" style="color: #667eea;">GitHub: ${github}</a></div>` : ''}
+              </div>
             </div>
           </div>
         `;
@@ -1561,7 +1702,7 @@
       function initializeColorPicker() {
         const externalColorPicker = document.getElementById('primary_color_external');
         const hiddenColorInput = document.getElementById('primary_color');
-        const colorPresets = document.querySelectorAll('.personalization-panel .color-preset');
+        const colorPresets = document.querySelectorAll('.color-preset');
         
         // Set initial color
         updateColorPreview(externalColorPicker.value);
@@ -1599,40 +1740,13 @@
         updatePresetSelection(externalColorPicker.value);
       }
       
-      function togglePersonalizationPanel() {
-        const panelContent = document.querySelector('.panel-content');
-        const toggleIcon = document.querySelector('.panel-toggle i');
-        
-        panelContent.classList.toggle('collapsed');
-        toggleIcon.classList.toggle('fa-chevron-down');
-        toggleIcon.classList.toggle('fa-chevron-up');
-        
-        // Update button rotation
-        const toggleBtn = document.querySelector('.panel-toggle');
-        toggleBtn.classList.toggle('collapsed');
-      }
-      
       function updateColorPreview(color) {
-        // Only update the small preview in the personalization panel
-        const previewHeader = document.querySelector('.personalization-panel .preview-header');
-        const previewSectionH5 = document.querySelector('.personalization-panel .preview-section h5');
-        
-        if (previewHeader) {
-          // Convert hex to RGB for gradient
-          const rgb = hexToRgb(color);
-          if (rgb) {
-            previewHeader.style.background = `linear-gradient(135deg, ${color} 0%, ${darkenColor(color, 20)} 100%)`;
-          }
-        }
-        
-        if (previewSectionH5) {
-          previewSectionH5.style.color = color;
-          previewSectionH5.style.borderBottomColor = color;
-        }
+        // Color preview has been removed - this function is kept for compatibility
+        // The live preview will show the color changes in real-time
       }
       
       function updatePresetSelection(selectedColor) {
-        const colorPresets = document.querySelectorAll('.personalization-panel .color-preset');
+        const colorPresets = document.querySelectorAll('.color-preset');
         colorPresets.forEach(preset => {
           if (preset.getAttribute('data-color') === selectedColor) {
             preset.classList.add('selected');

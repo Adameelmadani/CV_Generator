@@ -4,9 +4,44 @@ include('../Login_Signup/db_connection.php');
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $editingCVId = isset($_POST['editing_cv_id']) ? intval($_POST['editing_cv_id']) : null;
-     // Extract form data
+    
+     // Extract form data first
     $nom = htmlspecialchars($_POST['nom'] ?? '');
     $prenom = htmlspecialchars($_POST['prenom'] ?? '');
+    
+    // Handle photo upload
+    $photoPath = '';
+    if (isset($_FILES['photo']) && $_FILES['photo']['error'] === UPLOAD_ERR_OK) {
+        // New photo uploaded
+        $uploadDir = 'uploads/photos/';
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+        
+        $fileInfo = pathinfo($_FILES['photo']['name']);
+        $fileName = $nom . '_' . $prenom . '_' . time() . '.' . $fileInfo['extension'];
+        $photoPath = $uploadDir . $fileName;
+        
+        // Validate file type
+        $allowedTypes = ['jpg', 'jpeg', 'png', 'gif'];
+        if (in_array(strtolower($fileInfo['extension']), $allowedTypes)) {
+            move_uploaded_file($_FILES['photo']['tmp_name'], $photoPath);
+        } else {
+            $photoPath = ''; // Reset if invalid file type
+        }
+    } elseif (!empty($_POST['existing_photo_path'])) {
+        // No new photo uploaded, but there's an existing photo path
+        $existingPhotoPath = $_POST['existing_photo_path'];
+        // Verify the existing photo file still exists
+        if (file_exists($existingPhotoPath)) {
+            $photoPath = $existingPhotoPath;
+            error_log("Using existing photo: " . $photoPath);
+        } else {
+            error_log("Existing photo file not found: " . $existingPhotoPath);
+        }
+    }
+    
+    // Continue extracting form data
     $location = htmlspecialchars($_POST['location'] ?? '');
     $email = htmlspecialchars($_POST['email'] ?? '');
     $telephone = htmlspecialchars($_POST['telephone'] ?? '');
@@ -74,6 +109,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ($website)  $xmlContent .= "    <website>"   . htmlspecialchars($website)   . "</website>\n";
     if ($linkedin) $xmlContent .= "    <linkedin>"  . htmlspecialchars($linkedin)  . "</linkedin>\n";
     if ($github)   $xmlContent .= "    <github>"    . htmlspecialchars($github)    . "</github>\n";
+    if ($photoPath) $xmlContent .= "    <photo>"    . htmlspecialchars($photoPath) . "</photo>\n";
     $xmlContent .= "  </personalInfo>\n\n";
 
     // ── Professional Profile ──
@@ -253,12 +289,36 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // $sectionHeader .= "\\definecolor{primaryColor}{RGB}{255, 0, 0}";
     $sectionHeader .= "\\begin{document}\n";
     $sectionHeader .= "    \\begin{header}\n";
-    /* $sectionHeader .= "        % Photo and name in a minipage\n";
-    $sectionHeader .= "        \\begin{minipage}{0.2\\textwidth}\n";
-    $sectionHeader .= "            \\includegraphics[width=2.5cm, height=2.5cm]{" . $photo . "}\n";
-    $sectionHeader .= "        \\end{minipage}%\n";
-    */
-    $sectionHeader .= "        \\begin{minipage}{0.8\\textwidth}\n";
+    
+    // Add photo section if photo exists
+    $photoForLatex = '';
+    if (!empty($photoPath) && file_exists($photoPath)) {
+        // Copy photo to current directory with simple name for LaTeX
+        $photoExtension = pathinfo($photoPath, PATHINFO_EXTENSION);
+        $photoForLatex = "cv_photo." . $photoExtension;
+        
+        // Debug: Check if copy works
+        if (copy($photoPath, $photoForLatex)) {
+            error_log("Photo copied successfully: " . $photoPath . " -> " . $photoForLatex);
+        } else {
+            error_log("Failed to copy photo: " . $photoPath . " -> " . $photoForLatex);
+            $photoForLatex = ''; // Reset if copy failed
+        }
+    }
+    
+    if (!empty($photoForLatex) && file_exists($photoForLatex)) {
+        $sectionHeader .= "        % Photo and name in a minipage\n";
+        $sectionHeader .= "        \\begin{minipage}{0.2\\textwidth}\n";
+        $sectionHeader .= "            \\begin{tikzpicture}\n";
+        $sectionHeader .= "                \\clip (0,0) circle (1.25cm);\n";
+        $sectionHeader .= "                \\node[anchor=center] at (0,0) {\\includegraphics[width=2.5cm, height=2.5cm]{" . $photoForLatex . "}};\n";
+        $sectionHeader .= "            \\end{tikzpicture}\n";
+        $sectionHeader .= "        \\end{minipage}%\n";
+        $sectionHeader .= "        \\begin{minipage}{0.75\\textwidth}\n";
+    } else {
+        $sectionHeader .= "        \\begin{minipage}{0.95\\textwidth}\n";
+    }
+    
     $sectionHeader .= "            \\raggedright\n";
     $sectionHeader .= "            \\fontsize{22 pt}{22 pt}\n";
     $sectionHeader .= "            \\textbf{" . $nom . " " . $prenom . "}\n\n";
@@ -321,19 +381,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $name = htmlspecialchars($certificate_name[$i]);
         $dates = htmlspecialchars($certificate_date[$i]);
         $orga = htmlspecialchars($certificate_issuer[$i]);
-        $location = htmlspecialchars($certificate_location[$i]);
+        $certLocation = htmlspecialchars($certificate_location[$i]);
         $description = $certificate_description[$i];
 
         $sectionCertificat .= "    \\begin{onecolentry}\n";
         $sectionCertificat .= "        \\textbf{" . $name . "} \\hfill " . $dates . " \\\\\n";
-        if (!empty($university)) {
+        if (!empty($orga)) {
             $sectionCertificat .= "        \\textit{" . $orga . "}";
-            if (!empty($field)) {
-                $sectionCertificat .= " \\hfill " . $location;
+            if (!empty($certLocation)) {
+                $sectionCertificat .= " \\hfill " . $certLocation;
             }
             $sectionCertificat .= " \\\\\n";
         }
-        if (!empty($detail)) {
+        if (!empty($description)) {
             $sectionCertificat .= "        " . $description . "\n";
         }
         $sectionCertificat .= "    \\end{onecolentry}\n\n";
@@ -440,7 +500,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 // Write LaTeX file
 $texFile = "CV_" . $nom . "_" . $prenom . ".tex";
 file_put_contents($texFile, $latexContent);
+
+// First compilation (creates .aux file with references)
 $output = shell_exec("pdflatex -interaction=nonstopmode " . escapeshellarg($texFile) . " 2>&1");
+
+// Second compilation (resolves references like LastPage for correct page numbering)
+$output2 = shell_exec("pdflatex -interaction=nonstopmode " . escapeshellarg($texFile) . " 2>&1");
+
+// Combine outputs for debugging if needed
+$output = $output . "\n\n=== Second compilation ===\n" . $output2;
 
 // Fix: Check for the actual PDF filename (same as tex file but .pdf)
 $pdfFile = str_replace('.tex', '.pdf', $texFile);
@@ -469,6 +537,7 @@ if (!file_exists($pdfFile)) {
         @unlink($texFile);
         @unlink($pdfFile);
         @unlink($xmlFile);
+        if (!empty($photoForLatex)) @unlink($photoForLatex);
         @unlink(str_replace('.tex', '.aux', $texFile));
         @unlink(str_replace('.tex', '.log', $texFile));
         @unlink(str_replace('.tex', '.out', $texFile));
@@ -488,6 +557,7 @@ if (!file_exists($pdfFile)) {
         @unlink($texFile);
         @unlink($pdfFile);
         @unlink($xmlFile);
+        if (!empty($photoForLatex)) @unlink($photoForLatex);
         @unlink(str_replace('.tex', '.aux', $texFile));
         @unlink(str_replace('.tex', '.log', $texFile));
         @unlink(str_replace('.tex', '.out', $texFile));
@@ -522,6 +592,7 @@ if (!file_exists($pdfFile)) {
                 @unlink($pdfFile);
                 @unlink($xmlFile);
                 @unlink($zipFileName);
+                if (!empty($photoForLatex)) @unlink($photoForLatex);
                 @unlink(str_replace('.tex', '.aux', $texFile));
                 @unlink(str_replace('.tex', '.log', $texFile));
                 @unlink(str_replace('.tex', '.out', $texFile));
@@ -548,6 +619,7 @@ if (!file_exists($pdfFile)) {
         @unlink($texFile);
         @unlink($pdfFile);
         @unlink($xmlFile);
+        if (!empty($photoForLatex)) @unlink($photoForLatex);
         @unlink(str_replace('.tex', '.aux', $texFile));
         @unlink(str_replace('.tex', '.log', $texFile));
     }
