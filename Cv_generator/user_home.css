@@ -10,19 +10,22 @@ body {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     min-height: 100vh;
     color: #333;
+    margin: 0;
+    padding: 0;
 }
 
 .container {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    width: 100%;
 }
 
 /* Header */
 .header {
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(10px);
-    padding: 1rem 2rem;
+    padding: 1.5rem 3rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -30,6 +33,7 @@ body {
     position: sticky;
     top: 0;
     z-index: 100;
+    width: 100%;
 }
 
 .header-left .logo {
@@ -111,10 +115,9 @@ body {
 /* Main Content */
 .main-content {
     flex: 1;
-    padding: 2rem;
-    max-width: 1200px;
-    margin: 0 auto;
+    padding: 2rem 3rem;
     width: 100%;
+    margin: 0;
 }
 
 /* Welcome Section */
@@ -293,6 +296,8 @@ body {
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
     cursor: pointer;
+    overflow: hidden;
+    position: relative;
 }
 
 .cv-card:hover {
@@ -305,6 +310,12 @@ body {
     justify-content: space-between;
     align-items: flex-start;
     margin-bottom: 1rem;
+    gap: 1rem;
+}
+
+.cv-card-info-left {
+    flex: 1;
+    min-width: 0; /* Allow shrinking */
 }
 
 .cv-card-title {
@@ -312,6 +323,7 @@ body {
     font-weight: 600;
     color: #333;
     margin-bottom: 0.25rem;
+    word-wrap: break-word;
 }
 
 .cv-card-date {
@@ -322,6 +334,8 @@ body {
 .cv-card-actions {
     display: flex;
     gap: 0.5rem;
+    flex-shrink: 0;
+    align-items: flex-start;
 }
 
 .action-btn {
@@ -353,17 +367,6 @@ body {
     border-top: 1px solid #eee;
 }
 
-.cv-format {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
-    background: rgba(102, 126, 234, 0.1);
-    color: #667eea;
-    padding: 0.25rem 0.5rem;
-    border-radius: 15px;
-    font-size: 0.8rem;
-    font-weight: 500;
-}
 
 /* List View Specific */
 .cv-grid.list-view .cv-card {
@@ -411,6 +414,39 @@ body {
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
 }
 
+/* Specific styles for CV preview modal - make it very large */
+#previewModal .modal-content {
+    max-width: 95vw;
+    max-height: 95vh;
+    width: 95vw;
+    height: 95vh;
+    display: flex;
+    flex-direction: column;
+}
+
+#previewModal .modal-header {
+    flex-shrink: 0;
+}
+
+#previewModal .modal-body {
+    flex: 1;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 0; /* Important for flex child */
+}
+
+#previewModal #previewFrame {
+    width: 100%;
+    height: 100%;
+    min-height: 600px;
+    flex: 1;
+}
+
+#previewModal .modal-footer {
+    flex-shrink: 0;
+}
+
 .modal-header {
     padding: 1.5rem;
     border-bottom: 1px solid #eee;
@@ -452,6 +488,35 @@ body {
     display: flex;
     justify-content: flex-end;
     gap: 1rem;
+}
+
+/* Preview Loading Styles */
+#previewLoading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    min-height: 600px;
+    color: #667eea;
+    font-size: 1.2rem;
+    gap: 1rem;
+    flex: 1;
+}
+
+#previewLoading i {
+    font-size: 3rem;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+#previewFrame {
+    border: none;
+    border-radius: 8px;
 }
 
 /* Import Zone */
@@ -619,7 +684,11 @@ body {
 /* Responsive */
 @media (max-width: 768px) {
     .main-content {
-        padding: 1rem;
+        padding: 1rem 1.5rem;
+    }
+
+    .header {
+        padding: 1rem 1.5rem;
     }
 
     .welcome-section {
@@ -641,6 +710,19 @@ body {
         grid-template-columns: 1fr;
     }
 
+    .cv-card-header {
+        gap: 0.5rem;
+    }
+
+    .cv-card-actions {
+        gap: 0.25rem;
+    }
+
+    .action-btn {
+        padding: 0.4rem;
+        font-size: 0.9rem;
+    }
+
     .section-header {
         flex-direction: column;
         gap: 1rem;
@@ -651,10 +733,23 @@ body {
         max-width: 95vw;
         margin: 1rem;
     }
+
+    /* Preview modal adjustments for tablets */
+    #previewModal .modal-content {
+        width: 98vw;
+        height: 90vh;
+        max-width: 98vw;
+        max-height: 90vh;
+        margin: 1rem;
+    }
 }
 
 @media (max-width: 480px) {
     .header {
+        padding: 1rem;
+    }
+
+    .main-content {
         padding: 1rem;
     }
 
@@ -676,5 +771,42 @@ body {
 
     .cv-card {
         padding: 1rem;
+    }
+
+    .cv-card-header {
+        gap: 0.25rem;
+    }
+
+    .cv-card-actions {
+        gap: 0.15rem;
+    }
+
+    .action-btn {
+        padding: 0.3rem;
+        font-size: 0.85rem;
+    }
+
+    .cv-card-title {
+        font-size: 1.1rem;
+    }
+
+    /* Preview modal adjustments for mobile */
+    #previewModal .modal-content {
+        width: 99vw;
+        height: 95vh;
+        max-width: 99vw;
+        max-height: 95vh;
+        margin: 0.5rem;
+        border-radius: 10px;
+    }
+
+    #previewModal .modal-header {
+        padding: 1rem;
+    }
+
+    #previewModal .modal-footer {
+        padding: 1rem;
+        flex-direction: column;
+        gap: 0.5rem;
     }
 }

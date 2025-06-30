@@ -58,7 +58,17 @@ $xmlDoc->loadXML($cv['xml_content']);
 $prenom = $xmlDoc->getElementsByTagName('firstname')->item(0)->nodeValue ?? 'Inconnu';
 $nom = $xmlDoc->getElementsByTagName('lastname')->item(0)->nodeValue ?? 'Inconnu';
 
-$baseFileName = "CV_" . $nom . "_" . $prenom;
+$baseFileName = "CV_" . $prenom . "_" . $nom;
+
+// Add error logging for debugging
+error_log("download_cv.php: Starting download process for CV ID: " . $cvId . ", Format: " . $format);
+
+// Debug: Check if we can reach this point
+error_log("download_cv.php: CV data retrieved: " . ($cv ? 'yes' : 'no'));
+if ($cv) {
+    error_log("download_cv.php: CV name: " . $cv['cv_name']);
+    error_log("download_cv.php: XML content length: " . strlen($cv['xml_content']));
+}
 
 if ($format === 'xml') {
     // Télécharger le XML
@@ -68,15 +78,20 @@ if ($format === 'xml') {
     
 } elseif ($format === 'pdf') {
     // Générer le PDF à partir du XML
+    error_log("download_cv.php: Starting PDF generation");
+    error_log("download_cv.php: Current working directory: " . getcwd());
+    
     $pdfContent = generatePdfFromXml($cv['xml_content']);
     
-    if ($pdfContent) {
+    if ($pdfContent !== false && !empty($pdfContent)) {
+        error_log("download_cv.php: PDF generated successfully, size: " . strlen($pdfContent) . " bytes");
         header('Content-Type: application/pdf');
         header('Content-Disposition: attachment; filename="' . $baseFileName . '.pdf"');
         echo $pdfContent;
     } else {
+        error_log("download_cv.php: PDF generation failed");
         header('HTTP/1.0 500 Internal Server Error');
-        exit('Erreur lors de la génération du PDF');
+        exit('Erreur lors de la génération du PDF - Vérifiez que LaTeX est installé et accessible');
     }
     
 } elseif ($format === 'latex') {
@@ -143,179 +158,151 @@ if ($format === 'xml') {
     exit('Format non supporté');
 }
 
-function generatePdfFromXml($xmlContent) {
-    // Parser le XML pour extraire les données
-    $xmlDoc = new DOMDocument();
-    $xmlDoc->loadXML($xmlContent);
+// Function to convert hex color to RGB array
+function hexToRgb($hex) {
+    // Remove # if present
+    $hex = ltrim($hex, '#');
     
-    // Extraire les informations personnelles
-    $personalInfo = $xmlDoc->getElementsByTagName('personalInfo')->item(0);
-    $prenom = $personalInfo->getElementsByTagName('firstname')->item(0)->nodeValue ?? '';
-    $nom = $personalInfo->getElementsByTagName('lastname')->item(0)->nodeValue ?? '';
-    $email = $personalInfo->getElementsByTagName('email')->item(0)->nodeValue ?? '';
-    $telephone = $personalInfo->getElementsByTagName('phone')->item(0)->nodeValue ?? '';
-    $linkedin = $personalInfo->getElementsByTagName('linkedin')->item(0)->nodeValue ?? '';
-    $emploi = $personalInfo->getElementsByTagName('jobTitle')->item(0)->nodeValue ?? '';
-    $emploiDescription = $personalInfo->getElementsByTagName('jobDescription')->item(0)->nodeValue ?? '';
-    $profil = $personalInfo->getElementsByTagName('profileDescription')->item(0)->nodeValue ?? '';
-    
-    // Générer le contenu LaTeX
-    $latexContent = "\\documentclass[a4paper,10pt]{article}\n";
-    $latexContent .= "\\usepackage[a4paper,margin=1in]{geometry}\n";
-    $latexContent .= "\\usepackage{titlesec}\n";
-    $latexContent .= "\\usepackage{graphicx}\n";
-    $latexContent .= "\\usepackage{enumitem}\n";
-    $latexContent .= "\\usepackage{hyperref}\n";
-    $latexContent .= "\\titleformat{\\section}{\\large\\bfseries}{}{0em}{}[\\titlerule]\n";
-    $latexContent .= "\\begin{document}\n";
-
-    $latexContent .= "\\begin{center}\n";
-    $latexContent .= "{\\LARGE \\textbf{" . $prenom . " " . $nom . "}} \\\\\n";
-    $latexContent .= "{\\large " . $emploi . "} \\\\\n";
-    if($emploiDescription != ""){
-        $latexContent .= "{\\small " . $emploiDescription . "} \\\\\n";
-    }
-    $latexContent .= "\\vspace{0.2cm}\n";
-    $latexContent .= "\\textbf{Email:} $email | \\textbf{Téléphone:} $telephone \\\\\n";
-    if($linkedin != ""){
-        $latexContent .= "\\textbf{LinkedIn:} \\href{" . $linkedin . "}{" . $linkedin . "} \n";
-    }
-    $latexContent .= "\\end{center}\n";
-
-    if($profil != ""){
-        $latexContent .= "\\section*{Profil}\n";
-        $latexContent .= $profil . "\n";
-    }
-
-    // Experiences
-    $experiences = $xmlDoc->getElementsByTagName('experience');
-    if ($experiences->length > 0) {
-        $latexContent .= "\\section{Expérience Professionnelle}\n";
-        foreach ($experiences as $exp) {
-            $date = $exp->getElementsByTagName('period')->item(0)->nodeValue ?? '';
-            $poste = $exp->getElementsByTagName('position')->item(0)->nodeValue ?? '';
-            $employeur = $exp->getElementsByTagName('employer')->item(0)->nodeValue ?? '';
-            $description = $exp->getElementsByTagName('description')->item(0)->nodeValue ?? '';
-            $latexContent .= "\\textbf{" . $poste . "}, " . $employeur . " (" . $date . ")\\\\\n";
-            $latexContent .= $description . "\n\\\\[0.3em]\n";
-        }
-    }
-
-    // Formation
-    $degrees = $xmlDoc->getElementsByTagName('degree');
-    if ($degrees->length > 0) {
-        $latexContent .= "\\section{Formation}\n";
-        foreach ($degrees as $degree) {
-            $date = $degree->getElementsByTagName('period')->item(0)->nodeValue ?? '';
-            $diplome = $degree->getElementsByTagName('title')->item(0)->nodeValue ?? '';
-            $etablissement = $degree->getElementsByTagName('institution')->item(0)->nodeValue ?? '';
-            $description = $degree->getElementsByTagName('description')->item(0)->nodeValue ?? '';
-            $latexContent .= "\\textbf{" . $diplome . "}, " . $etablissement . " (" . $date . ")\\\\\n";
-            if($description != ""){
-                $latexContent .= $description . "\n";
-            }
-            $latexContent .= "\\\\[0.3em]\n";
-        }
-    }
-
-    // Langues
-    $languages = $xmlDoc->getElementsByTagName('language');
-    if ($languages->length > 0) {
-        $latexContent .= "\\section{Langues}\n";
-        $latexContent .= "\\begin{itemize}\n";
-        foreach ($languages as $lang) {
-            $langue = $lang->getElementsByTagName('name')->item(0)->nodeValue ?? '';
-            $niveau = $lang->getElementsByTagName('level')->item(0)->nodeValue ?? '';
-            $description = $lang->getElementsByTagName('description')->item(0)->nodeValue ?? '';
-            $latexContent .= "\\item " . $langue . " - " . $niveau;
-            if($description != ""){
-                $latexContent .= " (" . $description . ")";
-            }
-            $latexContent .= "\n";
-        }
-        $latexContent .= "\\end{itemize}\n";
-    }
-
-    // Compétences
-    $skills = $xmlDoc->getElementsByTagName('skills')->item(0);
-    if ($skills) {
-        $competencesNumeriques = $skills->getElementsByTagName('digitalSkills')->item(0)->nodeValue ?? '';
-        $competencesAutres = $skills->getElementsByTagName('otherSkills')->item(0)->nodeValue ?? '';
-        
-        $latexContent .= "\\section{Compétences}\n";
-        $latexContent .= "\\subsection*{Compétences numériques}\n";
-        $latexContent .= $competencesNumeriques . "\n";
-        $latexContent .= "\\subsection*{Autres compétences}\n";
-        $latexContent .= $competencesAutres . "\n";
-    }
-
-    $latexContent .= "\\end{document}\n";
-
-    // Créer des fichiers temporaires
-    $tempDir = sys_get_temp_dir();
-    $latexFile = tempnam($tempDir, 'cv_') . '.tex';
-    $pdfFile = str_replace('.tex', '.pdf', $latexFile);
-    
-    // Sauvegarder le fichier LaTeX
-    file_put_contents($latexFile, $latexContent);
-    
-    // Compiler avec pdflatex
-    $oldDir = getcwd();
-    chdir($tempDir);
-    $output = shell_exec("pdflatex -interaction=nonstopmode " . basename($latexFile) . " 2>&1");
-    chdir($oldDir);
-    
-    // Lire le contenu du PDF
-    $pdfContent = false;
-    if (file_exists($pdfFile)) {
-        $pdfContent = file_get_contents($pdfFile);
-        
-        // Nettoyer les fichiers temporaires
-        @unlink($latexFile);
-        @unlink($pdfFile);
-        @unlink(str_replace('.tex', '.aux', $latexFile));
-        @unlink(str_replace('.tex', '.log', $latexFile));
-        @unlink(str_replace('.tex', '.out', $latexFile));
+    // Handle 3-character hex codes
+    if (strlen($hex) == 3) {
+        $hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];
     }
     
-    return $pdfContent;
+    // Convert to RGB
+    return [
+        'r' => hexdec(substr($hex, 0, 2)),
+        'g' => hexdec(substr($hex, 2, 2)),
+        'b' => hexdec(substr($hex, 4, 2))
+    ];
 }
 
-function generateLatexFromXml($xmlContent) {
+function generatePdfFromXml($xmlContent) {
+    error_log("generatePdfFromXml: Starting PDF generation");
+    
     // Parser le XML pour extraire les données
     $xmlDoc = new DOMDocument();
-    $xmlDoc->loadXML($xmlContent);
+    if (!$xmlDoc->loadXML($xmlContent)) {
+        error_log("generatePdfFromXml: Failed to parse XML content");
+        return false;
+    }
+    
+    error_log("generatePdfFromXml: XML parsed successfully");
     
     // Extraire les informations personnelles
     $personalInfo = $xmlDoc->getElementsByTagName('personalInfo')->item(0);
+    if (!$personalInfo) {
+        error_log("generatePdfFromXml: No personalInfo found in XML");
+        return false;
+    }
+    
     $prenom = $personalInfo->getElementsByTagName('firstname')->item(0)->nodeValue ?? '';
     $nom = $personalInfo->getElementsByTagName('lastname')->item(0)->nodeValue ?? '';
+    
+    error_log("generatePdfFromXml: Processing CV for " . $prenom . " " . $nom);
+    
     $location = $personalInfo->getElementsByTagName('location')->item(0)->nodeValue ?? '';
     $email = $personalInfo->getElementsByTagName('email')->item(0)->nodeValue ?? '';
     $telephone = $personalInfo->getElementsByTagName('phone')->item(0)->nodeValue ?? '';
     $website = $personalInfo->getElementsByTagName('website')->item(0)->nodeValue ?? '';
     $linkedin = $personalInfo->getElementsByTagName('linkedin')->item(0)->nodeValue ?? '';
     $github = $personalInfo->getElementsByTagName('github')->item(0)->nodeValue ?? '';
+    $photoPath = $personalInfo->getElementsByTagName('photo')->item(0)->nodeValue ?? '';
     
     // Profil
     $profil = $xmlDoc->getElementsByTagName('profil')->item(0);
     $profilDescription = $profil ? $profil->getElementsByTagName('description')->item(0)->nodeValue ?? '' : '';
     
-    // Générer le contenu LaTeX (similaire à generate_cv.php)
-    $latexClass = "templates/modern";
+    // Personnalisation
+    $personalization = $xmlDoc->getElementsByTagName('personalization')->item(0);
+    $primaryColor = $personalization ? $personalization->getElementsByTagName('primaryColor')->item(0)->nodeValue ?? '#667eea' : '#667eea';
+    
+    // Create temporary directory and files first
+    $tempDir = sys_get_temp_dir();
+    $uniqueId = uniqid();
+    $latexFile = $tempDir . DIRECTORY_SEPARATOR . 'cv_' . $uniqueId . '.tex';
+    $pdfFile = str_replace('.tex', '.pdf', $latexFile);
+    
+    // Handle photo copying to temp directory BEFORE LaTeX generation
+    $photoForLatex = '';
+    $photoForLatexInTemp = '';
+    if (!empty($photoPath)) {
+        // Handle both absolute and relative photo paths
+        $fullPhotoPath = '';
+        
+        // Check if it's already an absolute path
+        if (file_exists($photoPath)) {
+            $fullPhotoPath = $photoPath;
+        } 
+        // Try relative to current directory
+        elseif (file_exists('./' . $photoPath)) {
+            $fullPhotoPath = './' . $photoPath;
+        }
+        // Try relative to uploads directory
+        elseif (file_exists('./uploads/photos/' . basename($photoPath))) {
+            $fullPhotoPath = './uploads/photos/' . basename($photoPath);
+        }
+        // Try the uploads directory with full path
+        elseif (file_exists('uploads/photos/' . basename($photoPath))) {
+            $fullPhotoPath = 'uploads/photos/' . basename($photoPath);
+        }
+        
+        error_log("Photo path from XML: " . $photoPath);
+        error_log("Full photo path resolved: " . $fullPhotoPath);
+        error_log("Photo exists: " . (file_exists($fullPhotoPath) ? 'yes' : 'no'));
+        
+        if (!empty($fullPhotoPath) && file_exists($fullPhotoPath)) {
+            // Copy photo to temp directory with simple name for LaTeX
+            $photoExtension = pathinfo($fullPhotoPath, PATHINFO_EXTENSION);
+            $photoForLatexInTemp = $tempDir . DIRECTORY_SEPARATOR . "cv_photo." . $photoExtension;
+            
+            if (copy($fullPhotoPath, $photoForLatexInTemp)) {
+                error_log("Photo copied successfully to temp dir: " . $fullPhotoPath . " -> " . $photoForLatexInTemp);
+                // Use simple name for LaTeX reference (since LaTeX will run in temp dir)
+                $photoForLatex = "cv_photo." . $photoExtension;
+            } else {
+                error_log("Failed to copy photo to temp dir: " . $fullPhotoPath . " -> " . $photoForLatexInTemp);
+                $photoForLatex = '';
+                $photoForLatexInTemp = '';
+            }
+        } else {
+            error_log("Photo file not found at any expected location. Original path: " . $photoPath);
+            $photoForLatex = '';
+        }
+    }
+    
+    // Generate LaTeX content using the same structure as generate_cv.php
+    $latexClass = "modern"; // Use just the class name, we'll copy the file
     $sectionHeader = "\\documentclass{" . $latexClass . "}\n";
     $sectionHeader .= "\\hypersetup{\n";
     $sectionHeader .= "    pdftitle={" . $nom . "'s CV},\n";
     $sectionHeader .= "    pdfauthor={" . $nom . "},\n";
     $sectionHeader .= "    pdfcreator={" . $nom . "}\n";
     $sectionHeader .= "}\n\n";
-    $sectionHeader .= "\\definecolor{primaryColor}{RGB}{255, 0, 0}\n";
+
+    // Color definitions - Convert hex color to RGB for LaTeX
+    $primaryColorRGB = hexToRgb($primaryColor);
+    $sectionHeader .= "\\definecolor{primaryColor}{RGB}{" . $primaryColorRGB['r'] . ", " . $primaryColorRGB['g'] . ", " . $primaryColorRGB['b'] . "}\n\n";
+
     $sectionHeader .= "\\begin{document}\n";
     $sectionHeader .= "    \\begin{header}\n";
-    $sectionHeader .= "        \\begin{minipage}{0.8\\textwidth}\n";
+    
+    if (!empty($photoForLatex)) {
+        error_log("Using photo for LaTeX: " . $photoForLatex);
+        $sectionHeader .= "        % Photo and name in a minipage\n";
+        $sectionHeader .= "        \\begin{minipage}{0.2\\textwidth}\n";
+        $sectionHeader .= "            \\begin{tikzpicture}\n";
+        $sectionHeader .= "                \\clip (0,0) circle (1.25cm);\n";
+        $sectionHeader .= "                \\node[anchor=center] at (0,0) {\\includegraphics[width=2.5cm, height=2.5cm]{" . $photoForLatex . "}};\n";
+        $sectionHeader .= "            \\end{tikzpicture}\n";
+        $sectionHeader .= "        \\end{minipage}%\n";
+        $sectionHeader .= "        \\begin{minipage}{0.75\\textwidth}\n";
+    } else {
+        $sectionHeader .= "        \\begin{minipage}{0.95\\textwidth}\n";
+    }
+    
     $sectionHeader .= "            \\raggedright\n";
     $sectionHeader .= "            \\fontsize{22 pt}{22 pt}\n";
-    $sectionHeader .= "            \\textbf{" . $nom . "}\n\n";
+    $sectionHeader .= "            \\textbf{" . $prenom . " " . $nom . "}\n\n";
     $sectionHeader .= "            \\vspace{0.1 cm}\n\n";
     $sectionHeader .= "            \\normalsize\n";
     $sectionHeader .= "            \\mbox{{\\footnotesize\\faMapMarker*}\\hspace*{0.1cm}" . $location . "}%\n";
@@ -327,13 +314,13 @@ function generateLatexFromXml($xmlContent) {
     $sectionHeader .= "            \\AND%\n";
     $sectionHeader .= "            \\kern 0.1 cm%\n";
     $sectionHeader .= "            \\mbox{\\hrefWithoutArrow{tel:" . $telephone . "}{{\\footnotesize\\faPhone*}\\hspace*{0.1cm}" . $telephone . "}}%\n";
-    if ($linkedin) {
+    if (!empty($linkedin)) {
         $sectionHeader .= "            \\kern 0.1 cm%\n";
         $sectionHeader .= "            \\AND%\n";
         $sectionHeader .= "            \\kern 0.1 cm%\n";
         $sectionHeader .= "            \\mbox{\\hrefWithoutArrow{" . $linkedin . "}{{\\footnotesize\\faLinkedinIn}\\hspace*{0.1cm} Linkedin}}%\n";
     }
-    if ($github) {
+    if (!empty($github)) {
         $sectionHeader .= "            \\kern 0.1 cm%\n";
         $sectionHeader .= "            \\AND%\n";
         $sectionHeader .= "            \\mbox{\\hrefWithoutArrow{" . $github. "}{\\footnotesize\\faGithub\\hspace*{0.1cm} Github}}%\n";
@@ -344,18 +331,18 @@ function generateLatexFromXml($xmlContent) {
     $sectionHeader .= "    \\vspace{0.1 cm}\n\n";
 
     $sectionProfil = "";
-    if ($profilDescription) {
+    if (!empty($profilDescription)) {
         $sectionProfil = "     \\section{Profil}\n";
         $sectionProfil .= "        \\begin{onecolentry}\n";
         $sectionProfil .= "        " . $profilDescription;
         $sectionProfil .= "        \\end{onecolentry}\n";
     }
 
-    // Education Section
+    // Formation Section - Parse from XML
     $sectionEducation = "";
     $degrees = $xmlDoc->getElementsByTagName('degree');
     if ($degrees->length > 0) {
-        $sectionEducation = "    \\section{Education}\n";
+        $sectionEducation = "    \\section{Formation}\n";
         foreach ($degrees as $degree) {
             $title = $degree->getElementsByTagName('title')->item(0)->nodeValue ?? '';
             $period = $degree->getElementsByTagName('period')->item(0)->nodeValue ?? '';
@@ -380,11 +367,40 @@ function generateLatexFromXml($xmlContent) {
         }
     }
 
+    // Certificat Section
+    $sectionCertificat = "";
+    $certificates = $xmlDoc->getElementsByTagName('certificate');
+    if ($certificates->length > 0) {
+        $sectionCertificat = "    \\section{Certificats}\n";
+        foreach ($certificates as $certificate) {
+            $name = $certificate->getElementsByTagName('name')->item(0)->nodeValue ?? '';
+            $period = $certificate->getElementsByTagName('period')->item(0)->nodeValue ?? '';
+            $issuer = $certificate->getElementsByTagName('issuer')->item(0)->nodeValue ?? '';
+            $certLocation = $certificate->getElementsByTagName('location')->item(0)->nodeValue ?? '';
+            $description = $certificate->getElementsByTagName('description')->item(0)->nodeValue ?? '';
+
+            $sectionCertificat .= "    \\begin{onecolentry}\n";
+            $sectionCertificat .= "        \\textbf{" . htmlspecialchars($name) . "} \\hfill " . htmlspecialchars($period) . " \\\\\n";
+            if (!empty($issuer)) {
+                $sectionCertificat .= "        \\textit{" . htmlspecialchars($issuer) . "}";
+                if (!empty($certLocation)) {
+                    $sectionCertificat .= " \\hfill " . htmlspecialchars($certLocation);
+                }
+                $sectionCertificat .= " \\\\\n";
+            }
+            if (!empty($description)) {
+                $sectionCertificat .= "        " . $description . "\n";
+            }
+            $sectionCertificat .= "    \\end{onecolentry}\n\n";
+            $sectionCertificat .= "    \\vspace{0.05 cm}\n\n";
+        }
+    }
+
     // Experience Section
     $sectionExperience = "";
     $experiences = $xmlDoc->getElementsByTagName('experience');
     if ($experiences->length > 0) {
-        $sectionExperience = "    \\section{Experience}\n";
+        $sectionExperience = "    \\section{Expérience}\n";
         foreach ($experiences as $exp) {
             $location = $exp->getElementsByTagName('location')->item(0)->nodeValue ?? '';
             $period = $exp->getElementsByTagName('period')->item(0)->nodeValue ?? '';
@@ -422,7 +438,7 @@ function generateLatexFromXml($xmlContent) {
     $sectionProjects = "";
     $projects = $xmlDoc->getElementsByTagName('project');
     if ($projects->length > 0) {
-        $sectionProjects = "    \\section{Projects}\n";
+        $sectionProjects = "    \\section{Projets}\n";
         foreach ($projects as $project) {
             $name = $project->getElementsByTagName('name')->item(0)->nodeValue ?? '';
             $link = $project->getElementsByTagName('link')->item(0)->nodeValue ?? '';
@@ -450,7 +466,7 @@ function generateLatexFromXml($xmlContent) {
     $sectionSkills = "";
     $skills = $xmlDoc->getElementsByTagName('skill');
     if ($skills->length > 0) {
-        $sectionSkills = "    \\section{Skills}\n";
+        $sectionSkills = "    \\section{Compétences}\n";
         foreach ($skills as $skill) {
             $category = $skill->getElementsByTagName('category')->item(0)->nodeValue ?? '';
             $item = $skill->getElementsByTagName('item')->item(0)->nodeValue ?? '';
@@ -466,7 +482,7 @@ function generateLatexFromXml($xmlContent) {
     $sectionLanguages = "";
     $languages = $xmlDoc->getElementsByTagName('language');
     if ($languages->length > 0) {
-        $sectionLanguages = "    \\section{Languages}\n";
+        $sectionLanguages = "    \\section{Langues}\n";
         $sectionLanguages .= "    \\begin{onecolentry}\n";
         $lang_items = [];
         foreach ($languages as $lang) {
@@ -481,6 +497,403 @@ function generateLatexFromXml($xmlContent) {
 
     $sectionFooter = "\\end{document}";
 
-    return $sectionHeader . $sectionProfil . $sectionEducation . $sectionExperience . $sectionProjects . $sectionSkills . $sectionLanguages . $sectionFooter;
+    $latexContent = $sectionHeader . $sectionProfil . $sectionEducation . $sectionCertificat . $sectionExperience . $sectionProjects . $sectionSkills . $sectionLanguages . $sectionFooter;
+
+    // Create temporary files
+    $tempDir = sys_get_temp_dir();
+    $uniqueId = uniqid();
+    $latexFile = $tempDir . DIRECTORY_SEPARATOR . 'cv_' . $uniqueId . '.tex';
+    $pdfFile = str_replace('.tex', '.pdf', $latexFile);
+    
+    // Handle photo copying to temp directory BEFORE LaTeX generation
+    $photoForLatexInTemp = '';
+    if (!empty($photoPath)) {
+        // Handle both absolute and relative photo paths
+        $fullPhotoPath = '';
+        
+        // Check if it's already an absolute path
+        if (file_exists($photoPath)) {
+            $fullPhotoPath = $photoPath;
+        } 
+        // Try relative to current directory
+        elseif (file_exists('./' . $photoPath)) {
+            $fullPhotoPath = './' . $photoPath;
+        }
+        // Try relative to uploads directory
+        elseif (file_exists('./uploads/photos/' . basename($photoPath))) {
+            $fullPhotoPath = './uploads/photos/' . basename($photoPath);
+        }
+        // Try the uploads directory with full path
+        elseif (file_exists('uploads/photos/' . basename($photoPath))) {
+            $fullPhotoPath = 'uploads/photos/' . basename($photoPath);
+        }
+        
+        error_log("Photo path from XML: " . $photoPath);
+        error_log("Full photo path resolved: " . $fullPhotoPath);
+        error_log("Photo exists: " . (file_exists($fullPhotoPath) ? 'yes' : 'no'));
+        
+        if (!empty($fullPhotoPath) && file_exists($fullPhotoPath)) {
+            // Copy photo to temp directory with simple name for LaTeX
+            $photoExtension = pathinfo($fullPhotoPath, PATHINFO_EXTENSION);
+            $photoForLatexInTemp = $tempDir . DIRECTORY_SEPARATOR . "cv_photo." . $photoExtension;
+            
+            if (copy($fullPhotoPath, $photoForLatexInTemp)) {
+                error_log("Photo copied successfully to temp dir: " . $fullPhotoPath . " -> " . $photoForLatexInTemp);
+                // Use simple name for LaTeX reference (since LaTeX will run in temp dir)
+                $photoForLatex = "cv_photo." . $photoExtension;
+            } else {
+                error_log("Failed to copy photo to temp dir: " . $fullPhotoPath . " -> " . $photoForLatexInTemp);
+                $photoForLatex = '';
+                $photoForLatexInTemp = '';
+            }
+        } else {
+            error_log("Photo file not found at any expected location. Original path: " . $photoPath);
+            $photoForLatex = '';
+        }
+    }
+    
+    // Copy the LaTeX class file to temp directory
+    $templateSource = 'templates/modern.cls';
+    $templateDest = $tempDir . DIRECTORY_SEPARATOR . 'modern.cls';
+    if (file_exists($templateSource)) {
+        if (copy($templateSource, $templateDest)) {
+            error_log("generatePdfFromXml: Copied template from " . $templateSource . " to " . $templateDest);
+        } else {
+            error_log("generatePdfFromXml: Failed to copy template from " . $templateSource . " to " . $templateDest);
+        }
+    } else {
+        error_log("generatePdfFromXml: Template file not found: " . $templateSource);
+        error_log("generatePdfFromXml: Current working directory: " . getcwd());
+        error_log("generatePdfFromXml: Checking absolute path: " . realpath($templateSource));
+    }
+    
+    // Save LaTeX file
+    file_put_contents($latexFile, $latexContent);
+    
+    // Change to temp directory and compile with pdflatex
+    $oldDir = getcwd();
+    chdir($tempDir);
+    
+    // Run pdflatex twice for proper cross-references
+    $output = shell_exec("pdflatex -interaction=nonstopmode " . basename($latexFile) . " 2>&1");
+    $output2 = shell_exec("pdflatex -interaction=nonstopmode " . basename($latexFile) . " 2>&1");
+    
+    error_log("generatePdfFromXml: pdflatex first run output: " . $output);
+    error_log("generatePdfFromXml: pdflatex second run output: " . $output2);
+    
+    chdir($oldDir);
+    
+    // Read PDF content
+    $pdfContent = false;
+    if (file_exists($pdfFile)) {
+        $pdfContent = file_get_contents($pdfFile);
+        error_log("generatePdfFromXml: PDF generated successfully, size: " . strlen($pdfContent) . " bytes");
+        
+        // Clean up temporary files
+        @unlink($latexFile);
+        @unlink($pdfFile);
+        @unlink($templateDest);
+        @unlink(str_replace('.tex', '.aux', $latexFile));
+        @unlink(str_replace('.tex', '.log', $latexFile));
+        @unlink(str_replace('.tex', '.out', $latexFile));
+        @unlink(str_replace('.tex', '.fls', $latexFile));
+        @unlink(str_replace('.tex', '.fdb_latexmk', $latexFile));
+        
+        // Clean up photo if it was copied to temp directory
+        if (!empty($photoForLatexInTemp) && file_exists($photoForLatexInTemp)) {
+            @unlink($photoForLatexInTemp);
+            error_log("Cleaned up temp photo file: " . $photoForLatexInTemp);
+        }
+    } else {
+        error_log("generatePdfFromXml: PDF file not created. LaTeX file: " . $latexFile);
+        error_log("generatePdfFromXml: Expected PDF file: " . $pdfFile);
+        error_log("generatePdfFromXml: Current working directory: " . getcwd());
+        error_log("generatePdfFromXml: Temp directory: " . $tempDir);
+    }
+    
+    return $pdfContent;
+}
+
+function generateLatexFromXml($xmlContent) {
+    // Parser le XML pour extraire les données
+    $xmlDoc = new DOMDocument();
+    $xmlDoc->loadXML($xmlContent);
+    
+    // Extraire les informations personnelles
+    $personalInfo = $xmlDoc->getElementsByTagName('personalInfo')->item(0);
+    $prenom = $personalInfo->getElementsByTagName('firstname')->item(0)->nodeValue ?? '';
+    $nom = $personalInfo->getElementsByTagName('lastname')->item(0)->nodeValue ?? '';
+    $location = $personalInfo->getElementsByTagName('location')->item(0)->nodeValue ?? '';
+    $email = $personalInfo->getElementsByTagName('email')->item(0)->nodeValue ?? '';
+    $telephone = $personalInfo->getElementsByTagName('phone')->item(0)->nodeValue ?? '';
+    $website = $personalInfo->getElementsByTagName('website')->item(0)->nodeValue ?? '';
+    $linkedin = $personalInfo->getElementsByTagName('linkedin')->item(0)->nodeValue ?? '';
+    $github = $personalInfo->getElementsByTagName('github')->item(0)->nodeValue ?? '';
+    $photoPath = $personalInfo->getElementsByTagName('photo')->item(0)->nodeValue ?? '';
+    
+    // Profil
+    $profil = $xmlDoc->getElementsByTagName('profil')->item(0);
+    $profilDescription = $profil ? $profil->getElementsByTagName('description')->item(0)->nodeValue ?? '' : '';
+    
+    // Personnalisation
+    $personalization = $xmlDoc->getElementsByTagName('personalization')->item(0);
+    $primaryColor = $personalization ? $personalization->getElementsByTagName('primaryColor')->item(0)->nodeValue ?? '#667eea' : '#667eea';
+    
+    // Générer le contenu LaTeX (similaire à generate_cv.php)
+    $latexClass = "modern"; // Use just the class name
+    $sectionHeader = "\\documentclass{" . $latexClass . "}\n";
+    $sectionHeader .= "\\hypersetup{\n";
+    $sectionHeader .= "    pdftitle={" . $nom . "'s CV},\n";
+    $sectionHeader .= "    pdfauthor={" . $nom . "},\n";
+    $sectionHeader .= "    pdfcreator={" . $nom . "}\n";
+    $sectionHeader .= "}\n\n";
+
+    // Color definitions
+    $primaryColorRGB = hexToRgb($primaryColor);
+    $sectionHeader .= "\\definecolor{primaryColor}{RGB}{" . $primaryColorRGB['r'] . ", " . $primaryColorRGB['g'] . ", " . $primaryColorRGB['b'] . "}\n\n";
+
+    $sectionHeader .= "\\begin{document}\n";
+    $sectionHeader .= "    \\begin{header}\n";
+    
+    // Add photo section if photo exists  
+    $photoForLatex = '';
+    if (!empty($photoPath)) {
+        // Handle both absolute and relative photo paths
+        $fullPhotoPath = '';
+        
+        // Check if it's already an absolute path
+        if (file_exists($photoPath)) {
+            $fullPhotoPath = $photoPath;
+        } 
+        // Try relative to current directory
+        elseif (file_exists('./' . $photoPath)) {
+            $fullPhotoPath = './' . $photoPath;
+        }
+        // Try relative to uploads directory
+        elseif (file_exists('./uploads/photos/' . basename($photoPath))) {
+            $fullPhotoPath = './uploads/photos/' . basename($photoPath);
+        }
+        // Try the uploads directory with full path
+        elseif (file_exists('uploads/photos/' . basename($photoPath))) {
+            $fullPhotoPath = 'uploads/photos/' . basename($photoPath);
+        }
+        
+        if (!empty($fullPhotoPath) && file_exists($fullPhotoPath)) {
+            // Use a simple reference for LaTeX generation only
+            $photoForLatex = "cv_photo." . pathinfo($fullPhotoPath, PATHINFO_EXTENSION);
+        }
+    }
+    
+    if (!empty($photoForLatex)) {
+        $sectionHeader .= "        % Photo and name in a minipage\n";
+        $sectionHeader .= "        \\begin{minipage}{0.2\\textwidth}\n";
+        $sectionHeader .= "            \\begin{tikzpicture}\n";
+        $sectionHeader .= "                \\clip (0,0) circle (1.25cm);\n";
+        $sectionHeader .= "                \\node[anchor=center] at (0,0) {\\includegraphics[width=2.5cm, height=2.5cm]{" . $photoForLatex . "}};\n";
+        $sectionHeader .= "            \\end{tikzpicture}\n";
+        $sectionHeader .= "        \\end{minipage}%\n";
+        $sectionHeader .= "        \\begin{minipage}{0.75\\textwidth}\n";
+    } else {
+        $sectionHeader .= "        \\begin{minipage}{0.95\\textwidth}\n";
+    }
+    
+    $sectionHeader .= "            \\raggedright\n";
+    $sectionHeader .= "            \\fontsize{22 pt}{22 pt}\n";
+    $sectionHeader .= "            \\textbf{" . $prenom . " " . $nom . "}\n\n";
+    $sectionHeader .= "            \\vspace{0.1 cm}\n\n";
+    $sectionHeader .= "            \\normalsize\n";
+    $sectionHeader .= "            \\mbox{{\\footnotesize\\faMapMarker*}\\hspace*{0.1cm}" . $location . "}%\n";
+    $sectionHeader .= "            \\kern 0.1 cm%\n";
+    $sectionHeader .= "            \\AND%\n";
+    $sectionHeader .= "            \\kern 0.1cm\n";
+    $sectionHeader .= "            \\mbox{\\hrefWithoutArrow{mailto:" . $email . "}{{\\footnotesize\\faEnvelope[regular]}\\hspace*{0.1cm}" . $email . "}}%\n";
+    $sectionHeader .= "            \\kern 0.1 cm%\n";
+    $sectionHeader .= "            \\AND%\n";
+    $sectionHeader .= "            \\kern 0.1 cm%\n";
+    $sectionHeader .= "            \\mbox{\\hrefWithoutArrow{tel:" . $telephone . "}{{\\footnotesize\\faPhone*}\\hspace*{0.1cm}" . $telephone . "}}%\n";
+    if (!empty($linkedin)) {
+        $sectionHeader .= "            \\kern 0.1 cm%\n";
+        $sectionHeader .= "            \\AND%\n";
+        $sectionHeader .= "            \\kern 0.1 cm%\n";
+        $sectionHeader .= "            \\mbox{\\hrefWithoutArrow{" . $linkedin . "}{{\\footnotesize\\faLinkedinIn}\\hspace*{0.1cm} Linkedin}}%\n";
+    }
+    if (!empty($github)) {
+        $sectionHeader .= "            \\kern 0.1 cm%\n";
+        $sectionHeader .= "            \\AND%\n";
+        $sectionHeader .= "            \\mbox{\\hrefWithoutArrow{" . $github. "}{\\footnotesize\\faGithub\\hspace*{0.1cm} Github}}%\n";
+    }
+    $sectionHeader .= "            \\kern 0.1cm\n";
+    $sectionHeader .= "        \\end{minipage}\n";
+    $sectionHeader .= "    \\end{header}\n\n";
+    $sectionHeader .= "    \\vspace{0.1 cm}\n\n";
+
+    $sectionProfil = "";
+    if (!empty($profilDescription)) {
+        $sectionProfil = "     \\section{Profil}\n";
+        $sectionProfil .= "        \\begin{onecolentry}\n";
+        $sectionProfil .= "        " . $profilDescription;
+        $sectionProfil .= "        \\end{onecolentry}\n";
+    }
+
+    // Formation Section
+    $sectionEducation = "";
+    $degrees = $xmlDoc->getElementsByTagName('degree');
+    if ($degrees->length > 0) {
+        $sectionEducation = "    \\section{Formation}\n";
+        foreach ($degrees as $degree) {
+            $title = $degree->getElementsByTagName('title')->item(0)->nodeValue ?? '';
+            $period = $degree->getElementsByTagName('period')->item(0)->nodeValue ?? '';
+            $institution = $degree->getElementsByTagName('institution')->item(0)->nodeValue ?? '';
+            $field = $degree->getElementsByTagName('field')->item(0)->nodeValue ?? '';
+            $description = $degree->getElementsByTagName('description')->item(0)->nodeValue ?? '';
+
+            $sectionEducation .= "    \\begin{onecolentry}\n";
+            $sectionEducation .= "        \\textbf{" . htmlspecialchars($title) . "} \\hfill " . htmlspecialchars($period) . " \\\\\n";
+            if (!empty($institution)) {
+                $sectionEducation .= "        \\textit{" . htmlspecialchars($institution) . "}";
+                if (!empty($field)) {
+                    $sectionEducation .= " \\hfill " . htmlspecialchars($field);
+                }
+                $sectionEducation .= " \\\\\n";
+            }
+            if (!empty($description)) {
+                $sectionEducation .= "        " . $description . "\n";
+            }
+            $sectionEducation .= "    \\end{onecolentry}\n\n";
+            $sectionEducation .= "    \\vspace{0.05 cm}\n\n";
+        }
+    }
+
+    // Certificat Section
+    $sectionCertificat = "";
+    $certificates = $xmlDoc->getElementsByTagName('certificate');
+    if ($certificates->length > 0) {
+        $sectionCertificat = "    \\section{Certificats}\n";
+        foreach ($certificates as $certificate) {
+            $name = $certificate->getElementsByTagName('name')->item(0)->nodeValue ?? '';
+            $period = $certificate->getElementsByTagName('period')->item(0)->nodeValue ?? '';
+            $issuer = $certificate->getElementsByTagName('issuer')->item(0)->nodeValue ?? '';
+            $certLocation = $certificate->getElementsByTagName('location')->item(0)->nodeValue ?? '';
+            $description = $certificate->getElementsByTagName('description')->item(0)->nodeValue ?? '';
+
+            $sectionCertificat .= "    \\begin{onecolentry}\n";
+            $sectionCertificat .= "        \\textbf{" . htmlspecialchars($name) . "} \\hfill " . htmlspecialchars($period) . " \\\\\n";
+            if (!empty($issuer)) {
+                $sectionCertificat .= "        \\textit{" . htmlspecialchars($issuer) . "}";
+                if (!empty($certLocation)) {
+                    $sectionCertificat .= " \\hfill " . htmlspecialchars($certLocation);
+                }
+                $sectionCertificat .= " \\\\\n";
+            }
+            if (!empty($description)) {
+                $sectionCertificat .= "        " . $description . "\n";
+            }
+            $sectionCertificat .= "    \\end{onecolentry}\n\n";
+            $sectionCertificat .= "    \\vspace{0.05 cm}\n\n";
+        }
+    }
+
+    // Experience Section
+    $sectionExperience = "";
+    $experiences = $xmlDoc->getElementsByTagName('experience');
+    if ($experiences->length > 0) {
+        $sectionExperience = "    \\section{Expérience}\n";
+        foreach ($experiences as $exp) {
+            $location = $exp->getElementsByTagName('location')->item(0)->nodeValue ?? '';
+            $period = $exp->getElementsByTagName('period')->item(0)->nodeValue ?? '';
+            $company = $exp->getElementsByTagName('company')->item(0)->nodeValue ?? '';
+            $position = $exp->getElementsByTagName('position')->item(0)->nodeValue ?? '';
+            $description = $exp->getElementsByTagName('description')->item(0)->nodeValue ?? '';
+
+            $sectionExperience .= "    \\begin{onecolentry}\n";
+            $sectionExperience .= "        \\textbf{" . htmlspecialchars($location) . "} \\hfill " . htmlspecialchars($period) . " \\\\\n";
+            if (!empty($company)) {
+                $sectionExperience .= "        \\textit{" . htmlspecialchars($company) . "}";
+                if (!empty($position)) {
+                    $sectionExperience .= " \\hfill " . htmlspecialchars($position);
+                }
+                $sectionExperience .= " \\\\\n";
+            }
+            if (!empty($description)) {
+                $descriptionLines = array_filter(array_map('trim', explode("\n", $description)));
+                if (!empty($descriptionLines)) {
+                    $sectionExperience .= "        \\begin{itemize}\n";
+                    foreach ($descriptionLines as $line) {
+                        if (!empty($line)) {
+                            $sectionExperience .= "            \\item " . $line . "\n";
+                        }
+                    }
+                    $sectionExperience .= "        \\end{itemize}\n";
+                }
+            }
+            $sectionExperience .= "    \\end{onecolentry}\n\n";
+            $sectionExperience .= "    \\vspace{0.05 cm}\n\n";
+        }
+    }
+
+    // Projects Section
+    $sectionProjects = "";
+    $projects = $xmlDoc->getElementsByTagName('project');
+    if ($projects->length > 0) {
+        $sectionProjects = "    \\section{Projets}\n";
+        foreach ($projects as $project) {
+            $name = $project->getElementsByTagName('name')->item(0)->nodeValue ?? '';
+            $link = $project->getElementsByTagName('link')->item(0)->nodeValue ?? '';
+            $description = $project->getElementsByTagName('description')->item(0)->nodeValue ?? '';
+
+            $sectionProjects .= "    \\textbf{" . htmlspecialchars($name) . "}";
+            $sectionProjects .= "\n    \n";
+            
+            if (!empty($description) || !empty($link)) {
+                $sectionProjects .= "    \\begin{itemize}\n";
+                if (!empty($description)) {
+                    $sectionProjects .= "        \\item \\textbf{Description}: " . $description . "\n";
+                }
+                if (!empty($link)) {
+                    $sectionProjects .= "        \\item \\textbf{GitHub Link}: \\hrefWithoutArrow{" . htmlspecialchars($link) . "}{\\footnotesize\\faGithub\\hspace*{0.1cm}" . htmlspecialchars($name) . "}\n";
+                }
+                $sectionProjects .= "    \\end{itemize}\n";
+            }
+            
+            $sectionProjects .= "    \\vspace{0.05 cm}\n\n";
+        }
+    }
+
+    // Skills Section
+    $sectionSkills = "";
+    $skills = $xmlDoc->getElementsByTagName('skill');
+    if ($skills->length > 0) {
+        $sectionSkills = "    \\section{Compétences}\n";
+        foreach ($skills as $skill) {
+            $category = $skill->getElementsByTagName('category')->item(0)->nodeValue ?? '';
+            $item = $skill->getElementsByTagName('item')->item(0)->nodeValue ?? '';
+
+            $sectionSkills .= "    \\begin{onecolentry}\n";
+            $sectionSkills .= "        \\textbf{" . htmlspecialchars($category) . ":} " . $item . "\n";
+            $sectionSkills .= "    \\end{onecolentry}\n\n";
+            $sectionSkills .= "    \\vspace{0.05 cm}\n\n";
+        }
+    }
+
+    // Languages Section
+    $sectionLanguages = "";
+    $languages = $xmlDoc->getElementsByTagName('language');
+    if ($languages->length > 0) {
+        $sectionLanguages = "    \\section{Langues}\n";
+        $sectionLanguages .= "    \\begin{onecolentry}\n";
+        $lang_items = [];
+        foreach ($languages as $lang) {
+            $name = $lang->getElementsByTagName('name')->item(0)->nodeValue ?? '';
+            $level = $lang->getElementsByTagName('level')->item(0)->nodeValue ?? '';
+            $lang_items[] = "\\textbf{" . htmlspecialchars($name) . ":} " . htmlspecialchars($level);
+        }
+        $sectionLanguages .= "        " . implode(" \\hfill\n        ", $lang_items) . "\n";
+        $sectionLanguages .= "    \\end{onecolentry}\n\n";
+        $sectionLanguages .= "    \\vspace{0.05 cm}\n\n";
+    }
+
+    $sectionFooter = "\\end{document}";
+
+    return $sectionHeader . $sectionProfil . $sectionEducation . $sectionCertificat . $sectionExperience . $sectionProjects . $sectionSkills . $sectionLanguages . $sectionFooter;
 }
 ?>

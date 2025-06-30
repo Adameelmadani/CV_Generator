@@ -76,7 +76,7 @@ function displayCVs() {
     gridElement.innerHTML = userCVs.map(cv => `
         <div class="cv-card" onclick="previewCV(${cv.id})">
             <div class="cv-card-header">
-                <div>
+                <div class="cv-card-info-left">
                     <div class="cv-card-title">${cv.cv_name}</div>
                     <div class="cv-card-date">Créé le ${formatDate(cv.created_at)}</div>
                 </div>
@@ -93,10 +93,6 @@ function displayCVs() {
                 </div>
             </div>
             <div class="cv-card-info">
-                <div class="cv-format">
-                    <i class="fas fa-file-pdf"></i>
-                    ${cv.xml_content ? 'PDF + XML' : 'PDF'}
-                </div>
                 <div class="cv-card-date">Modifié le ${formatDate(cv.updated_at)}</div>
             </div>
         </div>
@@ -143,8 +139,26 @@ async function previewCV(cvId) {
     }
     
     try {
-        // Générer l'aperçu PDF
-        const response = await fetch('generate_preview.php', {
+        // Afficher le modal avec un indicateur de chargement
+        document.getElementById('previewFrame').src = '';
+        document.getElementById('previewModal').classList.add('show');
+        
+        // Afficher un message de chargement temporaire
+        const iframe = document.getElementById('previewFrame');
+        iframe.style.display = 'none';
+        
+        // Créer un div de chargement temporaire
+        let loadingDiv = document.getElementById('previewLoading');
+        if (!loadingDiv) {
+            loadingDiv = document.createElement('div');
+            loadingDiv.id = 'previewLoading';
+            loadingDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i><br>Génération de l\'aperçu...';
+            iframe.parentNode.insertBefore(loadingDiv, iframe);
+        }
+        loadingDiv.style.display = 'flex';
+        
+        // Générer l'aperçu PDF avec la même logique que le téléchargement
+        const response = await fetch('preview_cv.php', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -156,14 +170,29 @@ async function previewCV(cvId) {
             const blob = await response.blob();
             const url = URL.createObjectURL(blob);
             
-            document.getElementById('previewFrame').src = url;
-            document.getElementById('previewModal').classList.add('show');
+            iframe.src = url;
+            iframe.style.display = 'block';
+            loadingDiv.style.display = 'none';
+            
+            // Nettoyer l'URL après un délai
+            setTimeout(() => URL.revokeObjectURL(url), 60000);
         } else {
-            alert('Erreur lors de la génération de l\'aperçu');
+            loadingDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i><br>Erreur lors de la génération de l\'aperçu';
+            setTimeout(() => {
+                loadingDiv.style.display = 'none';
+                iframe.style.display = 'block';
+            }, 3000);
         }
     } catch (error) {
         console.error('Erreur:', error);
-        alert('Erreur lors de la génération de l\'aperçu');
+        const loadingDiv = document.getElementById('previewLoading');
+        if (loadingDiv) {
+            loadingDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i><br>Erreur lors de la génération de l\'aperçu';
+            setTimeout(() => {
+                loadingDiv.style.display = 'none';
+                document.getElementById('previewFrame').style.display = 'block';
+            }, 3000);
+        }
     }
 }
 
@@ -340,11 +369,14 @@ async function confirmDownload() {
             closeModal('downloadFormatModal');
             currentCVForDownload = null;
         } else {
-            alert('Erreur lors du téléchargement');
+            // Get error details from response
+            const errorText = await response.text();
+            console.error('Download error:', response.status, errorText);
+            alert(`Erreur lors du téléchargement: ${response.status} - ${errorText}`);
         }
     } catch (error) {
         console.error('Erreur:', error);
-        alert('Erreur lors du téléchargement');
+        alert(`Erreur lors du téléchargement: ${error.message}`);
     }
 }
 

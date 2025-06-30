@@ -19,7 +19,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
         
         $fileInfo = pathinfo($_FILES['photo']['name']);
-        $fileName = $nom . '_' . $prenom . '_' . time() . '.' . $fileInfo['extension'];
+        $fileName = $prenom . '_' . $nom . '_' . time() . '.' . $fileInfo['extension'];
         $photoPath = $uploadDir . $fileName;
         
         // Validate file type
@@ -226,7 +226,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     
     // Save XML file locally
-    $xmlFile = "cv_" . $nom . "_" . $prenom . ".xml";
+    $xmlFile = "cv_" . $prenom . "_" . $nom . ".xml";
     file_put_contents($xmlFile, $xmlContent);    // Save CV to database if user is logged in
     if (isset($_SESSION['userId']) && !empty($_SESSION['userId'])) {
         error_log("generate_cv.php: User is logged in, saving to database. User ID: " . $_SESSION['userId']);
@@ -242,7 +242,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 ]);
             } else {
                 // Mode création : créer un nouveau CV
-                $cvName = "CV_" . $nom . "_" . $prenom . "_" . date('Y-m-d_H-i-s');
+                $cvName = "CV_" . $prenom . "_" . $nom;
                 
                 // Debug: Log CV creation attempt
                 error_log("generate_cv.php: Creating new CV with name: " . $cvName . " for user: " . $_SESSION['userId']);
@@ -321,7 +321,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
     $sectionHeader .= "            \\raggedright\n";
     $sectionHeader .= "            \\fontsize{22 pt}{22 pt}\n";
-    $sectionHeader .= "            \\textbf{" . $nom . " " . $prenom . "}\n\n";
+    $sectionHeader .= "            \\textbf{" . $prenom . " " . $nom . "}\n\n";
     $sectionHeader .= "            \\vspace{0.1 cm}\n\n";
     $sectionHeader .= "            \\normalsize\n";
     $sectionHeader .= "            \\mbox{{\\footnotesize\\faMapMarker*}\\hspace*{0.1cm}" . $location . "}%\n";
@@ -498,7 +498,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $latexContent = $sectionHeader . $sectionProfil . $sectionEducation . $sectionCertificat . $sectionExperience . $sectionProjects . $sectionSkills . $sectionLanguages . $sectionFooter;
 
 // Write LaTeX file
-$texFile = "CV_" . $nom . "_" . $prenom . ".tex";
+$texFile = "CV_" . $prenom . "_" . $nom . ".tex";
 file_put_contents($texFile, $latexContent);
 
 // First compilation (creates .aux file with references)
@@ -526,7 +526,7 @@ if (!file_exists($pdfFile)) {
     if ($format === 'xml') {
         // Send XML file with Save As dialog
         header('Content-Type: application/xml');
-        header('Content-Disposition: attachment; filename="CV_'.$nom.'_'.$prenom.'.xml"');
+        header('Content-Disposition: attachment; filename="CV_'.$prenom.'_'.$nom.'.xml"');
         header('Content-Length: ' . filesize($xmlFile));
         header('Cache-Control: no-cache, must-revalidate');
         header('Pragma: no-cache');
@@ -546,7 +546,7 @@ if (!file_exists($pdfFile)) {
     } elseif ($format === 'latex') {
         // Send LaTeX file with Save As dialog
         header('Content-Type: text/plain');
-        header('Content-Disposition: attachment; filename="CV_'.$nom.'_'.$prenom.'.tex"');
+        header('Content-Disposition: attachment; filename="CV_'.$prenom.'_'.$nom.'.tex"');
         header('Content-Length: ' . filesize($texFile));
         header('Cache-Control: no-cache, must-revalidate');
         header('Pragma: no-cache');
@@ -565,17 +565,17 @@ if (!file_exists($pdfFile)) {
         
     } elseif ($format === 'all') {
         // Create ZIP file with all three formats (PDF, XML, LaTeX)
-        $zipFileName = "CV_" . $nom . "_" . $prenom . ".zip";
+        $zipFileName = "CV_" . $prenom . "_" . $nom . ".zip";
         
         if (class_exists('ZipArchive')) {
             $zip = new ZipArchive();
             if ($zip->open($zipFileName, ZipArchive::CREATE) === TRUE) {
                 // Add PDF file to ZIP (use correct filename)
-                $zip->addFile($pdfFile, "CV_" . $nom . "_" . $prenom . ".pdf");
+                $zip->addFile($pdfFile, "CV_" . $prenom . "_" . $nom . ".pdf");
                 // Add XML file to ZIP  
-                $zip->addFile($xmlFile, "CV_" . $nom . "_" . $prenom . ".xml");
+                $zip->addFile($xmlFile, "CV_" . $prenom . "_" . $nom . ".xml");
                 // Add LaTeX file to ZIP
-                $zip->addFile($texFile, "CV_" . $nom . "_" . $prenom . ".tex");
+                $zip->addFile($texFile, "CV_" . $prenom . "_" . $nom . ".tex");
                 $zip->close();
                 
                 // Send ZIP file with Save As dialog
@@ -606,7 +606,7 @@ if (!file_exists($pdfFile)) {
     } else {
         // Send PDF file with Save As dialog (default behavior)
         header('Content-Type: application/pdf');
-        header('Content-Disposition: attachment; filename="CV_'.$nom.'_'.$prenom.'.pdf"');
+        header('Content-Disposition: attachment; filename="CV_'.$prenom.'_'.$nom.'.pdf"');
         header('Content-Length: ' . filesize($pdfFile));
         header('Cache-Control: no-cache, must-revalidate');
         header('Pragma: no-cache');
