@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { ChevronLeft } from "lucide-react"
 import Timeline from "../../components/timeline"
@@ -211,6 +211,36 @@ export default function CVGenerator() {
     return profileConfig.isOptional(section)
   }
 
+  // Correction du typage pour la prop onSkip : on ne la passe que si elle existe
+  // --- Ajout des handlers de changement en temps réel ---
+  const handleEducationChange = useCallback((data: Education[]) => {
+    setCvData((prev) => ({ ...prev, education: data || [] }))
+  }, [])
+  
+  const handleExperienceChange = useCallback((data: Experience[]) => {
+    setCvData((prev) => ({ ...prev, experience: data || [] }))
+  }, [])
+  
+  const handleProjectsChange = useCallback((data: Project[]) => {
+    setCvData((prev) => ({ ...prev, projects: data || [] }))
+  }, [])
+  
+  const handleCertificatesChange = useCallback((data: Certificate[]) => {
+    setCvData((prev) => ({ ...prev, certificates: data || [] }))
+  }, [])
+  
+  const handleAchievementsChange = useCallback((data: Achievement[]) => {
+    setCvData((prev) => ({ ...prev, achievements: data || [] }))
+  }, [])
+  
+  const handlePublicationsChange = useCallback((data: Publication[]) => {
+    setCvData((prev) => ({ ...prev, publications: data || [] }))
+  }, [])
+  
+  const handleSkillsChange = useCallback((data: Skill[]) => {
+    setCvData((prev) => ({ ...prev, skills: data || [] }))
+  }, [])
+
   const renderCurrentStep = () => {
     switch (currentStep) {
       case "profile":
@@ -222,63 +252,70 @@ export default function CVGenerator() {
           <PersonalInfoForm
             initialData={cvData.personalInfo}
             onSubmit={handlePersonalInfoSubmit}
-            onSkip={canSkipSection("personal") ? handlePersonalInfoSkip : () => {}}
+            {...(canSkipSection("personal") ? { onSkip: handlePersonalInfoSkip } : {})}
           />
         )
       case "education":
         return (
           <EducationForm
             initialData={cvData.education}
+            onChange={handleEducationChange}
             onSubmit={handleEducationSubmit}
-            onSkip={canSkipSection("education") ? handleEducationSkip : () => {}}
+            {...(canSkipSection("education") ? { onSkip: handleEducationSkip } : {})}
           />
         )
       case "experience":
         return (
           <ExperienceForm
             initialData={cvData.experience}
+            onChange={handleExperienceChange}
             onSubmit={handleExperienceSubmit}
-            onSkip={canSkipSection("experience") ? handleExperienceSkip : () => {}}
+            {...(canSkipSection("experience") ? { onSkip: handleExperienceSkip } : {})}
           />
         )
       case "projects":
         return (
           <ProjectsForm
             initialData={cvData.projects}
+            onChange={handleProjectsChange}
             onSubmit={handleProjectsSubmit}
-            onSkip={canSkipSection("projects") ? handleProjectsSkip : () => {}}
+            {...(canSkipSection("projects") ? { onSkip: handleProjectsSkip } : {})}
           />
         )
       case "certificates":
         return (
           <CertificatesForm
             initialData={cvData.certificates}
+            onChange={handleCertificatesChange}
             onSubmit={handleCertificatesSubmit}
-            onSkip={canSkipSection("certificates") ? handleCertificatesSkip : () => {}}
+            {...(canSkipSection("certificates") ? { onSkip: handleCertificatesSkip } : {})}
           />
         )
       case "achievements":
         return (
           <AchievementsForm
             initialData={cvData.achievements}
+            onChange={handleAchievementsChange}
             onSubmit={handleAchievementsSubmit}
-            onSkip={canSkipSection("achievements") ? handleAchievementsSkip : () => {}}
+            {...(canSkipSection("achievements") ? { onSkip: handleAchievementsSkip } : {})}
           />
         )
       case "publications":
         return (
           <PublicationsForm
             initialData={cvData.publications}
+            onChange={handlePublicationsChange}
             onSubmit={handlePublicationsSubmit}
-            onSkip={canSkipSection("publications") ? handlePublicationsSkip : () => {}}
+            {...(canSkipSection("publications") ? { onSkip: handlePublicationsSkip } : {})}
           />
         )
       case "skills":
         return (
           <SkillsForm
             initialData={cvData.skills}
+            onChange={handleSkillsChange}
             onSubmit={handleSkillsSubmit}
-            onSkip={canSkipSection("skills") ? handleSkillsSkip : () => {}}
+            {...(canSkipSection("skills") ? { onSkip: handleSkillsSkip } : {})}
           />
         )
       case "customization":

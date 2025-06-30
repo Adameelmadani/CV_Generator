@@ -38,15 +38,15 @@ export default function Timeline({ steps, currentStep, onStepClick, completedSte
   const getNodeStyles = (status: string) => {
     switch (status) {
       case "completed":
-        return "bg-[#28a745] border-[#28a745] text-white shadow-sm"
+        return "bg-[#28a745] border-[#28a745] text-white"
       case "current":
-        return "bg-[rgb(37,99,235)] border-[rgb(37,99,235)] text-white shadow-lg ring-2 ring-[rgb(37,99,235)] ring-opacity-30"
+        return "bg-[rgb(37,99,235)] border-[rgb(37,99,235)] text-white ring-2 ring-[rgb(37,99,235)] ring-opacity-30"
       case "skipped":
-        return "bg-[#ffa500] border-[#ffa500] text-white shadow-sm"
+        return "bg-[#ffa500] border-[#ffa500] text-white"
       case "upcoming":
-        return "bg-white border-gray-300 text-gray-600 shadow-sm"
+        return "bg-white border-gray-300 text-gray-600"
       default:
-        return "bg-white border-gray-300 text-gray-600 shadow-sm"
+        return "bg-white border-gray-300 text-gray-600"
     }
   }
 
@@ -76,10 +76,7 @@ export default function Timeline({ steps, currentStep, onStepClick, completedSte
         {/* Container principal avec ligne de base pour l'alignement */}
         <div className="relative">
           {/* Ligne de base horizontale continue */}
-          <div
-            className="absolute top-4 left-0 right-0 h-0.5 bg-gray-300 z-0"
-            style={{ transform: "translateY(-50%)" }}
-          />
+          <div className="absolute top-4 left-0 right-0 h-0.5 bg-gray-300 z-0" />
 
           {/* Segments colorés de la ligne */}
           {steps.map((step, index) => {
@@ -95,32 +92,40 @@ export default function Timeline({ steps, currentStep, onStepClick, completedSte
                 style={{
                   left: segmentLeft,
                   width: segmentWidth,
-                  transform: "translateY(-50%)",
                 }}
               />
             )
           })}
 
-          {/* Conteneur des nœuds avec flexbox pour alignement parfait */}
-          <div className="flex justify-between items-center relative z-10">
+          {/* Conteneur des nœuds avec flexbox pour distribution égale */}
+          <div className="flex justify-between items-start relative z-10">
             {steps.map((step, index) => {
               const status = getStepStatus(step.id, index)
               const canNavigate = canNavigateToStep(step.id, index)
 
               return (
-                <div key={step.id} className="flex flex-col items-center">
-                  {/* Nœud */}
+                <div key={step.id} className="flex flex-col items-center" style={{ flex: "0 0 auto" }}>
+                  {/* Nœud - taille absolument fixe */}
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => canNavigate && onStepClick(step.id)}
                     disabled={!canNavigate}
                     className={`
-                      w-8 h-8 rounded-full border-2 p-0 transition-all duration-300 hover:scale-105
+                      rounded-full border-2 p-0 transition-colors duration-300 flex items-center justify-center
                       ${getNodeStyles(status)}
-                      ${canNavigate ? "cursor-pointer" : "cursor-not-allowed"}
+                      ${canNavigate ? "cursor-pointer hover:opacity-90" : "cursor-not-allowed"}
                     `}
-                    style={{ fontFamily: "Arial, Helvetica, sans-serif" }}
+                    style={{ 
+                      fontFamily: "Arial, Helvetica, sans-serif",
+                      width: "32px",
+                      height: "32px",
+                      minWidth: "32px",
+                      maxWidth: "32px",
+                      minHeight: "32px",
+                      maxHeight: "32px",
+                      flexShrink: 0
+                    }}
                   >
                     {status === "completed" && (
                       <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -131,7 +136,7 @@ export default function Timeline({ steps, currentStep, onStepClick, completedSte
                         />
                       </svg>
                     )}
-                    {status === "current" && <div className="w-2 h-2 bg-white rounded-full animate-pulse" />}
+                    {status === "current" && <div className="w-2 h-2 bg-white rounded-full" />}
                     {status === "skipped" && (
                       <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                         <path
@@ -143,10 +148,10 @@ export default function Timeline({ steps, currentStep, onStepClick, completedSte
                     )}
                   </Button>
 
-                  {/* Titre de l'étape */}
-                  <div className="mt-3 text-center">
+                  {/* Titre de l'étape - directement sous son nœud */}
+                  <div className="mt-3 text-center" style={{ width: "80px" }}>
                     <p
-                      className={`text-xs font-medium transition-colors duration-300 ${
+                      className={`text-xs font-medium transition-colors duration-300 leading-tight ${
                         status === "completed"
                           ? "text-[#28a745]"
                           : status === "current"
@@ -157,8 +162,9 @@ export default function Timeline({ steps, currentStep, onStepClick, completedSte
                       }`}
                       style={{
                         fontFamily: "Arial, Helvetica, sans-serif",
-                        maxWidth: "80px",
                         lineHeight: "1.2",
+                        wordWrap: "break-word",
+                        hyphens: "auto"
                       }}
                     >
                       {step.title}

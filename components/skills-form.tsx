@@ -1,9 +1,6 @@
 "use client"
 
-import type React from "react"
-
-import { useState } from "react"
-import { useForm } from "react-hook-form"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -16,7 +13,8 @@ import type { Skill } from "../types/cv"
 interface SkillsFormProps {
   initialData?: Skill[]
   onSubmit: (data: Skill[]) => void
-  onSkip: () => void
+  onChange?: (data: Skill[]) => void
+  onSkip?: () => void
 }
 
 const skillLevels = ["Débutant", "Intermédiaire", "Avancé", "Expert"] as const
@@ -30,7 +28,7 @@ const skillCategories = [
   "Autre",
 ]
 
-export default function SkillsForm({ initialData = [], onSubmit, onSkip }: SkillsFormProps) {
+export default function SkillsForm({ initialData = [], onSubmit, onChange, onSkip }: SkillsFormProps) {
   const [skills, setSkills] = useState<Skill[]>(initialData)
   const [newSkill, setNewSkill] = useState({
     name: "",
@@ -38,7 +36,7 @@ export default function SkillsForm({ initialData = [], onSubmit, onSkip }: Skill
     category: "Langages de programmation",
   })
 
-  const { handleSubmit } = useForm()
+  const [errors, setErrors] = useState<Record<string, string>>({})
 
   const addSkill = () => {
     if (newSkill.name.trim()) {
@@ -48,17 +46,29 @@ export default function SkillsForm({ initialData = [], onSubmit, onSkip }: Skill
         level: newSkill.level,
         category: newSkill.category,
       }
-      setSkills([...skills, skill])
+      const updatedSkills = [...skills, skill]
+      setSkills(updatedSkills)
       setNewSkill({
         name: "",
         level: "Intermédiaire",
         category: "Langages de programmation",
       })
+      // Nettoyer l'erreur si il y en avait une
+      if (errors["newSkill"]) {
+        setErrors(prev => {
+          const newErrors = { ...prev }
+          delete newErrors["newSkill"]
+          return newErrors
+        })
+      }
+    } else {
+      setErrors(prev => ({ ...prev, newSkill: "Le nom de la compétence est requis" }))
     }
   }
 
   const removeSkill = (id: string) => {
-    setSkills(skills.filter((skill) => skill.id !== id))
+    const updatedSkills = skills.filter((skill) => skill.id !== id)
+    setSkills(updatedSkills)
   }
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -67,6 +77,24 @@ export default function SkillsForm({ initialData = [], onSubmit, onSkip }: Skill
       addSkill()
     }
   }
+
+  const validate = (): boolean => {
+    const newErrors: Record<string, string> = {}
+    if (skills.length === 0) newErrors["skills"] = "Au moins une compétence est requise"
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (validate()) {
+      onSubmit(skills)
+    }
+  }
+
+  useEffect(() => {
+    if (typeof onChange === "function") onChange(skills)
+  }, [skills, onChange])
 
   const groupedSkills = skills.reduce(
     (acc, skill) => {
@@ -103,7 +131,7 @@ export default function SkillsForm({ initialData = [], onSubmit, onSkip }: Skill
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit(() => onSubmit(skills))} className="space-y-6">
+        <form onSubmit={handleFormSubmit} className="space-y-6">
           {/* Ajouter une nouvelle compétence */}
           <div className="border rounded-lg p-4 space-y-4">
             <h3 className="font-medium">Ajouter une compétence</h3>
@@ -118,6 +146,9 @@ export default function SkillsForm({ initialData = [], onSubmit, onSkip }: Skill
                   onKeyPress={handleKeyPress}
                   placeholder="React, JavaScript, etc."
                 />
+                {errors["newSkill"] && (
+                  <p className="text-sm text-destructive">{errors["newSkill"]}</p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -183,13 +214,10 @@ export default function SkillsForm({ initialData = [], onSubmit, onSkip }: Skill
                       >
                         <span>{skill.name}</span>
                         <span className="text-xs">({skill.level})</span>
-                        <button
-                          type="button"
+                        <X
+                          className="h-3 w-3 cursor-pointer hover:text-destructive"
                           onClick={() => removeSkill(skill.id)}
-                          className="ml-1 hover:text-destructive"
-                        >
-                          <X className="h-3 w-3" />
-                        </button>
+                        />
                       </Badge>
                     ))}
                   </div>
@@ -200,15 +228,20 @@ export default function SkillsForm({ initialData = [], onSubmit, onSkip }: Skill
 
           {skills.length === 0 && (
             <div className="text-center py-8 text-muted-foreground">
+              {errors["skills"] && (
+                <p className="text-sm text-destructive mb-2">{errors["skills"]}</p>
+              )}
               Aucune compétence ajoutée. Commencez par ajouter vos compétences ci-dessus.
             </div>
           )}
 
           <div className="flex gap-4">
-            <Button type="button" variant="outline" onClick={onSkip} className="flex-1 bg-transparent">
-              Passer cette étape
-            </Button>
-            <Button type="submit" className="flex-1">
+            {onSkip && (
+              <Button type="button" variant="outline" onClick={onSkip} className="flex-1 bg-transparent">
+                Passer cette étape
+              </Button>
+            )}
+            <Button type="submit" className={onSkip ? "flex-1" : "w-full"}>
               Terminer
             </Button>
           </div>

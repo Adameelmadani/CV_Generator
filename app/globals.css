@@ -92,3 +92,32 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+/* Masquer les éléments flottants indésirables (badges, avatars, boutons de chat) */
+/* Cibler les éléments positionnés en fixed qui peuvent être des overlays indésirables */
+[style*="position: fixed"][style*="bottom"][style*="left"],
+[class*="fixed"][class*="bottom"][class*="left"] {
+  display: none !important;
+}
+
+/* Masquer spécifiquement les éléments circulaires avec du texte en bas à gauche */
+div[style*="position: fixed"][style*="bottom: 0"][style*="left: 0"],
+div[style*="position: fixed"][style*="bottom: 20px"][style*="left: 20px"],
+.fixed.bottom-0.left-0,
+.fixed.bottom-4.left-4,
+.fixed.bottom-6.left-6 {
+  display: none !important;
+}
+
+/* Masquer les boutons circulaires en bas à gauche */
+button[style*="position: fixed"][style*="bottom"][style*="left"],
+.fixed button[class*="rounded-full"],
+[style*="position: fixed"] button[style*="border-radius: 50%"] {
+  display: none !important;
+}
+
+/* Masquer tout élément contenant spécifiquement la lettre "N" en position fixe */
+[style*="position: fixed"]:has-text("N"),
+.fixed:has-text("N") {
+  display: none !important;
+}

@@ -1,11 +1,6 @@
 "use client"
 
-import type React from "react"
-
-import { useState } from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -15,22 +10,14 @@ import { Badge } from "@/components/ui/badge"
 import { Plus, Trash2, BookOpen, X } from "lucide-react"
 import type { Publication } from "../types/cv"
 
-const publicationSchema = z.object({
-  title: z.string().min(2, "Le titre de la publication est requis"),
-  authors: z.array(z.string()).min(1, "Au moins un auteur est requis"),
-  journal: z.string().min(2, "Le journal/conférence est requis"),
-  date: z.string().min(1, "La date de publication est requise"),
-  url: z.string().url("URL invalide").optional().or(z.literal("")),
-  description: z.string().optional(),
-})
-
 interface PublicationsFormProps {
   initialData?: Publication[]
   onSubmit: (data: Publication[]) => void
-  onSkip: () => void
+  onChange?: (data: Publication[]) => void
+  onSkip?: () => void
 }
 
-export default function PublicationsForm({ initialData = [], onSubmit, onSkip }: PublicationsFormProps) {
+export default function PublicationsForm({ initialData = [], onSubmit, onChange, onSkip }: PublicationsFormProps) {
   const [publications, setPublications] = useState<Publication[]>(
     initialData.length > 0
       ? initialData
@@ -47,69 +34,119 @@ export default function PublicationsForm({ initialData = [], onSubmit, onSkip }:
         ],
   )
 
+  const [errors, setErrors] = useState<Record<string, string>>({})
   const [authorInputs, setAuthorInputs] = useState<{ [key: string]: string }>({})
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    setValue,
-  } = useForm({
-    resolver: zodResolver(
-      z.object({
-        publications: z.array(publicationSchema).optional(),
-      }),
-    ),
-    defaultValues: { publications },
-  })
-
   const addPublication = () => {
-    const newPublication: Publication = {
-      id: crypto.randomUUID(),
-      title: "",
-      authors: [],
-      journal: "",
-      date: "",
-      url: "",
-      description: "",
-    }
-    setPublications([...publications, newPublication])
+    setPublications([
+      ...publications,
+      {
+        id: crypto.randomUUID(),
+        title: "",
+        authors: [],
+        journal: "",
+        date: "",
+        url: "",
+        description: "",
+      },
+    ])
   }
 
   const removePublication = (id: string) => {
     if (publications.length > 1) {
-      setPublications(publications.filter((pub) => pub.id !== id))
+      const newPublications = publications.filter((pub: Publication) => pub.id !== id)
+      setPublications(newPublications)
+      // Nettoyer les erreurs de l'élément supprimé
+      setErrors(prevErrors => {
+        const newErrors = { ...prevErrors }
+        Object.keys(newErrors).forEach(key => {
+          if (key.includes(id)) {
+            delete newErrors[key]
+          }
+        })
+        return newErrors
+      })
+      // Nettoyer l'input d'auteur
+      setAuthorInputs(prev => {
+        const newInputs = { ...prev }
+        delete newInputs[id]
+        return newInputs
+      })
     }
   }
 
-  const addAuthor = (publicationIndex: number) => {
-    const author = authorInputs[`publication-${publicationIndex}`]?.trim()
-    if (author) {
-      const updatedPublications = [...publications]
-      if (!updatedPublications[publicationIndex].authors.includes(author)) {
-        updatedPublications[publicationIndex].authors.push(author)
-        setPublications(updatedPublications)
-        setValue(`publications.${publicationIndex}.authors`, updatedPublications[publicationIndex].authors)
-      }
-      setAuthorInputs({ ...authorInputs, [`publication-${publicationIndex}`]: "" })
-    }
-  }
-
-  const removeAuthor = (publicationIndex: number, author: string) => {
-    const updatedPublications = [...publications]
-    updatedPublications[publicationIndex].authors = updatedPublications[publicationIndex].authors.filter(
-      (a) => a !== author,
+  const handleFieldChange = (id: string, field: keyof Publication, value: string | string[]) => {
+    const updated = publications.map(pub => 
+      pub.id === id ? { ...pub, [field]: value } : pub
     )
-    setPublications(updatedPublications)
-    setValue(`publications.${publicationIndex}.authors`, updatedPublications[publicationIndex].authors)
+    setPublications(updated)
+    
+    // Nettoyer l'erreur pour ce champ spécifique
+    const errorKey = `${field}-${id}`
+    if (errors[errorKey]) {
+      setErrors(prev => {
+        const newErrors = { ...prev }
+        delete newErrors[errorKey]
+        return newErrors
+      })
+    }
   }
 
-  const handleAuthorKeyPress = (e: React.KeyboardEvent, publicationIndex: number) => {
+  const addAuthor = (publicationId: string) => {
+    const author = authorInputs[publicationId]?.trim()
+    if (author) {
+      const publication = publications.find(p => p.id === publicationId)
+      if (publication && !publication.authors.includes(author)) {
+        handleFieldChange(publicationId, "authors", [...publication.authors, author])
+        setAuthorInputs(prev => ({ ...prev, [publicationId]: "" }))
+      }
+    }
+  }
+
+  const removeAuthor = (publicationId: string, authorToRemove: string) => {
+    const publication = publications.find(p => p.id === publicationId)
+    if (publication) {
+      const updatedAuthors = publication.authors.filter(author => author !== authorToRemove)
+      handleFieldChange(publicationId, "authors", updatedAuthors)
+    }
+  }
+
+  const handleAuthorKeyPress = (e: React.KeyboardEvent, publicationId: string) => {
     if (e.key === "Enter") {
       e.preventDefault()
-      addAuthor(publicationIndex)
+      addAuthor(publicationId)
     }
   }
+
+  const validate = (): boolean => {
+    const newErrors: Record<string, string> = {}
+    publications.forEach((pub: Publication) => {
+      if (!pub.title || pub.title.length < 2) newErrors[`title-${pub.id}`] = "Le titre de la publication est requis"
+      if (pub.authors.length === 0) newErrors[`authors-${pub.id}`] = "Au moins un auteur est requis"
+      if (!pub.journal || pub.journal.length < 2) newErrors[`journal-${pub.id}`] = "Le journal/conférence est requis"
+      if (!pub.date) newErrors[`date-${pub.id}`] = "La date de publication est requise"
+      if (pub.url && pub.url.length > 0) {
+        try {
+          new URL(pub.url)
+        } catch {
+          newErrors[`url-${pub.id}`] = "URL invalide"
+        }
+      }
+    })
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (validate()) {
+      onSubmit(publications)
+    }
+  }
+
+  useEffect(() => {
+    if (typeof onChange === "function") onChange(publications)
+  }, [publications, onChange])
 
   return (
     <Card>
@@ -120,7 +157,7 @@ export default function PublicationsForm({ initialData = [], onSubmit, onSkip }:
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit((data) => onSubmit(data.publications || []))} className="space-y-6">
+        <form onSubmit={handleFormSubmit} className="space-y-6">
           {publications.map((publication, index) => (
             <div key={publication.id} className="border rounded-lg p-4 space-y-4">
               <div className="flex justify-between items-center">
@@ -139,14 +176,15 @@ export default function PublicationsForm({ initialData = [], onSubmit, onSkip }:
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor={`title-${index}`}>Titre de la publication *</Label>
+                <Label htmlFor={`title-${publication.id}`}>Titre de la publication *</Label>
                 <Input
-                  id={`title-${index}`}
-                  {...register(`publications.${index}.title`)}
+                  id={`title-${publication.id}`}
+                  value={publication.title}
+                  onChange={e => handleFieldChange(publication.id, "title", e.target.value)}
                   placeholder="Machine Learning Applications in Healthcare"
                 />
-                {errors.publications?.[index]?.title && (
-                  <p className="text-sm text-destructive">{errors.publications[index]?.title?.message}</p>
+                {errors[`title-${publication.id}`] && (
+                  <p className="text-sm text-destructive">{errors[`title-${publication.id}`]}</p>
                 )}
               </div>
 
@@ -155,71 +193,80 @@ export default function PublicationsForm({ initialData = [], onSubmit, onSkip }:
                 <div className="flex gap-2">
                   <Input
                     placeholder="Ajouter un auteur"
-                    value={authorInputs[`publication-${index}`] || ""}
-                    onChange={(e) => setAuthorInputs({ ...authorInputs, [`publication-${index}`]: e.target.value })}
-                    onKeyPress={(e) => handleAuthorKeyPress(e, index)}
+                    value={authorInputs[publication.id] || ""}
+                    onChange={e => setAuthorInputs(prev => ({ ...prev, [publication.id]: e.target.value }))}
+                    onKeyPress={e => handleAuthorKeyPress(e, publication.id)}
                   />
-                  <Button type="button" variant="outline" onClick={() => addAuthor(index)}>
+                  <Button
+                    type="button"
+                    onClick={() => addAuthor(publication.id)}
+                    size="sm"
+                  >
                     <Plus className="h-4 w-4" />
                   </Button>
                 </div>
                 <div className="flex flex-wrap gap-2 mt-2">
-                  {publications[index].authors.map((author, authorIndex) => (
+                  {publication.authors.map((author, authorIndex) => (
                     <Badge key={authorIndex} variant="secondary" className="flex items-center gap-1">
                       {author}
-                      <button
-                        type="button"
-                        onClick={() => removeAuthor(index, author)}
-                        className="ml-1 hover:text-destructive"
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
+                      <X
+                        className="h-3 w-3 cursor-pointer hover:text-destructive"
+                        onClick={() => removeAuthor(publication.id, author)}
+                      />
                     </Badge>
                   ))}
                 </div>
-                {errors.publications?.[index]?.authors && (
-                  <p className="text-sm text-destructive">{errors.publications[index]?.authors?.message}</p>
+                {errors[`authors-${publication.id}`] && (
+                  <p className="text-sm text-destructive">{errors[`authors-${publication.id}`]}</p>
                 )}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor={`journal-${index}`}>Journal/Conférence *</Label>
+                  <Label htmlFor={`journal-${publication.id}`}>Journal/Conférence *</Label>
                   <Input
-                    id={`journal-${index}`}
-                    {...register(`publications.${index}.journal`)}
+                    id={`journal-${publication.id}`}
+                    value={publication.journal}
+                    onChange={e => handleFieldChange(publication.id, "journal", e.target.value)}
                     placeholder="IEEE Transactions on AI"
                   />
-                  {errors.publications?.[index]?.journal && (
-                    <p className="text-sm text-destructive">{errors.publications[index]?.journal?.message}</p>
+                  {errors[`journal-${publication.id}`] && (
+                    <p className="text-sm text-destructive">{errors[`journal-${publication.id}`]}</p>
                   )}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor={`date-${index}`}>Date de publication *</Label>
-                  <Input id={`date-${index}`} type="date" {...register(`publications.${index}.date`)} />
-                  {errors.publications?.[index]?.date && (
-                    <p className="text-sm text-destructive">{errors.publications[index]?.date?.message}</p>
+                  <Label htmlFor={`date-${publication.id}`}>Date de publication *</Label>
+                  <Input 
+                    id={`date-${publication.id}`} 
+                    type="date" 
+                    value={publication.date}
+                    onChange={e => handleFieldChange(publication.id, "date", e.target.value)}
+                  />
+                  {errors[`date-${publication.id}`] && (
+                    <p className="text-sm text-destructive">{errors[`date-${publication.id}`]}</p>
                   )}
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor={`url-${index}`}>URL (optionnel)</Label>
+                <Label htmlFor={`url-${publication.id}`}>URL (optionnel)</Label>
                 <Input
-                  id={`url-${index}`}
-                  {...register(`publications.${index}.url`)}
+                  id={`url-${publication.id}`}
+                  value={publication.url}
+                  onChange={e => handleFieldChange(publication.id, "url", e.target.value)}
                   placeholder="https://doi.org/10.1000/publication"
                 />
-                {errors.publications?.[index]?.url && (
-                  <p className="text-sm text-destructive">{errors.publications[index]?.url?.message}</p>
+                {errors[`url-${publication.id}`] && (
+                  <p className="text-sm text-destructive">{errors[`url-${publication.id}`]}</p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor={`description-${index}`}>Description (optionnel)</Label>
+                <Label htmlFor={`description-${publication.id}`}>Description (optionnel)</Label>
                 <Textarea
-                  id={`description-${index}`}
-                  {...register(`publications.${index}.description`)}
+                  id={`description-${publication.id}`}
+                  value={publication.description || ""}
+                  onChange={e => handleFieldChange(publication.id, "description", e.target.value)}
                   placeholder="Résumé ou description de la publication..."
                   className="min-h-[80px]"
                 />
@@ -238,10 +285,12 @@ export default function PublicationsForm({ initialData = [], onSubmit, onSkip }:
           </Button>
 
           <div className="flex gap-4">
-            <Button type="button" variant="outline" onClick={onSkip} className="flex-1 bg-transparent">
-              Passer cette étape
-            </Button>
-            <Button type="submit" className="flex-1">
+            {onSkip && (
+              <Button type="button" variant="outline" onClick={onSkip} className="flex-1 bg-transparent">
+                Passer cette étape
+              </Button>
+            )}
+            <Button type="submit" className={onSkip ? "flex-1" : "w-full"}>
               Continuer
             </Button>
           </div>

@@ -1,9 +1,6 @@
 "use client"
 
-import { useState } from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -13,36 +10,14 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Plus, Trash2, Briefcase } from "lucide-react"
 import type { Experience } from "../types/cv"
 
-const experienceSchema = z
-  .object({
-    position: z.string().min(2, "Le poste est requis"),
-    employer: z.string().min(2, "L'employeur est requis"),
-    city: z.string().min(2, "La ville est requise"),
-    startDate: z.string().min(1, "La date de début est requise"),
-    endDate: z.string().optional(),
-    isCurrently: z.boolean(),
-    description: z.string().min(10, "La description doit contenir au moins 10 caractères"),
-  })
-  .refine(
-    (data) => {
-      if (!data.isCurrently && !data.endDate) {
-        return false
-      }
-      return true
-    },
-    {
-      message: "La date de fin est requise si vous n'occupez pas actuellement ce poste",
-      path: ["endDate"],
-    },
-  )
-
 interface ExperienceFormProps {
   initialData?: Experience[]
   onSubmit: (data: Experience[]) => void
-  onSkip: () => void
+  onChange?: (data: Experience[]) => void
+  onSkip?: () => void
 }
 
-export default function ExperienceForm({ initialData = [], onSubmit, onSkip }: ExperienceFormProps) {
+export default function ExperienceForm({ initialData = [], onSubmit, onChange, onSkip }: ExperienceFormProps) {
   const [experiences, setExperiences] = useState<Experience[]>(
     initialData.length > 0
       ? initialData
@@ -60,64 +35,114 @@ export default function ExperienceForm({ initialData = [], onSubmit, onSkip }: E
         ],
   )
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    watch,
-    setValue,
-    reset,
-  } = useForm({
-    resolver: zodResolver(
-      z.object({
-        experiences: z.array(experienceSchema).optional(),
-      }),
-    ),
-  })
+  const [errors, setErrors] = useState<Record<string, string>>({})
 
   const addExperience = () => {
-    const newExperience: Experience = {
-      id: crypto.randomUUID(),
-      position: "",
-      employer: "",
-      city: "",
-      startDate: "",
-      endDate: "",
-      isCurrently: false,
-      description: "",
-    }
-    setExperiences([...experiences, newExperience])
+    setExperiences([
+      ...experiences,
+      {
+        id: crypto.randomUUID(),
+        position: "",
+        employer: "",
+        city: "",
+        startDate: "",
+        endDate: "",
+        isCurrently: false,
+        description: "",
+      },
+    ])
   }
 
   const removeExperience = (id: string) => {
     if (experiences.length > 1) {
-      setExperiences(experiences.filter((exp) => exp.id !== id))
+      const newExperiences = experiences.filter((exp: Experience) => exp.id !== id)
+      setExperiences(newExperiences)
+      // Nettoyer les erreurs de l'élément supprimé
+      setErrors(prevErrors => {
+        const newErrors = { ...prevErrors }
+        Object.keys(newErrors).forEach(key => {
+          if (key.includes(id)) {
+            delete newErrors[key]
+          }
+        })
+        return newErrors
+      })
     }
   }
 
-  const handleCurrentlyChange = (index: number, checked: boolean) => {
-    const updated = [...experiences]
-    updated[index].isCurrently = checked
-    if (checked) {
-      updated[index].endDate = ""
-    }
+  const handleFieldChange = (id: string, field: keyof Experience, value: string | boolean) => {
+    const updated = experiences.map(exp => 
+      exp.id === id ? { ...exp, [field]: value } : exp
+    )
     setExperiences(updated)
-    setValue(`experiences.${index}.isCurrently`, checked)
-    if (checked) {
-      setValue(`experiences.${index}.endDate`, "")
+    
+    // Nettoyer l'erreur pour ce champ spécifique
+    const errorKey = `${field}-${id}`
+    if (errors[errorKey]) {
+      setErrors(prev => {
+        const newErrors = { ...prev }
+        delete newErrors[errorKey]
+        return newErrors
+      })
     }
   }
+
+  const handleCurrentlyChange = (id: string, checked: boolean) => {
+    const updated = experiences.map(exp => 
+      exp.id === id 
+        ? { ...exp, isCurrently: checked, endDate: checked ? "" : exp.endDate }
+        : exp
+    )
+    setExperiences(updated)
+    
+    // Nettoyer l'erreur de endDate si on coche "actuellement"
+    if (checked) {
+      const errorKey = `endDate-${id}`
+      if (errors[errorKey]) {
+        setErrors(prev => {
+          const newErrors = { ...prev }
+          delete newErrors[errorKey]
+          return newErrors
+        })
+      }
+    }
+  }
+
+  const validate = (): boolean => {
+    const newErrors: Record<string, string> = {}
+    experiences.forEach((exp: Experience) => {
+      if (!exp.position || exp.position.length < 2) newErrors[`position-${exp.id}`] = "Le poste est requis"
+      if (!exp.employer || exp.employer.length < 2) newErrors[`employer-${exp.id}`] = "L'employeur est requis"
+      if (!exp.city || exp.city.length < 2) newErrors[`city-${exp.id}`] = "La ville est requise"
+      if (!exp.startDate) newErrors[`startDate-${exp.id}`] = "La date de début est requise"
+      if (!exp.isCurrently && !exp.endDate) newErrors[`endDate-${exp.id}`] = "La date de fin est requise si vous n'occupez pas actuellement ce poste"
+      if (!exp.description || exp.description.length < 10) newErrors[`description-${exp.id}`] = "La description doit contenir au moins 10 caractères"
+    })
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (validate()) {
+      onSubmit(experiences)
+    }
+  }
+
+  useEffect(() => {
+    if (typeof onChange === "function") onChange(experiences)
+  }, [experiences, onChange])
 
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Briefcase className="h-5 w-5" />
-          Expériences professionnelles
+          Expérience professionnelle
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit((data) => onSubmit(data.experiences))} className="space-y-6">
+        <form onSubmit={handleFormSubmit} className="space-y-6">
           {experiences.map((experience, index) => (
             <div key={experience.id} className="border rounded-lg p-4 space-y-4">
               <div className="flex justify-between items-center">
@@ -137,77 +162,91 @@ export default function ExperienceForm({ initialData = [], onSubmit, onSkip }: E
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor={`position-${index}`}>Poste *</Label>
+                  <Label htmlFor={`position-${experience.id}`}>Poste *</Label>
                   <Input
-                    id={`position-${index}`}
-                    {...register(`experiences.${index}.position`)}
+                    id={`position-${experience.id}`}
+                    value={experience.position}
+                    onChange={e => handleFieldChange(experience.id, "position", e.target.value)}
                     placeholder="Développeur Full Stack"
                   />
-                  {errors.experiences?.[index]?.position && (
-                    <p className="text-sm text-destructive">{errors.experiences[index]?.position?.message}</p>
+                  {errors[`position-${experience.id}`] && (
+                    <p className="text-sm text-destructive">{errors[`position-${experience.id}`]}</p>
                   )}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor={`employer-${index}`}>Employeur *</Label>
+                  <Label htmlFor={`employer-${experience.id}`}>Employeur *</Label>
                   <Input
-                    id={`employer-${index}`}
-                    {...register(`experiences.${index}.employer`)}
-                    placeholder="Tech Company"
+                    id={`employer-${experience.id}`}
+                    value={experience.employer}
+                    onChange={e => handleFieldChange(experience.id, "employer", e.target.value)}
+                    placeholder="Nom de l'entreprise"
                   />
-                  {errors.experiences?.[index]?.employer && (
-                    <p className="text-sm text-destructive">{errors.experiences[index]?.employer?.message}</p>
+                  {errors[`employer-${experience.id}`] && (
+                    <p className="text-sm text-destructive">{errors[`employer-${experience.id}`]}</p>
                   )}
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor={`city-${index}`}>Ville *</Label>
-                  <Input id={`city-${index}`} {...register(`experiences.${index}.city`)} placeholder="Paris" />
-                  {errors.experiences?.[index]?.city && (
-                    <p className="text-sm text-destructive">{errors.experiences[index]?.city?.message}</p>
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor={`startDate-${index}`}>Date de début *</Label>
-                  <Input id={`startDate-${index}`} type="date" {...register(`experiences.${index}.startDate`)} />
-                  {errors.experiences?.[index]?.startDate && (
-                    <p className="text-sm text-destructive">{errors.experiences[index]?.startDate?.message}</p>
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor={`endDate-${index}`}>Date de fin</Label>
+                  <Label htmlFor={`city-${experience.id}`}>Ville *</Label>
                   <Input
-                    id={`endDate-${index}`}
-                    type="date"
-                    {...register(`experiences.${index}.endDate`)}
-                    disabled={watch(`experiences.${index}.isCurrently`)}
+                    id={`city-${experience.id}`}
+                    value={experience.city}
+                    onChange={e => handleFieldChange(experience.id, "city", e.target.value)}
+                    placeholder="Paris"
                   />
-                  {errors.experiences?.[index]?.endDate && (
-                    <p className="text-sm text-destructive">{errors.experiences[index]?.endDate?.message}</p>
+                  {errors[`city-${experience.id}`] && (
+                    <p className="text-sm text-destructive">{errors[`city-${experience.id}`]}</p>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor={`startDate-${experience.id}`}>Date de début *</Label>
+                  <Input
+                    id={`startDate-${experience.id}`}
+                    type="date"
+                    value={experience.startDate}
+                    onChange={e => handleFieldChange(experience.id, "startDate", e.target.value)}
+                  />
+                  {errors[`startDate-${experience.id}`] && (
+                    <p className="text-sm text-destructive">{errors[`startDate-${experience.id}`]}</p>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor={`endDate-${experience.id}`}>Date de fin</Label>
+                  <Input
+                    id={`endDate-${experience.id}`}
+                    type="date"
+                    value={experience.endDate}
+                    onChange={e => handleFieldChange(experience.id, "endDate", e.target.value)}
+                    disabled={experience.isCurrently}
+                  />
+                  {errors[`endDate-${experience.id}`] && (
+                    <p className="text-sm text-destructive">{errors[`endDate-${experience.id}`]}</p>
                   )}
                 </div>
               </div>
 
               <div className="flex items-center space-x-2">
                 <Checkbox
-                  id={`currently-${index}`}
-                  checked={watch(`experiences.${index}.isCurrently`)}
-                  onCheckedChange={(checked) => handleCurrentlyChange(index, checked as boolean)}
+                  id={`currently-${experience.id}`}
+                  checked={experience.isCurrently}
+                  onCheckedChange={checked => handleCurrentlyChange(experience.id, checked as boolean)}
                 />
-                <Label htmlFor={`currently-${index}`}>J'occupe actuellement ce poste</Label>
+                <Label htmlFor={`currently-${experience.id}`}>J'occupe actuellement ce poste</Label>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor={`description-${index}`}>Description *</Label>
+                <Label htmlFor={`description-${experience.id}`}>Description *</Label>
                 <Textarea
-                  id={`description-${index}`}
-                  {...register(`experiences.${index}.description`)}
-                  placeholder="Décrivez vos missions, responsabilités, réalisations et technologies utilisées..."
+                  id={`description-${experience.id}`}
+                  value={experience.description}
+                  onChange={e => handleFieldChange(experience.id, "description", e.target.value)}
+                  placeholder="Décrivez vos responsabilités, réalisations et compétences développées..."
                   className="min-h-[100px]"
                 />
-                {errors.experiences?.[index]?.description && (
-                  <p className="text-sm text-destructive">{errors.experiences[index]?.description?.message}</p>
+                {errors[`description-${experience.id}`] && (
+                  <p className="text-sm text-destructive">{errors[`description-${experience.id}`]}</p>
                 )}
               </div>
             </div>
@@ -224,10 +263,12 @@ export default function ExperienceForm({ initialData = [], onSubmit, onSkip }: E
           </Button>
 
           <div className="flex gap-4">
-            <Button type="button" variant="outline" onClick={onSkip} className="flex-1 bg-transparent">
-              Passer cette étape
-            </Button>
-            <Button type="submit" className="flex-1">
+            {onSkip && (
+              <Button type="button" variant="outline" onClick={onSkip} className="flex-1 bg-transparent">
+                Passer cette étape
+              </Button>
+            )}
+            <Button type="submit" className={onSkip ? "flex-1" : "w-full"}>
               Continuer
             </Button>
           </div>

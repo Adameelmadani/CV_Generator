@@ -1,9 +1,6 @@
 "use client"
 
-import { useState } from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -12,20 +9,14 @@ import { Textarea } from "@/components/ui/textarea"
 import { Plus, Trash2, Trophy } from "lucide-react"
 import type { Achievement } from "../types/cv"
 
-const achievementSchema = z.object({
-  title: z.string().min(2, "Le titre de la réalisation est requis"),
-  description: z.string().min(10, "La description doit contenir au moins 10 caractères"),
-  date: z.string().min(1, "La date est requise"),
-  organization: z.string().optional(),
-})
-
 interface AchievementsFormProps {
   initialData?: Achievement[]
   onSubmit: (data: Achievement[]) => void
-  onSkip: () => void
+  onChange?: (data: Achievement[]) => void
+  onSkip?: () => void
 }
 
-export default function AchievementsForm({ initialData = [], onSubmit, onSkip }: AchievementsFormProps) {
+export default function AchievementsForm({ initialData = [], onSubmit, onChange, onSkip }: AchievementsFormProps) {
   const [achievements, setAchievements] = useState<Achievement[]>(
     initialData.length > 0
       ? initialData
@@ -40,35 +31,76 @@ export default function AchievementsForm({ initialData = [], onSubmit, onSkip }:
         ],
   )
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm({
-    resolver: zodResolver(
-      z.object({
-        achievements: z.array(achievementSchema).optional(),
-      }),
-    ),
-    defaultValues: { achievements },
-  })
+  const [errors, setErrors] = useState<Record<string, string>>({})
 
   const addAchievement = () => {
-    const newAchievement: Achievement = {
-      id: crypto.randomUUID(),
-      title: "",
-      description: "",
-      date: "",
-      organization: "",
-    }
-    setAchievements([...achievements, newAchievement])
+    setAchievements([
+      ...achievements,
+      {
+        id: crypto.randomUUID(),
+        title: "",
+        description: "",
+        date: "",
+        organization: "",
+      },
+    ])
   }
 
   const removeAchievement = (id: string) => {
     if (achievements.length > 1) {
-      setAchievements(achievements.filter((ach) => ach.id !== id))
+      const newAchievements = achievements.filter((ach: Achievement) => ach.id !== id)
+      setAchievements(newAchievements)
+      // Nettoyer les erreurs de l'élément supprimé
+      setErrors(prevErrors => {
+        const newErrors = { ...prevErrors }
+        Object.keys(newErrors).forEach(key => {
+          if (key.includes(id)) {
+            delete newErrors[key]
+          }
+        })
+        return newErrors
+      })
     }
   }
+
+  const handleFieldChange = (id: string, field: keyof Achievement, value: string) => {
+    const updated = achievements.map(ach => 
+      ach.id === id ? { ...ach, [field]: value } : ach
+    )
+    setAchievements(updated)
+    
+    // Nettoyer l'erreur pour ce champ spécifique
+    const errorKey = `${field}-${id}`
+    if (errors[errorKey]) {
+      setErrors(prev => {
+        const newErrors = { ...prev }
+        delete newErrors[errorKey]
+        return newErrors
+      })
+    }
+  }
+
+  const validate = (): boolean => {
+    const newErrors: Record<string, string> = {}
+    achievements.forEach((ach: Achievement) => {
+      if (!ach.title || ach.title.length < 2) newErrors[`title-${ach.id}`] = "Le titre de la réalisation est requis"
+      if (!ach.description || ach.description.length < 10) newErrors[`description-${ach.id}`] = "La description doit contenir au moins 10 caractères"
+      if (!ach.date) newErrors[`date-${ach.id}`] = "La date est requise"
+    })
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (validate()) {
+      onSubmit(achievements)
+    }
+  }
+
+  useEffect(() => {
+    if (typeof onChange === "function") onChange(achievements)
+  }, [achievements, onChange])
 
   return (
     <Card>
@@ -79,7 +111,7 @@ export default function AchievementsForm({ initialData = [], onSubmit, onSkip }:
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit((data) => onSubmit(data.achievements || []))} className="space-y-6">
+        <form onSubmit={handleFormSubmit} className="space-y-6">
           {achievements.map((achievement, index) => (
             <div key={achievement.id} className="border rounded-lg p-4 space-y-4">
               <div className="flex justify-between items-center">
@@ -99,44 +131,52 @@ export default function AchievementsForm({ initialData = [], onSubmit, onSkip }:
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor={`title-${index}`}>Titre de la réalisation *</Label>
+                  <Label htmlFor={`title-${achievement.id}`}>Titre de la réalisation *</Label>
                   <Input
-                    id={`title-${index}`}
-                    {...register(`achievements.${index}.title`)}
+                    id={`title-${achievement.id}`}
+                    value={achievement.title}
+                    onChange={e => handleFieldChange(achievement.id, "title", e.target.value)}
                     placeholder="Prix du meilleur projet innovant"
                   />
-                  {errors.achievements?.[index]?.title && (
-                    <p className="text-sm text-destructive">{errors.achievements[index]?.title?.message}</p>
+                  {errors[`title-${achievement.id}`] && (
+                    <p className="text-sm text-destructive">{errors[`title-${achievement.id}`]}</p>
                   )}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor={`organization-${index}`}>Organisation (optionnel)</Label>
+                  <Label htmlFor={`organization-${achievement.id}`}>Organisation (optionnel)</Label>
                   <Input
-                    id={`organization-${index}`}
-                    {...register(`achievements.${index}.organization`)}
+                    id={`organization-${achievement.id}`}
+                    value={achievement.organization || ""}
+                    onChange={e => handleFieldChange(achievement.id, "organization", e.target.value)}
                     placeholder="Université de Paris"
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor={`date-${index}`}>Date *</Label>
-                <Input id={`date-${index}`} type="date" {...register(`achievements.${index}.date`)} />
-                {errors.achievements?.[index]?.date && (
-                  <p className="text-sm text-destructive">{errors.achievements[index]?.date?.message}</p>
+                <Label htmlFor={`date-${achievement.id}`}>Date *</Label>
+                <Input 
+                  id={`date-${achievement.id}`} 
+                  type="date" 
+                  value={achievement.date}
+                  onChange={e => handleFieldChange(achievement.id, "date", e.target.value)}
+                />
+                {errors[`date-${achievement.id}`] && (
+                  <p className="text-sm text-destructive">{errors[`date-${achievement.id}`]}</p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor={`description-${index}`}>Description *</Label>
+                <Label htmlFor={`description-${achievement.id}`}>Description *</Label>
                 <Textarea
-                  id={`description-${index}`}
-                  {...register(`achievements.${index}.description`)}
+                  id={`description-${achievement.id}`}
+                  value={achievement.description}
+                  onChange={e => handleFieldChange(achievement.id, "description", e.target.value)}
                   placeholder="Décrivez votre réalisation, son impact et sa valeur..."
                   className="min-h-[100px]"
                 />
-                {errors.achievements?.[index]?.description && (
-                  <p className="text-sm text-destructive">{errors.achievements[index]?.description?.message}</p>
+                {errors[`description-${achievement.id}`] && (
+                  <p className="text-sm text-destructive">{errors[`description-${achievement.id}`]}</p>
                 )}
               </div>
             </div>
@@ -153,10 +193,12 @@ export default function AchievementsForm({ initialData = [], onSubmit, onSkip }:
           </Button>
 
           <div className="flex gap-4">
-            <Button type="button" variant="outline" onClick={onSkip} className="flex-1 bg-transparent">
-              Passer cette étape
-            </Button>
-            <Button type="submit" className="flex-1">
+            {onSkip && (
+              <Button type="button" variant="outline" onClick={onSkip} className="flex-1 bg-transparent">
+                Passer cette étape
+              </Button>
+            )}
+            <Button type="submit" className={onSkip ? "flex-1" : "w-full"}>
               Continuer
             </Button>
           </div>

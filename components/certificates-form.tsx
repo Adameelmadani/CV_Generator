@@ -1,9 +1,6 @@
 "use client"
 
-import { useState } from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -11,20 +8,14 @@ import { Label } from "@/components/ui/label"
 import { Plus, Trash2, Award } from "lucide-react"
 import type { Certificate } from "../types/cv"
 
-const certificateSchema = z.object({
-  name: z.string().min(2, "Le nom du certificat est requis"),
-  issueDate: z.string().min(1, "La date d'obtention est requise"),
-  issuer: z.string().min(2, "L'organisme délivreur est requis"),
-  url: z.string().url("URL invalide").optional().or(z.literal("")),
-})
-
 interface CertificatesFormProps {
   initialData?: Certificate[]
   onSubmit: (data: Certificate[]) => void
-  onSkip: () => void
+  onChange?: (data: Certificate[]) => void
+  onSkip?: () => void
 }
 
-export default function CertificatesForm({ initialData = [], onSubmit, onSkip }: CertificatesFormProps) {
+export default function CertificatesForm({ initialData = [], onSubmit, onChange, onSkip }: CertificatesFormProps) {
   const [certificates, setCertificates] = useState<Certificate[]>(
     initialData.length > 0
       ? initialData
@@ -39,35 +30,83 @@ export default function CertificatesForm({ initialData = [], onSubmit, onSkip }:
         ],
   )
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm({
-    resolver: zodResolver(
-      z.object({
-        certificates: z.array(certificateSchema).optional(),
-      }),
-    ),
-    defaultValues: { certificates },
-  })
+  const [errors, setErrors] = useState<Record<string, string>>({})
 
   const addCertificate = () => {
-    const newCertificate: Certificate = {
-      id: crypto.randomUUID(),
-      name: "",
-      issueDate: "",
-      issuer: "",
-      url: "",
-    }
-    setCertificates([...certificates, newCertificate])
+    setCertificates([
+      ...certificates,
+      {
+        id: crypto.randomUUID(),
+        name: "",
+        issueDate: "",
+        issuer: "",
+        url: "",
+      },
+    ])
   }
 
   const removeCertificate = (id: string) => {
     if (certificates.length > 1) {
-      setCertificates(certificates.filter((cert) => cert.id !== id))
+      const newCertificates = certificates.filter((cert: Certificate) => cert.id !== id)
+      setCertificates(newCertificates)
+      // Nettoyer les erreurs de l'élément supprimé
+      setErrors(prevErrors => {
+        const newErrors = { ...prevErrors }
+        Object.keys(newErrors).forEach(key => {
+          if (key.includes(id)) {
+            delete newErrors[key]
+          }
+        })
+        return newErrors
+      })
     }
   }
+
+  const handleFieldChange = (id: string, field: keyof Certificate, value: string) => {
+    const updated = certificates.map(cert => 
+      cert.id === id ? { ...cert, [field]: value } : cert
+    )
+    setCertificates(updated)
+    
+    // Nettoyer l'erreur pour ce champ spécifique
+    const errorKey = `${field}-${id}`
+    if (errors[errorKey]) {
+      setErrors(prev => {
+        const newErrors = { ...prev }
+        delete newErrors[errorKey]
+        return newErrors
+      })
+    }
+  }
+
+  const validate = (): boolean => {
+    const newErrors: Record<string, string> = {}
+    certificates.forEach((cert: Certificate) => {
+      if (!cert.name || cert.name.length < 2) newErrors[`name-${cert.id}`] = "Le nom du certificat est requis"
+      if (!cert.issueDate) newErrors[`issueDate-${cert.id}`] = "La date d'obtention est requise"
+      if (!cert.issuer || cert.issuer.length < 2) newErrors[`issuer-${cert.id}`] = "L'organisme délivreur est requis"
+      if (cert.url && cert.url.length > 0) {
+        try {
+          new URL(cert.url)
+        } catch {
+          newErrors[`url-${cert.id}`] = "URL invalide"
+        }
+      }
+    })
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (validate()) {
+      onSubmit(certificates)
+    }
+  }
+
+  useEffect(() => {
+    if (typeof onChange === "function") onChange(certificates)
+  }, [certificates, onChange])
 
   return (
     <Card>
@@ -78,7 +117,7 @@ export default function CertificatesForm({ initialData = [], onSubmit, onSkip }:
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit((data) => onSubmit(data.certificates || []))} className="space-y-6">
+        <form onSubmit={handleFormSubmit} className="space-y-6">
           {certificates.map((certificate, index) => (
             <div key={certificate.id} className="border rounded-lg p-4 space-y-4">
               <div className="flex justify-between items-center">
@@ -98,46 +137,54 @@ export default function CertificatesForm({ initialData = [], onSubmit, onSkip }:
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor={`name-${index}`}>Nom du certificat *</Label>
+                  <Label htmlFor={`name-${certificate.id}`}>Nom du certificat *</Label>
                   <Input
-                    id={`name-${index}`}
-                    {...register(`certificates.${index}.name`)}
+                    id={`name-${certificate.id}`}
+                    value={certificate.name}
+                    onChange={e => handleFieldChange(certificate.id, "name", e.target.value)}
                     placeholder="AWS Certified Solutions Architect"
                   />
-                  {errors.certificates?.[index]?.name && (
-                    <p className="text-sm text-destructive">{errors.certificates[index]?.name?.message}</p>
+                  {errors[`name-${certificate.id}`] && (
+                    <p className="text-sm text-destructive">{errors[`name-${certificate.id}`]}</p>
                   )}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor={`issuer-${index}`}>Organisme délivreur *</Label>
+                  <Label htmlFor={`issuer-${certificate.id}`}>Organisme délivreur *</Label>
                   <Input
-                    id={`issuer-${index}`}
-                    {...register(`certificates.${index}.issuer`)}
+                    id={`issuer-${certificate.id}`}
+                    value={certificate.issuer}
+                    onChange={e => handleFieldChange(certificate.id, "issuer", e.target.value)}
                     placeholder="Amazon Web Services"
                   />
-                  {errors.certificates?.[index]?.issuer && (
-                    <p className="text-sm text-destructive">{errors.certificates[index]?.issuer?.message}</p>
+                  {errors[`issuer-${certificate.id}`] && (
+                    <p className="text-sm text-destructive">{errors[`issuer-${certificate.id}`]}</p>
                   )}
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor={`issueDate-${index}`}>Date d'obtention *</Label>
-                  <Input id={`issueDate-${index}`} type="date" {...register(`certificates.${index}.issueDate`)} />
-                  {errors.certificates?.[index]?.issueDate && (
-                    <p className="text-sm text-destructive">{errors.certificates[index]?.issueDate?.message}</p>
+                  <Label htmlFor={`issueDate-${certificate.id}`}>Date d'obtention *</Label>
+                  <Input 
+                    id={`issueDate-${certificate.id}`} 
+                    type="date" 
+                    value={certificate.issueDate}
+                    onChange={e => handleFieldChange(certificate.id, "issueDate", e.target.value)}
+                  />
+                  {errors[`issueDate-${certificate.id}`] && (
+                    <p className="text-sm text-destructive">{errors[`issueDate-${certificate.id}`]}</p>
                   )}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor={`url-${index}`}>URL de vérification (optionnel)</Label>
+                  <Label htmlFor={`url-${certificate.id}`}>URL de vérification (optionnel)</Label>
                   <Input
-                    id={`url-${index}`}
-                    {...register(`certificates.${index}.url`)}
+                    id={`url-${certificate.id}`}
+                    value={certificate.url}
+                    onChange={e => handleFieldChange(certificate.id, "url", e.target.value)}
                     placeholder="https://verify.certificate.com"
                   />
-                  {errors.certificates?.[index]?.url && (
-                    <p className="text-sm text-destructive">{errors.certificates[index]?.url?.message}</p>
+                  {errors[`url-${certificate.id}`] && (
+                    <p className="text-sm text-destructive">{errors[`url-${certificate.id}`]}</p>
                   )}
                 </div>
               </div>
@@ -155,10 +202,12 @@ export default function CertificatesForm({ initialData = [], onSubmit, onSkip }:
           </Button>
 
           <div className="flex gap-4">
-            <Button type="button" variant="outline" onClick={onSkip} className="flex-1 bg-transparent">
-              Passer cette étape
-            </Button>
-            <Button type="submit" className="flex-1">
+            {onSkip && (
+              <Button type="button" variant="outline" onClick={onSkip} className="flex-1 bg-transparent">
+                Passer cette étape
+              </Button>
+            )}
+            <Button type="submit" className={onSkip ? "flex-1" : "w-full"}>
               Continuer
             </Button>
           </div>
