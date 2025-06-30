@@ -464,8 +464,27 @@ if (!file_exists($pdfFile)) {
         @unlink(str_replace('.tex', '.out', $texFile));
         @unlink("modern1.cls");
         
-    } elseif ($format === 'both') {
-        // Create ZIP file with both formats
+    } elseif ($format === 'latex') {
+        // Send LaTeX file with Save As dialog
+        header('Content-Type: text/plain');
+        header('Content-Disposition: attachment; filename="CV_'.$nom.'_'.$prenom.'.tex"');
+        header('Content-Length: ' . filesize($texFile));
+        header('Cache-Control: no-cache, must-revalidate');
+        header('Pragma: no-cache');
+        header('Expires: 0');
+        readfile($texFile);
+        
+        // Clean up files
+        @unlink($texFile);
+        @unlink($pdfFile);
+        @unlink($xmlFile);
+        @unlink(str_replace('.tex', '.aux', $texFile));
+        @unlink(str_replace('.tex', '.log', $texFile));
+        @unlink(str_replace('.tex', '.out', $texFile));
+        @unlink("modern1.cls");
+        
+    } elseif ($format === 'all') {
+        // Create ZIP file with all three formats (PDF, XML, LaTeX)
         $zipFileName = "CV_" . $nom . "_" . $prenom . ".zip";
         
         if (class_exists('ZipArchive')) {
@@ -475,6 +494,8 @@ if (!file_exists($pdfFile)) {
                 $zip->addFile($pdfFile, "CV_" . $nom . "_" . $prenom . ".pdf");
                 // Add XML file to ZIP  
                 $zip->addFile($xmlFile, "CV_" . $nom . "_" . $prenom . ".xml");
+                // Add LaTeX file to ZIP
+                $zip->addFile($texFile, "CV_" . $nom . "_" . $prenom . ".tex");
                 $zip->close();
                 
                 // Send ZIP file with Save As dialog
@@ -519,8 +540,6 @@ if (!file_exists($pdfFile)) {
         @unlink($xmlFile);
         @unlink(str_replace('.tex', '.aux', $texFile));
         @unlink(str_replace('.tex', '.log', $texFile));
-        @unlink(str_replace('.tex', '.out', $texFile));
-        @unlink("modern1.cls");
     }
 
     exit();

@@ -212,13 +212,23 @@
                         </div>
                     </label>
                     <label class="format-option">
-                        <input type="radio" name="downloadFormat" value="both">
+                        <input type="radio" name="downloadFormat" value="latex">
+                        <div class="format-content">
+                            <div class="format-header">
+                                <i class="fas fa-file-code format-icon latex"></i>
+                                <span class="format-label">LaTeX uniquement</span>
+                            </div>
+                            <span class="format-description">Code source LaTeX pour personnalisation avancée</span>
+                        </div>
+                    </label>
+                    <label class="format-option">
+                        <input type="radio" name="downloadFormat" value="all">
                         <div class="format-content">
                             <div class="format-header">
                                 <i class="fas fa-archive format-icon zip"></i>
-                                <span class="format-label">PDF + XML (ZIP)</span>
+                                <span class="format-label">PDF + XML + LaTeX (ZIP)</span>
                             </div>
-                            <span class="format-description">Les deux formats dans un fichier ZIP compressé</span>
+                            <span class="format-description">Les trois formats dans un fichier ZIP compressé</span>
                         </div>
                     </label>
                 </div>

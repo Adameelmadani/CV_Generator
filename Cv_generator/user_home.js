@@ -308,7 +308,10 @@ async function confirmDownload() {
                 case 'xml':
                     filename += '.xml';
                     break;
-                case 'both':
+                case 'latex':
+                    filename += '.tex';
+                    break;
+                case 'all':
                     filename += '.zip';
                     break;
                 default:
