@@ -401,6 +401,10 @@ textarea {
   color: #28a745 !important;
 }
 
+.preview-header h3.error {
+  color: #dc3545;
+}
+
 .preview-toggle-btn {
   background: rgba(255,255,255,0.2);
   border: none;
@@ -690,6 +694,10 @@ textarea {
   color: #28a745 !important;
 }
 
+.preview-header h3.error {
+  color: #dc3545;
+}
+
 .preview-container {
   position: relative;
 }
@@ -801,6 +809,12 @@ textarea {
   background: rgba(40, 167, 69, 0.2);
 }
 
+.preview-status.error {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
 .preview-status i {
   font-size: 8px;
   transition: all 0.3s ease;
@@ -813,6 +827,10 @@ textarea {
 
 .preview-status.success i {
   color: #28a745 !important;
+}
+
+.preview-status.error i {
+  color: #dc3545;
 }
 
 .preview-placeholder small {
@@ -1141,4 +1159,224 @@ textarea {
 
 .remove-photo-btn:hover {
   background: #ff3742;
+}
+
+/* ============ APERÇU PDF STYLES ============ */
+
+.pdf-preview-container {
+  width: 100%;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #f8f9fa;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.pdf-preview-container embed {
+  border: none;
+  display: block;
+  width: 100%;
+  min-height: 800px;
+}
+
+.pdf-preview-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  background: #667eea;
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.pdf-preview-info i {
+  color: #ff6b6b;
+}
+
+/* ============ ÉTATS DE CHARGEMENT ============ */
+
+.preview-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 2px dashed #ddd;
+}
+
+.loading-spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.preview-loading p {
+  color: #666;
+  font-size: 16px;
+  font-weight: 500;
+  margin: 0;
+}
+
+/* ============ ÉTATS D'ERREUR ============ */
+
+.preview-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.preview-error i {
+  font-size: 32px;
+  color: #e17055;
+  margin-bottom: 12px;
+}
+
+.preview-error p {
+  color: #856404;
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.preview-error small {
+  color: #6c757d;
+  font-size: 14px;
+}
+
+/* ============ AMÉLIORATIONS DE L'APERÇU ============ */
+
+.preview-container.updating {
+  position: relative;
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
+}
+
+.preview-container.updating::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255,255,255,0.8);
+  backdrop-filter: blur(2px);
+  z-index: 10;
+  pointer-events: none;
+}
+
+.cv-preview.updating {
+  filter: blur(1px);
+  transition: filter 0.3s ease;
+}
+
+/* ============ INDICATEUR DE STATUT DE PRÉVISUALISATION ============ */
+
+.preview-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  margin-bottom: 16px;
+  transition: all 0.3s ease;
+}
+
+.preview-status i {
+  font-size: 10px;
+}
+
+.preview-status.updating {
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeaa7;
+}
+
+.preview-status.updating i {
+  color: #f39c12;
+}
+
+.preview-status.success {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.preview-status.success i {
+  color: #28a745;
+}
+
+.preview-status.error {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.preview-status.error i {
+  color: #dc3545;
+}
+
+.preview-header.updating h3 {
+  color: #f39c12;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.preview-header.success h3 {
+  color: #28a745;
+  animation: checkmark 0.6s ease-out;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes checkmark {
+  0% { transform: scale(0.8); opacity: 0.5; }
+  50% { transform: scale(1.1); opacity: 0.8; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* ============ RESPONSIVITÉ POUR L'APERÇU PDF ============ */
+
+@media (max-width: 768px) {
+  .pdf-preview-container embed {
+    min-height: 600px;
+  }
+  
+  .preview-loading {
+    padding: 40px 15px;
+  }
+  
+  .preview-error {
+    padding: 30px 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .pdf-preview-container embed {
+    min-height: 500px;
+  }
 }

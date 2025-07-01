@@ -464,8 +464,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
             $sectionProjects .= "    \\end{itemize}\n";
         }
-        
-        $sectionProjects .= "    \\vspace{0.05 cm}\n\n";
     }
 
     // Skills Section
@@ -541,7 +539,6 @@ if (!file_exists($pdfFile)) {
         @unlink(str_replace('.tex', '.aux', $texFile));
         @unlink(str_replace('.tex', '.log', $texFile));
         @unlink(str_replace('.tex', '.out', $texFile));
-        @unlink("modern1.cls");
         
     } elseif ($format === 'latex') {
         // Send LaTeX file with Save As dialog
@@ -561,7 +558,6 @@ if (!file_exists($pdfFile)) {
         @unlink(str_replace('.tex', '.aux', $texFile));
         @unlink(str_replace('.tex', '.log', $texFile));
         @unlink(str_replace('.tex', '.out', $texFile));
-        @unlink("modern1.cls");
         
     } elseif ($format === 'all') {
         // Create ZIP file with all three formats (PDF, XML, LaTeX)
@@ -596,7 +592,6 @@ if (!file_exists($pdfFile)) {
                 @unlink(str_replace('.tex', '.aux', $texFile));
                 @unlink(str_replace('.tex', '.log', $texFile));
                 @unlink(str_replace('.tex', '.out', $texFile));
-                @unlink("modern1.cls");
             } else {
                 die("Erreur lors de la création du fichier ZIP.");
             }

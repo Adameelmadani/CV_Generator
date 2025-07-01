@@ -1,5 +1,5 @@
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{modern1}[2024/01/01 Professional CV Class]
+\ProvidesClass{modern}[2024/01/01 Professional CV Class]
 
 % Base class
 \LoadClass[10pt, letterpaper]{article}
