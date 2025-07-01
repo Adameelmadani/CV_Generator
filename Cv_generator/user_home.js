@@ -157,7 +157,8 @@ async function previewCV(cvId) {
         }
         loadingDiv.style.display = 'flex';
         
-        // Générer l'aperçu PDF avec la même logique que le téléchargement
+        // Générer l'aperçu PDF avec LaTeX (preview_cv.php)
+        console.log('Generating LaTeX preview for CV ID:', cvId);
         const response = await fetch('preview_cv.php', {
             method: 'POST',
             headers: {
@@ -168,30 +169,40 @@ async function previewCV(cvId) {
         
         if (response.ok) {
             const blob = await response.blob();
-            const url = URL.createObjectURL(blob);
             
-            iframe.src = url;
-            iframe.style.display = 'block';
-            loadingDiv.style.display = 'none';
-            
-            // Nettoyer l'URL après un délai
-            setTimeout(() => URL.revokeObjectURL(url), 60000);
+            // Vérifier que c'est bien un PDF
+            if (blob.type === 'application/pdf' || blob.size > 0) {
+                const url = URL.createObjectURL(blob);
+                
+                iframe.src = url;
+                iframe.style.display = 'block';
+                loadingDiv.style.display = 'none';
+                
+                console.log('LaTeX preview generated successfully');
+                
+                // Nettoyer l'URL après un délai
+                setTimeout(() => URL.revokeObjectURL(url), 60000);
+            } else {
+                throw new Error('Invalid PDF response');
+            }
         } else {
-            loadingDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i><br>Erreur lors de la génération de l\'aperçu';
+            const errorText = await response.text();
+            console.error('Preview generation failed:', response.status, errorText);
+            loadingDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i><br>Erreur lors de la génération de l\'aperçu LaTeX<br><small>Vérifiez que preview_cv.php existe et que LaTeX est installé</small>';
             setTimeout(() => {
                 loadingDiv.style.display = 'none';
                 iframe.style.display = 'block';
             }, 3000);
         }
     } catch (error) {
-        console.error('Erreur:', error);
+        console.error('Preview error:', error);
         const loadingDiv = document.getElementById('previewLoading');
         if (loadingDiv) {
-            loadingDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i><br>Erreur lors de la génération de l\'aperçu';
+            loadingDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i><br>Erreur lors de la génération de l\'aperçu LaTeX<br><small>' + error.message + '</small><br><a href="setup_verification.php" target="_blank">Vérifier la configuration</a>';
             setTimeout(() => {
                 loadingDiv.style.display = 'none';
                 document.getElementById('previewFrame').style.display = 'block';
-            }, 3000);
+            }, 5000);
         }
     }
 }
