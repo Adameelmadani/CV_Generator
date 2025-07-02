@@ -20,6 +20,8 @@ import {
   Building,
   Zap,
   Crown,
+  Menu,
+  X,
 } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
@@ -28,124 +30,125 @@ export default function TemplatesPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [selectedLevel, setSelectedLevel] = useState("all")
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   const categories = [
-    { id: "all", name: "All Templates", icon: FileText },
-    { id: "business", name: "Business", icon: Briefcase },
-    { id: "creative", name: "Creative", icon: Palette },
-    { id: "tech", name: "Technology", icon: Code },
-    { id: "academic", name: "Academic", icon: GraduationCap },
-    { id: "healthcare", name: "Healthcare", icon: Heart },
-    { id: "corporate", name: "Corporate", icon: Building },
+    { id: "all", name: "Tous les Modèles", icon: FileText },
+    { id: "business", name: "Affaires", icon: Briefcase },
+    { id: "creative", name: "Créatif", icon: Palette },
+    { id: "tech", name: "Technologie", icon: Code },
+    { id: "academic", name: "Académique", icon: GraduationCap },
+    { id: "healthcare", name: "Santé", icon: Heart },
+    { id: "corporate", name: "Entreprise", icon: Building },
   ]
 
   const templates = [
     {
       id: 1,
-      name: "Modern Professional",
+      name: "Professionnel Moderne",
       category: "business",
       level: "premium",
-      description: "Clean, modern design perfect for business professionals",
+      description: "Design épuré et moderne parfait pour les professionnels d'affaires",
       image: "/placeholder.svg?height=400&width=300",
       rating: 4.9,
       downloads: "12.5K",
-      tags: ["ATS-Friendly", "Modern", "Professional"],
+      tags: ["Compatible ATS", "Moderne", "Professionnel"],
       color: "blue",
     },
     {
       id: 2,
-      name: "Creative Portfolio",
+      name: "Portfolio Créatif",
       category: "creative",
       level: "premium",
-      description: "Showcase your creativity with this vibrant template",
+      description: "Mettez en valeur votre créativité avec ce modèle vibrant",
       image: "/placeholder.svg?height=400&width=300",
       rating: 4.8,
       downloads: "8.2K",
-      tags: ["Creative", "Portfolio", "Colorful"],
+      tags: ["Créatif", "Portfolio", "Coloré"],
       color: "purple",
     },
     {
       id: 3,
-      name: "Tech Minimalist",
+      name: "Tech Minimaliste",
       category: "tech",
       level: "free",
-      description: "Minimalist design for tech professionals",
+      description: "Design minimaliste pour les professionnels de la tech",
       image: "/placeholder.svg?height=400&width=300",
       rating: 4.7,
       downloads: "15.1K",
-      tags: ["Minimalist", "Tech", "Clean"],
+      tags: ["Minimaliste", "Tech", "Épuré"],
       color: "green",
     },
     {
       id: 4,
-      name: "Executive Elite",
+      name: "Exécutif Élite",
       category: "corporate",
       level: "premium",
-      description: "Sophisticated template for senior executives",
+      description: "Modèle sophistiqué pour les cadres supérieurs",
       image: "/placeholder.svg?height=400&width=300",
       rating: 4.9,
       downloads: "6.8K",
-      tags: ["Executive", "Elegant", "Corporate"],
+      tags: ["Exécutif", "Élégant", "Entreprise"],
       color: "indigo",
     },
     {
       id: 5,
-      name: "Academic Scholar",
+      name: "Académique Érudit",
       category: "academic",
       level: "free",
-      description: "Perfect for academic and research positions",
+      description: "Parfait pour les postes académiques et de recherche",
       image: "/placeholder.svg?height=400&width=300",
       rating: 4.6,
       downloads: "9.3K",
-      tags: ["Academic", "Research", "Traditional"],
+      tags: ["Académique", "Recherche", "Traditionnel"],
       color: "emerald",
     },
     {
       id: 6,
-      name: "Healthcare Pro",
+      name: "Pro Santé",
       category: "healthcare",
       level: "premium",
-      description: "Professional template for healthcare workers",
+      description: "Modèle professionnel pour les travailleurs de la santé",
       image: "/placeholder.svg?height=400&width=300",
       rating: 4.8,
       downloads: "7.4K",
-      tags: ["Healthcare", "Professional", "Clean"],
+      tags: ["Santé", "Professionnel", "Épuré"],
       color: "red",
     },
     {
       id: 7,
-      name: "Startup Founder",
+      name: "Fondateur Startup",
       category: "business",
       level: "free",
-      description: "Dynamic template for entrepreneurs and startup founders",
+      description: "Modèle dynamique pour entrepreneurs et fondateurs de startup",
       image: "/placeholder.svg?height=400&width=300",
       rating: 4.7,
       downloads: "11.2K",
-      tags: ["Startup", "Dynamic", "Modern"],
+      tags: ["Startup", "Dynamique", "Moderne"],
       color: "orange",
     },
     {
       id: 8,
-      name: "Designer Showcase",
+      name: "Vitrine Designer",
       category: "creative",
       level: "premium",
-      description: "Perfect for designers to showcase their work",
+      description: "Parfait pour les designers qui veulent présenter leur travail",
       image: "/placeholder.svg?height=400&width=300",
       rating: 4.9,
       downloads: "5.9K",
-      tags: ["Design", "Portfolio", "Visual"],
+      tags: ["Design", "Portfolio", "Visuel"],
       color: "pink",
     },
     {
       id: 9,
-      name: "Developer Focus",
+      name: "Focus Développeur",
       category: "tech",
       level: "premium",
-      description: "Code-focused template for software developers",
+      description: "Modèle axé sur le code pour les développeurs logiciels",
       image: "/placeholder.svg?height=400&width=300",
       rating: 4.8,
       downloads: "13.7K",
-      tags: ["Developer", "Code", "Technical"],
+      tags: ["Développeur", "Code", "Technique"],
       color: "cyan",
     },
   ]
@@ -180,40 +183,68 @@ export default function TemplatesPage() {
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-50 to-white">
       {/* Header */}
-      <header className="px-4 lg:px-6 h-16 flex items-center border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto flex items-center justify-between">
+      <header className="border-b sticky top-0 bg-white z-50">
+        <div className="container mx-auto flex h-16 items-center justify-between px-4 lg:px-6">
           <Link href="/" className="flex items-center space-x-2">
             <div className="bg-blue-600 p-2 rounded-lg">
               <FileText className="h-6 w-6 text-white" />
             </div>
             <span className="text-xl font-bold text-gray-900">CVCraft</span>
           </Link>
-          <nav className="hidden md:flex items-center space-x-6">
+          <nav className="hidden lg:flex items-center space-x-6">
             <Link href="/" className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors">
-              Home
+              Accueil
             </Link>
             <Link href="/features" className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors">
-              Features
+              Fonctionnalités
             </Link>
             <Link href="/templates" className="text-sm font-medium text-blue-600 font-semibold">
-              Templates
+              Modèles
             </Link>
             <Link href="/pricing" className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors">
-              Pricing
+              Tarifs
             </Link>
             <Link href="/resources" className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors">
-              Resources
+              Ressources
             </Link>
             <Link href="/auth/login">
               <Button variant="outline" className="bg-white text-gray-700 border-gray-300">
-                Sign In
+                Se connecter
               </Button>
             </Link>
             <Link href="/auth/signup">
-              <Button className="bg-blue-600 hover:bg-blue-700">Get Started</Button>
+              <Button className="bg-blue-600 hover:bg-blue-700">S'inscrire</Button>
             </Link>
           </nav>
+          <div className="lg:hidden">
+            <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+              {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              <span className="sr-only">Toggle menu</span>
+            </Button>
+          </div>
         </div>
+        {isMobileMenuOpen && (
+          <div className="lg:hidden bg-white border-t">
+            <nav className="flex flex-col space-y-2 p-4">
+              <Link href="/" className="text-base font-medium text-gray-700 hover:text-blue-600 py-2">Accueil</Link>
+              <Link href="/features" className="text-base font-medium text-gray-700 hover:text-blue-600 py-2">Fonctionnalités</Link>
+              <Link href="/templates" className="text-base font-medium text-blue-600 py-2">Modèles</Link>
+              <Link href="/pricing" className="text-base font-medium text-gray-700 hover:text-blue-600 py-2">Tarifs</Link>
+              <Link href="/resources" className="text-base font-medium text-gray-700 hover:text-blue-600 py-2">Ressources</Link>
+              <div className="border-t my-2"></div>
+              <div className="flex flex-col space-y-2">
+                <Link href="/auth/login">
+                  <Button variant="outline" className="w-full bg-white text-gray-700 border-gray-300">
+                    Se connecter
+                  </Button>
+                </Link>
+                <Link href="/auth/signup">
+                  <Button className="w-full bg-blue-600 hover:bg-blue-700">S'inscrire</Button>
+                </Link>
+              </div>
+            </nav>
+          </div>
+        )}
       </header>
 
       <main className="flex-1">
@@ -222,15 +253,12 @@ export default function TemplatesPage() {
           <div className="container mx-auto px-4 lg:px-6 text-center">
             <div className="max-w-4xl mx-auto space-y-8">
               <div className="space-y-4">
-                <Badge variant="secondary" className="bg-blue-100 text-blue-700 hover:bg-blue-100">
-                  🎨 Professional Templates
-                </Badge>
                 <h1 className="text-4xl lg:text-6xl font-bold text-gray-900 leading-tight">
-                  Choose from <span className="text-blue-600">50+ Professional</span> CV Templates
+                  Choisissez parmi <span className="text-blue-600">50+ Modèles</span> de CV Professionnels
                 </h1>
                 <p className="text-xl text-gray-600 leading-relaxed">
-                  Discover our collection of expertly designed, ATS-optimized templates crafted for every industry and
-                  career level. Find the perfect design to showcase your unique professional story.
+                  Découvrez notre collection de modèles conçus par des experts, optimisés pour les ATS et créés pour chaque secteur et 
+                  niveau de carrière. Trouvez le design parfait pour présenter votre parcours professionnel unique.
                 </p>
               </div>
 
@@ -239,7 +267,7 @@ export default function TemplatesPage() {
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                   <Input
-                    placeholder="Search templates..."
+                    placeholder="Rechercher des modèles..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="pl-10 h-11"
@@ -251,8 +279,8 @@ export default function TemplatesPage() {
                     onChange={(e) => setSelectedLevel(e.target.value)}
                     className="px-4 py-2 border border-gray-300 rounded-md bg-white"
                   >
-                    <option value="all">All Levels</option>
-                    <option value="free">Free</option>
+                    <option value="all">Tous les Niveaux</option>
+                    <option value="free">Gratuit</option>
                     <option value="premium">Premium</option>
                   </select>
                 </div>
@@ -261,15 +289,15 @@ export default function TemplatesPage() {
               <div className="flex items-center justify-center space-x-6 text-sm text-gray-600">
                 <div className="flex items-center space-x-2">
                   <Star className="h-4 w-4 text-yellow-500" />
-                  <span>4.8/5 average rating</span>
+                  <span>Note moyenne 4,8/5</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Download className="h-4 w-4 text-green-500" />
-                  <span>500K+ downloads</span>
+                  <span>500K+ téléchargements</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Zap className="h-4 w-4 text-blue-500" />
-                  <span>ATS-optimized</span>
+                  <span>Optimisé ATS</span>
                 </div>
               </div>
             </div>
@@ -305,10 +333,10 @@ export default function TemplatesPage() {
         <section className="py-20">
           <div className="container mx-auto px-4 lg:px-6">
             <div className="text-center mb-12">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">{filteredTemplates.length} Templates Found</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">{filteredTemplates.length} Modèles Trouvés</h2>
               <p className="text-gray-600">
                 {selectedCategory !== "all" &&
-                  `Showing ${categories.find((c) => c.id === selectedCategory)?.name} templates`}
+                  `Affichage des modèles ${categories.find((c) => c.id === selectedCategory)?.name}`}
               </p>
             </div>
 
@@ -335,7 +363,7 @@ export default function TemplatesPage() {
                           </Badge>
                         ) : (
                           <Badge variant="secondary" className="bg-green-100 text-green-700">
-                            Free
+                            Gratuit
                           </Badge>
                         )}
                       </div>
@@ -343,11 +371,11 @@ export default function TemplatesPage() {
                         <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex space-x-2">
                           <Button size="sm" variant="secondary" className="bg-white text-gray-900">
                             <Eye className="h-4 w-4 mr-1" />
-                            Preview
+                            Aperçu
                           </Button>
                           <Link href="/builder">
                             <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
-                              Use Template
+                              Utiliser le Modèle
                             </Button>
                           </Link>
                         </div>
@@ -383,7 +411,7 @@ export default function TemplatesPage() {
                         </div>
                         <Link href="/builder">
                           <Button size="sm" variant="outline">
-                            Use Template
+                            Utiliser le Modèle
                             <ArrowRight className="h-3 w-3 ml-1" />
                           </Button>
                         </Link>
@@ -399,8 +427,8 @@ export default function TemplatesPage() {
                 <div className="bg-gray-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Search className="h-8 w-8 text-gray-400" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">No templates found</h3>
-                <p className="text-gray-600 mb-4">Try adjusting your search or filter criteria</p>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Aucun modèle trouvé</h3>
+                <p className="text-gray-600 mb-4">Essayez d'ajuster vos critères de recherche ou de filtre</p>
                 <Button
                   onClick={() => {
                     setSearchTerm("")
@@ -408,7 +436,7 @@ export default function TemplatesPage() {
                     setSelectedLevel("all")
                   }}
                 >
-                  Clear Filters
+                  Effacer les Filtres
                 </Button>
               </div>
             )}
@@ -419,9 +447,9 @@ export default function TemplatesPage() {
         <section className="py-20 bg-blue-600">
           <div className="container mx-auto px-4 lg:px-6 text-center">
             <div className="max-w-3xl mx-auto space-y-8">
-              <h2 className="text-3xl lg:text-4xl font-bold text-white">Ready to Create Your Perfect CV?</h2>
+              <h2 className="text-3xl lg:text-4xl font-bold text-white">Prêt à Créer Votre CV Parfait ?</h2>
               <p className="text-xl text-blue-100">
-                Choose from our collection of professional templates and start building your career-winning CV today
+                Choisissez parmi notre collection de modèles professionnels et commencez à créer votre CV qui vous fera décrocher un emploi dès aujourd'hui
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link href="/builder">
@@ -430,7 +458,7 @@ export default function TemplatesPage() {
                     variant="secondary"
                     className="bg-white text-blue-600 hover:bg-gray-100 text-lg px-8 py-3"
                   >
-                    Start Building Now
+                    Commencer Maintenant
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </Link>
@@ -440,7 +468,7 @@ export default function TemplatesPage() {
                     variant="outline"
                     className="border-white text-white hover:bg-white hover:text-blue-600 text-lg px-8 py-3"
                   >
-                    View Pricing
+                    Voir les Tarifs
                   </Button>
                 </Link>
               </div>
@@ -461,91 +489,43 @@ export default function TemplatesPage() {
                 <span className="text-xl font-bold">CVCraft</span>
               </div>
               <p className="text-gray-400">
-                Create professional CVs that get you hired. Trusted by professionals worldwide.
+                Créez des CV professionnels qui captent l'attention des recruteurs grâce à notre plateforme intuitive.
               </p>
             </div>
 
             <div>
-              <h3 className="font-semibold mb-4">Product</h3>
+              <h3 className="font-semibold mb-4">Produit</h3>
               <ul className="space-y-2 text-gray-400">
-                <li>
-                  <Link href="/templates" className="hover:text-white transition-colors">
-                    Templates
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/features" className="hover:text-white transition-colors">
-                    Features
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/pricing" className="hover:text-white transition-colors">
-                    Pricing
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/examples" className="hover:text-white transition-colors">
-                    Examples
-                  </Link>
-                </li>
+                <li><Link href="#" className="hover:text-white transition-colors">Modèles</Link></li>
+                <li><Link href="#" className="hover:text-white transition-colors">Fonctionnalités</Link></li>
+                <li><Link href="#" className="hover:text-white transition-colors">Tarifs</Link></li>
+                <li><Link href="#" className="hover:text-white transition-colors">Exemples</Link></li>
               </ul>
             </div>
 
             <div>
               <h3 className="font-semibold mb-4">Support</h3>
               <ul className="space-y-2 text-gray-400">
-                <li>
-                  <Link href="/help" className="hover:text-white transition-colors">
-                    Help Center
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/contact" className="hover:text-white transition-colors">
-                    Contact Us
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/resources" className="hover:text-white transition-colors">
-                    CV Tips
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/blog" className="hover:text-white transition-colors">
-                    Career Advice
-                  </Link>
-                </li>
+                <li><Link href="#" className="hover:text-white transition-colors">Centre d’aide</Link></li>
+                <li><Link href="#" className="hover:text-white transition-colors">Nous contacter</Link></li>
+                <li><Link href="#" className="hover:text-white transition-colors">Conseils CV</Link></li>
+                <li><Link href="#" className="hover:text-white transition-colors">Conseils carrière</Link></li>
               </ul>
             </div>
 
             <div>
-              <h3 className="font-semibold mb-4">Company</h3>
+              <h3 className="font-semibold mb-4">Entreprise</h3>
               <ul className="space-y-2 text-gray-400">
-                <li>
-                  <Link href="/about" className="hover:text-white transition-colors">
-                    About
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/blog" className="hover:text-white transition-colors">
-                    Blog
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/privacy" className="hover:text-white transition-colors">
-                    Privacy
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/terms" className="hover:text-white transition-colors">
-                    Terms
-                  </Link>
-                </li>
+                <li><Link href="#" className="hover:text-white transition-colors">À propos</Link></li>
+                <li><Link href="#" className="hover:text-white transition-colors">Blog</Link></li>
+                <li><Link href="#" className="hover:text-white transition-colors">Confidentialité</Link></li>
+                <li><Link href="#" className="hover:text-white transition-colors">Conditions</Link></li>
               </ul>
             </div>
           </div>
 
           <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
-            <p>&copy; {new Date().getFullYear()} CVCraft. All rights reserved.</p>
+            <p>&copy; {new Date().getFullYear()} CVCraft. Tous droits réservés.</p>
           </div>
         </div>
       </footer>

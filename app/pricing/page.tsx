@@ -6,76 +6,77 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Switch } from "@/components/ui/switch"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { FileText, Check, X, Crown, Shield, Headphones, Star, ArrowRight, Users, Building, Lock } from "lucide-react"
+import { FileText, Check, X, Crown, Shield, Headphones, Star, ArrowRight, Users, Building, Lock, Menu } from "lucide-react"
 import Link from "next/link"
 
 export default function PricingPage() {
   const [isYearly, setIsYearly] = useState(false)
   const [activeTab, setActiveTab] = useState("individual")
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   const individualPlans = [
     {
-      name: "Start Free",
-      description: "Perfect for trying out CVCraft",
+      name: "Commencer Gratuitement",
+      description: "Parfait pour essayer CVCraft",
       monthlyPrice: 0,
       yearlyPrice: 0,
       icon: FileText,
       badge: null,
       features: [
-        "1 basic CV template",
-        "Standard PDF export",
-        "Basic customization",
-        "Community support",
-        "CVCraft watermark",
+        "1 modèle de CV basique",
+        "Export PDF standard",
+        "Personnalisation basique",
+        "Support communautaire",
+        "Filigrane CVCraft",
       ],
-      limitations: ["Limited to 1 CV", "No ATS optimization", "No cloud storage", "Basic support only"],
-      cta: "Start Free",
+      limitations: ["Limité à 1 CV", "Pas d'optimisation ATS", "Pas de stockage cloud", "Support basique uniquement"],
+      cta: "Commencer Gratuitement",
       popular: false,
       color: "gray",
     },
     {
-      name: "Create Account",
-      description: "Best for job seekers",
+      name: "Créer un Compte",
+      description: "Idéal pour les chercheurs d'emploi",
       monthlyPrice: 0,
       yearlyPrice: 0,
       icon: Users,
-      badge: "Most Popular",
+      badge: "Le Plus Populaire",
       features: [
-        "3 professional templates",
-        "Cloud storage & sync",
-        "Multiple export formats",
-        "Email support",
-        "No watermark",
-        "Save & edit anytime",
-        "Mobile responsive",
+        "3 modèles professionnels",
+        "Stockage cloud & synchronisation",
+        "Multiples formats d'export",
+        "Support par email",
+        "Pas de filigrane",
+        "Sauvegarde & édition à tout moment",
+        "Adapté aux mobiles",
       ],
-      limitations: ["3 CVs per month limit", "Basic templates only", "Standard support"],
-      cta: "Create Free Account",
+      limitations: ["Limite de 3 CVs par mois", "Modèles basiques uniquement", "Support standard"],
+      cta: "Créer un Compte Gratuit",
       popular: true,
       color: "blue",
     },
     {
-      name: "Go Premium",
-      description: "For serious professionals",
+      name: "Passer Premium",
+      description: "Pour les professionnels sérieux",
       monthlyPrice: 14.99,
       yearlyPrice: 149.99,
       icon: Crown,
-      badge: "Best Value",
+      badge: "Meilleur Rapport Qualité-Prix",
       features: [
-        "50+ premium templates",
-        "ATS-optimized designs",
-        "Cover letter builder",
-        "Unlimited CV creation",
-        "Advanced customization",
-        "Priority support",
-        "Analytics dashboard",
-        "LinkedIn integration",
-        "AI-powered suggestions",
-        "Custom branding",
-        "Portfolio integration",
+        "50+ modèles premium",
+        "Designs optimisés pour ATS",
+        "Générateur de lettre de motivation",
+        "Création illimitée de CVs",
+        "Personnalisation avancée",
+        "Support prioritaire",
+        "Tableau de bord analytique",
+        "Intégration LinkedIn",
+        "Suggestions par IA",
+        "Personnalisation de la marque",
+        "Intégration de portfolio",
       ],
       limitations: [],
-      cta: "Go Premium",
+      cta: "Passer Premium",
       popular: false,
       color: "purple",
     },
@@ -83,49 +84,49 @@ export default function PricingPage() {
 
   const businessPlans = [
     {
-      name: "Team",
-      description: "For small teams & agencies",
+      name: "Équipe",
+      description: "Pour petites équipes & agences",
       monthlyPrice: 49.99,
       yearlyPrice: 499.99,
       icon: Users,
-      badge: "Popular",
+      badge: "Populaire",
       features: [
-        "Everything in Premium",
-        "Up to 10 team members",
-        "Team collaboration tools",
-        "Centralized billing",
-        "Team analytics",
-        "Brand customization",
-        "Admin dashboard",
-        "Bulk operations",
-        "Team templates library",
+        "Tout inclus dans Premium",
+        "Jusqu'à 10 membres d'équipe",
+        "Outils de collaboration d'équipe",
+        "Facturation centralisée",
+        "Analytiques d'équipe",
+        "Personnalisation de marque",
+        "Tableau de bord admin",
+        "Opérations en masse",
+        "Bibliothèque de modèles d'équipe",
       ],
       limitations: [],
-      cta: "Start Team Trial",
+      cta: "Essai Équipe Gratuit",
       popular: true,
       color: "green",
     },
     {
-      name: "Enterprise",
-      description: "For large organizations",
+      name: "Entreprise",
+      description: "Pour grandes organisations",
       monthlyPrice: 199.99,
       yearlyPrice: 1999.99,
       icon: Building,
-      badge: "Custom",
+      badge: "Personnalisé",
       features: [
-        "Everything in Team",
-        "Unlimited team members",
-        "Advanced security & compliance",
-        "Custom integrations",
-        "Dedicated support",
-        "Training & onboarding",
-        "SLA guarantees",
-        "White-label solution",
-        "API access",
-        "Custom workflows",
+        "Tout inclus dans Équipe",
+        "Membres d'équipe illimités",
+        "Sécurité & conformité avancées",
+        "Intégrations personnalisées",
+        "Support dédié",
+        "Formation & intégration",
+        "Garanties SLA",
+        "Solution white-label",
+        "Accès API",
+        "Workflows personnalisés",
       ],
       limitations: [],
-      cta: "Contact Sales",
+      cta: "Contacter les Ventes",
       popular: false,
       color: "indigo",
     },
@@ -146,84 +147,84 @@ export default function PricingPage() {
 
   const features = [
     {
-      category: "Templates & Design",
+      category: "Modèles & Design",
       items: [
         {
-          feature: "CV Templates",
-          free: "1 basic",
-          account: "3 professional",
+          feature: "Modèles de CV",
+          free: "1 basique",
+          account: "3 professionnels",
           premium: "50+ premium",
           team: "50+ premium",
-          enterprise: "Unlimited custom",
+          enterprise: "Illimités personnalisés",
         },
         {
-          feature: "Cover Letter Templates",
+          feature: "Modèles de lettre de motivation",
           free: false,
           account: false,
           premium: "25+",
           team: "25+",
-          enterprise: "Unlimited",
+          enterprise: "Illimités",
         },
-        { feature: "ATS Optimization", free: false, account: false, premium: true, team: true, enterprise: true },
+        { feature: "Optimisation ATS", free: false, account: false, premium: true, team: true, enterprise: true },
         {
-          feature: "Custom Branding",
+          feature: "Personnalisation de marque",
           free: false,
           account: false,
-          premium: "Basic",
-          team: "Advanced",
-          enterprise: "Full white-label",
+          premium: "Basique",
+          team: "Avancée",
+          enterprise: "White-label complet",
         },
       ],
     },
     {
-      category: "Features & Tools",
+      category: "Fonctionnalités & Outils",
       items: [
         {
-          feature: "Export Formats",
-          free: "PDF only",
+          feature: "Formats d'export",
+          free: "PDF uniquement",
           account: "PDF, Word",
-          premium: "All formats",
-          team: "All formats",
-          enterprise: "All + custom",
+          premium: "Tous formats",
+          team: "Tous formats",
+          enterprise: "Tous + personnalisés",
         },
         {
-          feature: "Cloud Storage",
+          feature: "Stockage cloud",
           free: false,
           account: "5 CVs",
-          premium: "Unlimited",
-          team: "Unlimited",
-          enterprise: "Unlimited",
+          premium: "Illimité",
+          team: "Illimité",
+          enterprise: "Illimité",
         },
-        { feature: "AI Suggestions", free: false, account: false, premium: true, team: true, enterprise: true },
+        { feature: "Suggestions IA", free: false, account: false, premium: true, team: true, enterprise: true },
         {
-          feature: "Analytics Dashboard",
+          feature: "Tableau de bord analytique",
           free: false,
           account: false,
-          premium: "Basic",
-          team: "Advanced",
-          enterprise: "Enterprise",
+          premium: "Basique",
+          team: "Avancé",
+          enterprise: "Entreprise",
         },
       ],
     },
     {
       category: "Collaboration & Support",
       items: [
-        { feature: "Team Members", free: "1", account: "1", premium: "1", team: "Up to 10", enterprise: "Unlimited" },
+        { feature: "Membres d'équipe", free: "1", account: "1", premium: "1", team: "Jusqu'à 10", enterprise: "Illimités" },
         {
-          feature: "Support Level",
-          free: "Community",
+          feature: "Niveau de support",
+          free: "Communauté",
           account: "Email",
-          premium: "Priority",
-          team: "Priority",
-          enterprise: "Dedicated",
+          premium: "Prioritaire",
+          team: "Prioritaire",
+          enterprise: "Dédié",
         },
         {
-          feature: "Training & Onboarding",
+          feature: "Formation & Intégration",
           free: false,
           account: false,
           premium: false,
-          team: "Basic",
-          enterprise: "Full",
+          team: "Basique",
+          enterprise: "Complète",
         },
         { feature: "SLA", free: false, account: false, premium: false, team: false, enterprise: "99.9%" },
       ],
@@ -233,150 +234,175 @@ export default function PricingPage() {
   const testimonials = [
     {
       name: "Sarah Johnson",
-      role: "Marketing Manager",
+      role: "Responsable Marketing",
       company: "TechCorp",
-      image: "/placeholder.svg?height=60&width=60",
-      content: "CVCraft helped me land my dream job! The ATS optimization feature made all the difference.",
+      image: "/review_img1.jpg?height=60&width=60",
+      content: "CVCraft m'a aidé à décrocher mon emploi de rêve ! La fonction d'optimisation ATS a fait toute la différence.",
       rating: 5,
     },
     {
       name: "Michael Chen",
-      role: "Software Engineer",
+      role: "Ingénieur Logiciel",
       company: "StartupXYZ",
-      image: "/placeholder.svg?height=60&width=60",
-      content: "The premium templates are absolutely stunning. Worth every penny for a professional look.",
+      image: "/review_img2.jpg?height=60&width=60",
+      content: "Les modèles premium sont absolument magnifiques. Ça vaut chaque centime pour un look professionnel.",
       rating: 5,
     },
     {
       name: "Emily Rodriguez",
-      role: "HR Director",
+      role: "Directrice RH",
       company: "Global Inc",
-      image: "/placeholder.svg?height=60&width=60",
-      content: "We use CVCraft for our entire team. The collaboration features are game-changing.",
+      image: "/review_img3.jpg?height=60&width=60",
+      content: "Nous utilisons CVCraft pour toute notre équipe. Les fonctionnalités de collaboration changent la donne.",
       rating: 5,
     },
   ]
 
   const faqs = [
     {
-      question: "Can I change my plan at any time?",
+      question: "Puis-je changer de plan à tout moment ?",
       answer:
-        "Yes, you can upgrade or downgrade your plan at any time. Changes will be reflected in your next billing cycle, and we'll prorate any differences.",
+        "Oui, vous pouvez passer à un plan supérieur ou inférieur à tout moment. Les changements seront effectifs à votre prochain cycle de facturation, et nous ajusterons le prix au prorata.",
     },
     {
-      question: "Is there a free trial for paid plans?",
+      question: "Y a-t-il un essai gratuit pour les plans payants ?",
       answer:
-        "Yes, we offer a 14-day free trial for Premium, Team, and Enterprise plans. No credit card required to start your trial.",
+        "Oui, nous proposons un essai gratuit de 14 jours pour les plans Premium, Équipe et Entreprise. Aucune carte bancaire requise pour commencer votre essai.",
     },
     {
-      question: "What payment methods do you accept?",
+      question: "Quels moyens de paiement acceptez-vous ?",
       answer:
-        "We accept all major credit cards (Visa, MasterCard, American Express), PayPal, and bank transfers for Enterprise customers.",
+        "Nous acceptons toutes les cartes bancaires (Visa, MasterCard, American Express), PayPal, et virements bancaires pour les clients Entreprise.",
     },
     {
-      question: "Can I cancel my subscription anytime?",
+      question: "Puis-je annuler mon abonnement à tout moment ?",
       answer:
-        "Absolutely. You can cancel your subscription at any time from your account settings. No cancellation fees or long-term commitments.",
+        "Absolument. Vous pouvez annuler votre abonnement à tout moment depuis les paramètres de votre compte. Pas de frais d'annulation ni d'engagement à long terme.",
     },
     {
-      question: "Do you offer refunds?",
+      question: "Proposez-vous des remboursements ?",
       answer:
-        "Yes, we offer a 30-day money-back guarantee for all paid plans. If you're not satisfied, we'll provide a full refund.",
+        "Oui, nous offrons une garantie satisfait ou remboursé de 30 jours pour tous les plans payants. Si vous n'êtes pas satisfait, nous vous rembourserons intégralement.",
     },
     {
-      question: "Is my data secure and private?",
+      question: "Mes données sont-elles sécurisées et privées ?",
       answer:
-        "Yes, we use enterprise-grade security with SSL encryption, regular security audits, and comply with GDPR and other privacy regulations.",
+        "Oui, nous utilisons une sécurité de niveau entreprise avec chiffrement SSL, audits de sécurité réguliers, et nous respectons le RGPD et autres réglementations.",
     },
     {
-      question: "Can I export my CV to different formats?",
+      question: "Puis-je exporter mon CV vers différents formats ?",
       answer:
-        "Yes, depending on your plan, you can export to PDF, Word, HTML, and other formats. Premium plans include all export options.",
+        "Oui, selon votre plan, vous pouvez exporter en PDF, Word, HTML et autres formats. Les plans Premium incluent toutes les options d'export.",
     },
     {
-      question: "Do you offer customer support?",
+      question: "Proposez-vous un support client ?",
       answer:
-        "Yes, we provide different levels of support based on your plan - from community support for free users to dedicated account managers for Enterprise customers.",
+        "Oui, nous fournissons différents niveaux de support selon votre plan - du support communautaire pour les utilisateurs gratuits aux gestionnaires de compte dédiés pour les clients Entreprise.",
     },
   ]
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-50 to-white">
-      {/* Header */}
-      <header className="px-4 lg:px-6 h-16 flex items-center border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto flex items-center justify-between">
+      {/* En-tête */}
+      <header className="border-b sticky top-0 bg-white z-50">
+        <div className="container mx-auto flex h-16 items-center justify-between px-4 lg:px-6">
           <Link href="/" className="flex items-center space-x-2">
             <div className="bg-blue-600 p-2 rounded-lg">
               <FileText className="h-6 w-6 text-white" />
             </div>
             <span className="text-xl font-bold text-gray-900">CVCraft</span>
           </Link>
-          <nav className="hidden md:flex items-center space-x-6">
+          <nav className="hidden lg:flex items-center space-x-6">
             <Link href="/" className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors">
-              Home
+              Accueil
             </Link>
             <Link href="/features" className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors">
-              Features
+              Fonctionnalités
             </Link>
             <Link href="/templates" className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors">
-              Templates
+              Modèles
             </Link>
             <Link href="/pricing" className="text-sm font-medium text-blue-600 font-semibold">
-              Pricing
+              Tarifs
             </Link>
             <Link href="/resources" className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors">
-              Resources
+              Ressources
             </Link>
             <Link href="/auth/login">
               <Button variant="outline" className="bg-white text-gray-700 border-gray-300">
-                Sign In
+                Se connecter
               </Button>
             </Link>
             <Link href="/auth/signup">
-              <Button className="bg-blue-600 hover:bg-blue-700">Get Started</Button>
+              <Button className="bg-blue-600 hover:bg-blue-700">S'inscrire</Button>
             </Link>
           </nav>
+          <div className="lg:hidden">
+            <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+              {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              <span className="sr-only">Toggle menu</span>
+            </Button>
+          </div>
         </div>
+        {isMobileMenuOpen && (
+          <div className="lg:hidden bg-white border-t">
+            <nav className="flex flex-col space-y-2 p-4">
+              <Link href="/" className="text-base font-medium text-gray-700 hover:text-blue-600 py-2">Accueil</Link>
+              <Link href="/features" className="text-base font-medium text-gray-700 hover:text-blue-600 py-2">Fonctionnalités</Link>
+              <Link href="/templates" className="text-base font-medium text-gray-700 hover:text-blue-600 py-2">Modèles</Link>
+              <Link href="/pricing" className="text-base font-medium text-blue-600 py-2">Tarifs</Link>
+              <Link href="/resources" className="text-base font-medium text-gray-700 hover:text-blue-600 py-2">Ressources</Link>
+              <div className="border-t my-2"></div>
+              <div className="flex flex-col space-y-2">
+                <Link href="/auth/login">
+                  <Button variant="outline" className="w-full bg-white text-gray-700 border-gray-300">
+                    Se connecter
+                  </Button>
+                </Link>
+                <Link href="/auth/signup">
+                  <Button className="w-full bg-blue-600 hover:bg-blue-700">S'inscrire</Button>
+                </Link>
+              </div>
+            </nav>
+          </div>
+        )}
       </header>
 
       <main className="flex-1">
-        {/* Hero Section */}
+        {/* Section Hero */}
         <section className="py-20 lg:py-32">
           <div className="container mx-auto px-4 lg:px-6 text-center">
             <div className="max-w-4xl mx-auto space-y-8">
               <div className="space-y-4">
-                <Badge variant="secondary" className="bg-blue-100 text-blue-700 hover:bg-blue-100">
-                  💰 Simple, Transparent Pricing
-                </Badge>
                 <h1 className="text-4xl lg:text-6xl font-bold text-gray-900 leading-tight">
-                  Choose the Perfect Plan for <span className="text-blue-600">Your Success</span>
+                  Choisissez le Plan Parfait pour <span className="text-blue-600">Votre Succès</span>
                 </h1>
                 <p className="text-xl text-gray-600 leading-relaxed max-w-2xl mx-auto">
-                  From free tools to enterprise solutions, we have the right plan to accelerate your career growth.
-                  Start free and scale as you succeed.
+                  Des outils gratuits aux solutions professionnelles, nous avons le bon plan pour accélérer votre croissance professionnelle.
+                  Commencez gratuitement et évoluez avec votre succès.
                 </p>
               </div>
 
-              {/* Plan Type Toggle */}
+              {/* Sélecteur de type de plan */}
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full max-w-md mx-auto">
                 <TabsList className="grid w-full grid-cols-2 bg-gray-100">
                   <TabsTrigger value="individual" className="data-[state=active]:bg-white">
-                    For Individuals
+                    Pour Particuliers
                   </TabsTrigger>
                   <TabsTrigger value="business" className="data-[state=active]:bg-white">
-                    For Teams
+                    Pour Équipes
                   </TabsTrigger>
                 </TabsList>
               </Tabs>
 
-              {/* Billing Toggle */}
+              {/* Sélecteur de facturation */}
               <div className="flex items-center justify-center space-x-4 bg-white rounded-full p-2 shadow-lg max-w-xs mx-auto">
-                <span className={`text-sm font-medium ${!isYearly ? "text-blue-600" : "text-gray-500"}`}>Monthly</span>
+                <span className={`text-sm font-medium ${!isYearly ? "text-blue-600" : "text-gray-500"}`}>Mensuel</span>
                 <Switch checked={isYearly} onCheckedChange={setIsYearly} className="data-[state=checked]:bg-blue-600" />
-                <span className={`text-sm font-medium ${isYearly ? "text-blue-600" : "text-gray-500"}`}>Yearly</span>
+                <span className={`text-sm font-medium ${isYearly ? "text-blue-600" : "text-gray-500"}`}>Annuel</span>
                 {isYearly && (
                   <Badge variant="secondary" className="bg-green-100 text-green-700 text-xs">
-                    Save 17%
+                    Économisez 17%
                   </Badge>
                 )}
               </div>
@@ -384,7 +410,7 @@ export default function PricingPage() {
           </div>
         </section>
 
-        {/* Pricing Cards */}
+        {/* Cartes de tarification */}
         <section className="py-20">
           <div className="container mx-auto px-4 lg:px-6">
             <div className={`grid gap-8 max-w-7xl mx-auto ${plans.length === 2 ? "lg:grid-cols-2" : "lg:grid-cols-3"}`}>
@@ -440,13 +466,13 @@ export default function PricingPage() {
                       <div className="space-y-2 mt-4">
                         <div className="flex items-baseline justify-center space-x-2">
                           {plan.monthlyPrice === 0 ? (
-                            <span className="text-4xl font-bold text-gray-900">Free</span>
+                            <span className="text-4xl font-bold text-gray-900">Gratuit</span>
                           ) : (
                             <>
                               <span className="text-4xl font-bold text-gray-900">
                                 ${isYearly ? Math.floor(plan.yearlyPrice / 12) : plan.monthlyPrice}
                               </span>
-                              <span className="text-gray-500">/month</span>
+                              <span className="text-gray-500">/mois</span>
                             </>
                           )}
                         </div>
@@ -454,7 +480,7 @@ export default function PricingPage() {
                           <div className="text-sm text-gray-500">
                             <span className="line-through">${plan.monthlyPrice * 12}</span>
                             <span className="text-green-600 ml-2 font-medium">
-                              Save ${plan.monthlyPrice * 12 - plan.yearlyPrice}
+                              Économisez ${plan.monthlyPrice * 12 - plan.yearlyPrice}
                             </span>
                           </div>
                         )}
@@ -462,7 +488,7 @@ export default function PricingPage() {
                     </CardHeader>
 
                     <CardContent className="space-y-6">
-                      <Link href={plan.name === "Start Free" ? "/builder" : "/auth/signup"}>
+                      <Link href={plan.name === "Commencer Gratuitement" ? "/builder" : "/auth/signup"}>
                         <Button
                           className={`w-full ${
                             plan.popular ? "bg-blue-600 hover:bg-blue-700" : "bg-gray-900 hover:bg-gray-800"
@@ -475,7 +501,7 @@ export default function PricingPage() {
                       </Link>
 
                       <div className="space-y-3">
-                        <h4 className="font-semibold text-gray-900">What's included:</h4>
+                        <h4 className="font-semibold text-gray-900">Ce qui est inclus :</h4>
                         {plan.features.map((feature, index) => (
                           <div key={index} className="flex items-start space-x-3">
                             <Check className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
@@ -485,7 +511,7 @@ export default function PricingPage() {
 
                         {plan.limitations.length > 0 && (
                           <div className="pt-3 border-t border-gray-200">
-                            <h4 className="font-semibold text-gray-900 text-sm mb-2">Limitations:</h4>
+                            <h4 className="font-semibold text-gray-900 text-sm mb-2">Limitations :</h4>
                             {plan.limitations.map((limitation, index) => (
                               <div key={index} className="flex items-start space-x-3 mb-2">
                                 <X className="h-4 w-4 text-gray-400 mt-0.5 flex-shrink-0" />
@@ -503,13 +529,13 @@ export default function PricingPage() {
           </div>
         </section>
 
-        {/* Feature Comparison Table */}
+        {/* Tableau comparatif */}
         <section className="py-20 bg-gray-50">
           <div className="container mx-auto px-4 lg:px-6">
             <div className="text-center space-y-4 mb-16">
-              <h2 className="text-3xl lg:text-4xl font-bold text-gray-900">Compare All Features</h2>
+              <h2 className="text-3xl lg:text-4xl font-bold text-gray-900">Comparez Toutes les Fonctionnalités</h2>
               <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                See exactly what's included in each plan to make the best choice for your needs
+                Voyez exactement ce qui est inclus dans chaque plan pour faire le meilleur choix selon vos besoins
               </p>
             </div>
 
@@ -523,14 +549,14 @@ export default function PricingPage() {
                     <table className="w-full">
                       <thead className="bg-gray-50">
                         <tr>
-                          <th className="text-left py-4 px-6 font-semibold text-gray-900 w-1/4">Feature</th>
-                          <th className="text-center py-4 px-6 font-semibold text-gray-900">Start Free</th>
-                          <th className="text-center py-4 px-6 font-semibold text-gray-900">Create Account</th>
-                          <th className="text-center py-4 px-6 font-semibold text-gray-900">Go Premium</th>
+                          <th className="text-left py-4 px-6 font-semibold text-gray-900 w-1/4">Fonctionnalité</th>
+                          <th className="text-center py-4 px-6 font-semibold text-gray-900">Commencer Gratuitement</th>
+                          <th className="text-center py-4 px-6 font-semibold text-gray-900">Créer un Compte</th>
+                          <th className="text-center py-4 px-6 font-semibold text-gray-900">Passer Premium</th>
                           {activeTab === "business" && (
                             <>
-                              <th className="text-center py-4 px-6 font-semibold text-gray-900">Team</th>
-                              <th className="text-center py-4 px-6 font-semibold text-gray-900">Enterprise</th>
+                              <th className="text-center py-4 px-6 font-semibold text-gray-900">Équipe</th>
+                              <th className="text-center py-4 px-6 font-semibold text-gray-900">Entreprise</th>
                             </>
                           )}
                         </tr>
@@ -609,13 +635,13 @@ export default function PricingPage() {
           </div>
         </section>
 
-        {/* Testimonials */}
+        {/* Témoignages */}
         <section className="py-20">
           <div className="container mx-auto px-4 lg:px-6">
             <div className="text-center space-y-4 mb-16">
-              <h2 className="text-3xl lg:text-4xl font-bold text-gray-900">Trusted by Professionals Worldwide</h2>
+              <h2 className="text-3xl lg:text-4xl font-bold text-gray-900">Recommandé par des Professionnels du Monde Entier</h2>
               <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                See what our customers say about their success with CVCraft
+                Découvrez ce que nos clients disent de leur succès avec CVCraft
               </p>
             </div>
 
@@ -638,7 +664,7 @@ export default function PricingPage() {
                       <div>
                         <div className="font-semibold text-gray-900">{testimonial.name}</div>
                         <div className="text-sm text-gray-600">
-                          {testimonial.role} at {testimonial.company}
+                          {testimonial.role} chez {testimonial.company}
                         </div>
                       </div>
                     </div>
@@ -649,7 +675,7 @@ export default function PricingPage() {
           </div>
         </section>
 
-        {/* Trust Signals */}
+        {/* Signaux de confiance */}
         <section className="py-20 bg-gray-50">
           <div className="container mx-auto px-4 lg:px-6">
             <div className="grid md:grid-cols-4 gap-8 text-center">
@@ -657,46 +683,46 @@ export default function PricingPage() {
                 <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto">
                   <Shield className="h-8 w-8 text-green-600" />
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900">30-Day Money Back</h3>
-                <p className="text-gray-600">Not satisfied? Get a full refund within 30 days, no questions asked.</p>
+                <h3 className="text-xl font-semibold text-gray-900">Remboursement 30 Jours</h3>
+                <p className="text-gray-600">Pas satisfait ? Remboursement intégral sous 30 jours, sans questions.</p>
               </div>
 
               <div className="space-y-4">
                 <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto">
                   <Headphones className="h-8 w-8 text-blue-600" />
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900">24/7 Support</h3>
-                <p className="text-gray-600">Get help whenever you need it with our dedicated support team.</p>
+                <h3 className="text-xl font-semibold text-gray-900">Support 24/7</h3>
+                <p className="text-gray-600">Obtenez de l'aide quand vous en avez besoin avec notre équipe dédiée.</p>
               </div>
 
               <div className="space-y-4">
                 <div className="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto">
                   <Lock className="h-8 w-8 text-purple-600" />
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900">Enterprise Security</h3>
-                <p className="text-gray-600">Bank-level security with SSL encryption and GDPR compliance.</p>
+                <h3 className="text-xl font-semibold text-gray-900">Sécurité Entreprise</h3>
+                <p className="text-gray-600">Sécurité bancaire avec chiffrement SSL et conformité RGPD.</p>
               </div>
 
               <div className="space-y-4">
                 <div className="bg-orange-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto">
                   <Star className="h-8 w-8 text-orange-600" />
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900">Trusted by 500K+</h3>
+                <h3 className="text-xl font-semibold text-gray-900">Utilisé par 500K+</h3>
                 <p className="text-gray-600">
-                  Join thousands of professionals who trust CVCraft for their career success.
+                  Rejoignez des milliers de professionnels qui font confiance à CVCraft pour leur succès professionnel.
                 </p>
               </div>
             </div>
           </div>
         </section>
 
-        {/* FAQ Section */}
+        {/* FAQ */}
         <section className="py-20">
           <div className="container mx-auto px-4 lg:px-6">
             <div className="text-center space-y-4 mb-16">
-              <h2 className="text-3xl lg:text-4xl font-bold text-gray-900">Frequently Asked Questions</h2>
+              <h2 className="text-3xl lg:text-4xl font-bold text-gray-900">Questions Fréquentes</h2>
               <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                Everything you need to know about our pricing and plans
+                Tout ce que vous devez savoir sur nos tarifs et plans
               </p>
             </div>
 
@@ -715,13 +741,13 @@ export default function PricingPage() {
           </div>
         </section>
 
-        {/* Final CTA */}
+        {/* CTA Final */}
         <section className="py-20 bg-blue-600">
           <div className="container mx-auto px-4 lg:px-6 text-center">
             <div className="max-w-3xl mx-auto space-y-8">
-              <h2 className="text-3xl lg:text-4xl font-bold text-white">Ready to Accelerate Your Career?</h2>
+              <h2 className="text-3xl lg:text-4xl font-bold text-white">Prêt à Accélérer Votre Carrière ?</h2>
               <p className="text-xl text-blue-100">
-                Join over 500,000 professionals who have successfully advanced their careers with CVCraft
+                Rejoignez plus de 500 000 professionnels qui ont réussi à faire progresser leur carrière avec CVCraft
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link href="/builder">
@@ -730,7 +756,7 @@ export default function PricingPage() {
                     variant="secondary"
                     className="bg-white text-blue-600 hover:bg-gray-100 text-lg px-8 py-3"
                   >
-                    Start Free Today
+                    Commencer Gratuitement
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </Link>
@@ -740,7 +766,7 @@ export default function PricingPage() {
                     variant="outline"
                     className="border-white text-white hover:bg-white hover:text-blue-600 text-lg px-8 py-3"
                   >
-                    Contact Sales
+                    Contacter les Ventes
                   </Button>
                 </Link>
               </div>
@@ -749,7 +775,7 @@ export default function PricingPage() {
         </section>
       </main>
 
-      {/* Footer */}
+      {/* Pied de page */}
       <footer className="bg-gray-900 text-white py-12">
         <div className="container mx-auto px-4 lg:px-6">
           <div className="grid md:grid-cols-4 gap-8">
@@ -761,91 +787,43 @@ export default function PricingPage() {
                 <span className="text-xl font-bold">CVCraft</span>
               </div>
               <p className="text-gray-400">
-                Create professional CVs that get you hired. Trusted by professionals worldwide.
+                Créez des CV professionnels qui captent l'attention des recruteurs grâce à notre plateforme intuitive.
               </p>
             </div>
 
             <div>
-              <h3 className="font-semibold mb-4">Product</h3>
+              <h3 className="font-semibold mb-4">Produit</h3>
               <ul className="space-y-2 text-gray-400">
-                <li>
-                  <Link href="/templates" className="hover:text-white transition-colors">
-                    Templates
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/features" className="hover:text-white transition-colors">
-                    Features
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/pricing" className="hover:text-white transition-colors">
-                    Pricing
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/examples" className="hover:text-white transition-colors">
-                    Examples
-                  </Link>
-                </li>
+                <li><Link href="#" className="hover:text-white transition-colors">Modèles</Link></li>
+                <li><Link href="#" className="hover:text-white transition-colors">Fonctionnalités</Link></li>
+                <li><Link href="#" className="hover:text-white transition-colors">Tarifs</Link></li>
+                <li><Link href="#" className="hover:text-white transition-colors">Exemples</Link></li>
               </ul>
             </div>
 
             <div>
               <h3 className="font-semibold mb-4">Support</h3>
               <ul className="space-y-2 text-gray-400">
-                <li>
-                  <Link href="/help" className="hover:text-white transition-colors">
-                    Help Center
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/contact" className="hover:text-white transition-colors">
-                    Contact Us
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/resources" className="hover:text-white transition-colors">
-                    CV Tips
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/blog" className="hover:text-white transition-colors">
-                    Career Advice
-                  </Link>
-                </li>
+                <li><Link href="#" className="hover:text-white transition-colors">Centre d’aide</Link></li>
+                <li><Link href="#" className="hover:text-white transition-colors">Nous contacter</Link></li>
+                <li><Link href="#" className="hover:text-white transition-colors">Conseils CV</Link></li>
+                <li><Link href="#" className="hover:text-white transition-colors">Conseils carrière</Link></li>
               </ul>
             </div>
 
             <div>
-              <h3 className="font-semibold mb-4">Company</h3>
+              <h3 className="font-semibold mb-4">Entreprise</h3>
               <ul className="space-y-2 text-gray-400">
-                <li>
-                  <Link href="/about" className="hover:text-white transition-colors">
-                    About
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/blog" className="hover:text-white transition-colors">
-                    Blog
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/privacy" className="hover:text-white transition-colors">
-                    Privacy
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/terms" className="hover:text-white transition-colors">
-                    Terms
-                  </Link>
-                </li>
+                <li><Link href="#" className="hover:text-white transition-colors">À propos</Link></li>
+                <li><Link href="#" className="hover:text-white transition-colors">Blog</Link></li>
+                <li><Link href="#" className="hover:text-white transition-colors">Confidentialité</Link></li>
+                <li><Link href="#" className="hover:text-white transition-colors">Conditions</Link></li>
               </ul>
             </div>
           </div>
 
           <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
-            <p>&copy; {new Date().getFullYear()} CVCraft. All rights reserved.</p>
+            <p>&copy; {new Date().getFullYear()} CVCraft. Tous droits réservés.</p>
           </div>
         </div>
       </footer>
