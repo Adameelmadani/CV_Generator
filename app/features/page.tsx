@@ -51,20 +51,6 @@ export default function FeaturesPage() {
       color: "green",
     },
     {
-      icon: Download,
-      title: "Formats d'Exportation Multiples",
-      description: "Exportez en PDF, Word, HTML ou partagez via un lien personnalisé",
-      category: "Export",
-      color: "orange",
-    },
-    {
-      icon: BarChart3,
-      title: "Tableau de Bord Analytique",
-      description: "Suivez les vues, téléchargements et engagements avec des analyses détaillées",
-      category: "Analytiques",
-      color: "indigo",
-    },
-    {
       icon: Cloud,
       title: "Stockage Cloud & Synchronisation",
       description: "Accédez à vos CV de n'importe où avec synchronisation automatique dans le cloud",
@@ -83,14 +69,7 @@ export default function FeaturesPage() {
       title: "Responsive Mobile",
       description: "Créez et modifiez des CV sur n'importe quel appareil avec notre design responsive",
       category: "Mobile",
-      color: "emerald",
-    },
-    {
-      icon: Shield,
-      title: "Sécurité Entreprise",
-      description: "Sécurité bancaire avec chiffrement SSL et conformité RGPD",
-      category: "Sécurité",
-      color: "red",
+      color: "orange",
     },
   ]
 
@@ -111,7 +90,7 @@ export default function FeaturesPage() {
       title: "Qualité Professionnelle",
       description: "Des modèles de qualité professionnelle qui impressionnent les recruteurs",
       icon: Star,
-      stats: "Utilisé par plus de 500K professionnels",
+      stats: "Utilisé par des professionnels",
     },
     {
       title: "Toujours à Jour",
@@ -220,7 +199,7 @@ export default function FeaturesPage() {
 
                 <div className="flex flex-col sm:flex-row gap-4">
                   <Link href="/builder">
-                    <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-lg px-6 py-3">
+                    <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-lg px-3 py-3">
                       Essayez toutes les fonctionnalités gratuitement
                       <ArrowRight className="ml-2 h-5 w-5" />
                     </Button>
@@ -349,20 +328,22 @@ export default function FeaturesPage() {
                   </li>
                 </ul>
                 <Link href="/builder">
-                  <Button className="bg-purple-600 hover:bg-purple-700 mt-2">
+                  <Button className="bg-purple-600 hover:bg-purple-700 mt-4">
                     Essayer les fonctionnalités IA
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </Link>
               </div>
               <div className="relative">
-                <Image
-                  src="/placeholder.svg?height=400&width=500"
+                <div className="bg-white rounded-2xl shadow-2xl p-8 transform rotate-2 hover:rotate-0 transition-transform duration-300">
+                  <Image
+                  src="/img3.png?height=400&width=400"
                   alt="Suggestions optimisées par IA"
-                  width={500}
+                  width={400}
                   height={400}
                   className="rounded-lg shadow-lg"
-                />
+                  />
+                </div>
               </div>
             </div>
           </div>
