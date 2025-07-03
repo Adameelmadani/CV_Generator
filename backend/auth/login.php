@@ -40,44 +40,62 @@ if (!empty($response['errors'])) {
 require_once('../db_connection.php');
 
 try {
-    // Prepare SQL statement to find user by email
+    // Check if the user exists in the auth table
     $stmt = $pdo->prepare("
-        SELECT a.auth_id, a.email, a.mot_de_passe, u.id, u.prenom, u.nom
+        SELECT a.id, a.email, a.mot_de_passe, a.entity_type, a.entity_id
         FROM auth a
-        INNER JOIN utilisateurs u ON a.auth_id = u.auth_id
         WHERE a.email = ?
     ");
     $stmt->execute([$email]);
-    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    $authUser = $stmt->fetch(PDO::FETCH_ASSOC);
     
     // Verify if user exists and password is correct
-    if ($user && password_verify($password, $user['mot_de_passe'])) {
+    if ($authUser && password_verify($password, $authUser['mot_de_passe'])) {
         // Update last login time
-        $updateStmt = $pdo->prepare("UPDATE auth SET derniere_connexion = CURDATE() WHERE auth_id = ?");
-        $updateStmt->execute([$user['auth_id']]);
+        $updateStmt = $pdo->prepare("UPDATE auth SET derniere_connexion = CURDATE() WHERE id = ?");
+        $updateStmt->execute([$authUser['id']]);
         
-        // Password is correct - create session
+        $userType = null;
+        
+        // Determine user type based on entity_type
+        if ($authUser['entity_type'] === 'utilisateur') {
+            // Get user info to check if they're an employee
+            $userStmt = $pdo->prepare("SELECT id, est_employe FROM utilisateurs WHERE id = ?");
+            $userStmt->execute([$authUser['entity_id']]);
+            $userInfo = $userStmt->fetch(PDO::FETCH_ASSOC);
+            
+            if ($userInfo) {
+                $userType = $userInfo['est_employe'] ? 'employee' : 'user';
+            }
+        } else if ($authUser['entity_type'] === 'demande_entreprise') {
+            $userType = 'company';
+        }
+        
+        // Generate remember me token if requested
+        if ($rememberMe) {
+            // Generate a secure token
+            $token = bin2hex(random_bytes(32));
+            
+            // Store token in database
+            $tokenStmt = $pdo->prepare("UPDATE auth SET token = ? WHERE id = ?");
+            $tokenStmt->execute([password_hash($token, PASSWORD_DEFAULT), $authUser['id']]);
+            
+            // Set cookies with token that expires in 30 days
+            setcookie('remember_token', $token, time() + (86400 * 30), '/', '', false, true);
+            setcookie('user_email', $email, time() + (86400 * 30), '/', '', false, false);
+        }
+        
+        // Create session with minimal information
         $_SESSION['user'] = [
-            'id' => $user['id'],
-            'auth_id' => $user['auth_id'],
-            'email' => $user['email'],
-            'first_name' => $user['prenom'],
-            'last_name' => $user['nom'],
+            'auth_id' => $authUser['id'],
+            'email' => $authUser['email'],
+            'type' => $userType,
             'loggedIn' => true
         ];
         
-        if ($rememberMe) {
-            // Set a cookie that expires in 30 days
-            setcookie('remember_user', $email, time() + (86400 * 30), '/');
-        }
-        
+        // Prepare response with minimal information
         $response['success'] = true;
-        $response['redirect'] = '/dashboard';
-        $response['user'] = [
-            'firstName' => $user['prenom'],
-            'lastName' => $user['nom'],
-            'email' => $user['email']
-        ];
+        $response['userType'] = $userType; // Just send user type for redirection
     } else {
         // Invalid login
         $response['errors']['general'] = 'Invalid email or password';

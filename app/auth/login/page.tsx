@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -10,17 +10,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Separator } from "@/components/ui/separator"
 import { FileText, Eye, EyeOff, Mail, Lock, ArrowLeft } from "lucide-react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { useSearchParams } from "next/navigation"
 
 export default function LoginPage() {
-  // Add the errors state
   const [errors, setErrors] = useState({
     email: "",
     password: "",
     general: ""
   })
   const [showPassword, setShowPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(true) // Start as loading to check token
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -29,8 +29,46 @@ export default function LoginPage() {
 
   const searchParams = useSearchParams()
   const selectedPlan = searchParams.get("plan")
+  const router = useRouter()
 
-  // Modified handleSubmit function for login page
+  useEffect(() => {
+    // Check if user has a valid token
+    const checkToken = async () => {
+      try {
+        const response = await fetch('http://localhost/CV_Generator/backend/auth/check_token.php', {
+          method: 'GET',
+          credentials: 'include' // Important for cookies
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          // User has a valid token, redirect to dashboard
+          let redirectUrl = '/dashboard';
+          
+          if (data.userType === 'employee') {
+            redirectUrl = '/dashboard?user=employee';
+          } else if (data.userType === 'user') {
+            redirectUrl = '/dashboard?user=user';
+          } else if (data.userType === 'company') {
+            redirectUrl = '/dashboard?user=company';
+          }
+          
+          router.push(redirectUrl);
+        } else {
+          // No valid token, allow user to login manually
+          setIsLoading(false);
+        }
+      } catch (error) {
+        // Error checking token, allow user to login manually
+        console.error('Error checking authentication token:', error);
+        setIsLoading(false);
+      }
+    };
+    
+    checkToken();
+  }, [router]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -42,12 +80,25 @@ export default function LoginPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(formData),
+        credentials: 'include' // Important: this sends cookies with the request
       });
       
       const data = await response.json();
       
       if (data.success) {
-        window.location.href = data.redirect;
+        // Redirect based on user type
+        let redirectUrl = '/dashboard';
+        
+        // Add user type as query param to handle different dashboard views
+        if (data.userType === 'employee') {
+          redirectUrl = '/dashboard?user=employee';
+        } else if (data.userType === 'user') {
+          redirectUrl = '/dashboard?user=user';
+        } else if (data.userType === 'company') {
+          redirectUrl = '/dashboard?user=company';
+        }
+        
+        router.push(redirectUrl);
       } else {
         setErrors({
           email: data.errors.email || '',
@@ -75,7 +126,6 @@ export default function LoginPage() {
 
   const handleSocialLogin = (provider: string) => {
     console.log(`Login with ${provider}`)
-    // Handle social login - redirect to homepage after successful login
     setTimeout(() => {
       const redirectUrl = selectedPlan
         ? `/?login=success&plan=${selectedPlan}&user=returning&provider=${provider}`
@@ -85,10 +135,21 @@ export default function LoginPage() {
     }, 1000)
   }
 
+  // Show loading indicator while checking token
+  if (isLoading && formData.email === '' && formData.password === '') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full mx-auto animate-spin"></div>
+          <p className="mt-4 text-gray-600">Checking authentication...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        {/* Header */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center space-x-2 text-blue-600 hover:text-blue-700 mb-6">
             <ArrowLeft className="h-4 w-4" />
@@ -117,7 +178,6 @@ export default function LoginPage() {
           </CardHeader>
 
           <CardContent className="space-y-6">
-            {/* Social Login Buttons */}
             <div className="space-y-3">
               <Button variant="outline" className="w-full h-11" onClick={() => handleSocialLogin("google")}>
                 <svg className="w-5 h-5 mr-3" viewBox="0 0 24 24">
@@ -158,8 +218,11 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {/* Login Form */}
             <form onSubmit={handleSubmit} className="space-y-4">
+              {errors.general && (
+                <div className="text-red-500 text-sm text-center">{errors.general}</div>
+              )}
+
               <div className="space-y-2">
                 <Label htmlFor="email">Email address</Label>
                 <div className="relative">
@@ -171,10 +234,11 @@ export default function LoginPage() {
                     placeholder="Enter your email"
                     value={formData.email}
                     onChange={handleInputChange}
-                    className="pl-10 h-11"
+                    className={`pl-10 h-11 ${errors.email ? 'border-red-500' : ''}`}
                     required
                   />
                 </div>
+                {errors.email && <p className="text-red-500 text-xs">{errors.email}</p>}
               </div>
 
               <div className="space-y-2">
@@ -188,7 +252,7 @@ export default function LoginPage() {
                     placeholder="Enter your password"
                     value={formData.password}
                     onChange={handleInputChange}
-                    className="pl-10 pr-10 h-11"
+                    className={`pl-10 pr-10 h-11 ${errors.password ? 'border-red-500' : ''}`}
                     required
                   />
                   <button
@@ -199,6 +263,7 @@ export default function LoginPage() {
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
+                {errors.password && <p className="text-red-500 text-xs">{errors.password}</p>}
               </div>
 
               <div className="flex items-center justify-between">
@@ -246,7 +311,6 @@ export default function LoginPage() {
           </CardContent>
         </Card>
 
-        {/* Footer */}
         <div className="text-center mt-8 text-xs text-gray-500">
           <p>
             By signing in, you agree to our{" "}

@@ -1,4 +1,4 @@
--- Create the database
+-- Create database
 CREATE DATABASE IF NOT EXISTS cv_craft CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE cv_craft;
 
@@ -30,6 +30,15 @@ CREATE TABLE demandes_entreprises (
     date_traitement DATE
 );
 
+-- Entreprises
+CREATE TABLE entreprises (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    demande_id INT,
+    code_invitation VARCHAR(100),
+    date_creation DATE,
+    FOREIGN KEY (demande_id) REFERENCES demandes_entreprises(id) ON DELETE SET NULL
+);
+
 -- Utilisateurs
 CREATE TABLE utilisateurs (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -40,26 +49,14 @@ CREATE TABLE utilisateurs (
     est_employe BOOLEAN DEFAULT FALSE
 );
 
--- Auth (with polymorphic relationship using entity_type and entity_id)
+-- Auth
 CREATE TABLE auth (
-    id INT PRIMARY KEY AUTO_INCREMENT,
+    auth_id INT AUTO_INCREMENT PRIMARY KEY,
     email VARCHAR(150) UNIQUE NOT NULL,
     mot_de_passe VARCHAR(255) NOT NULL,
-    entity_type ENUM('utilisateur', 'demande_entreprise') NOT NULL,
-    entity_id INT NOT NULL,
     date_creation DATE,
     derniere_connexion DATE,
     token VARCHAR(255)
-    -- Note: Referential integrity (foreign keys) must be handled in application logic
-);
-
--- Entreprises
-CREATE TABLE entreprises (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    demande_id INT,
-    code_invitation VARCHAR(100),
-    date_creation DATE,
-    FOREIGN KEY (demande_id) REFERENCES demandes_entreprises(id) ON DELETE SET NULL
 );
 
 -- MembresEntreprise
@@ -95,3 +92,13 @@ CREATE TABLE entreprise_non_enregistre (
     domaine VARCHAR(100),
     FOREIGN KEY (utilisateur_id) REFERENCES utilisateurs(id) ON DELETE CASCADE
 );
+
+-- Link Auth to DemandesEntreprises (if applicable)
+ALTER TABLE demandes_entreprises
+ADD COLUMN auth_id INT,
+ADD FOREIGN KEY (auth_id) REFERENCES auth(auth_id) ON DELETE SET NULL;
+
+-- Link Auth to Utilisateurs
+ALTER TABLE utilisateurs
+ADD COLUMN auth_id INT,
+ADD FOREIGN KEY (auth_id) REFERENCES auth(auth_id) ON DELETE SET NULL;
