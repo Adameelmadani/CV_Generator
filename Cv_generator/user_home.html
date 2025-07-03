@@ -59,13 +59,19 @@
             <section class="cv-section">
                 <div class="section-header">
                     <h2>Mes CV</h2>
-                    <div class="view-controls">
-                        <button class="view-btn active" onclick="setView('grid')" id="gridViewBtn">
-                            <i class="fas fa-th"></i>
+                    <div class="header-controls">
+                        <button class="btn btn-danger btn-sm" onclick="deleteAllCVs()" id="deleteAllBtn" style="display: none;">
+                            <i class="fas fa-trash-alt"></i>
+                            Supprimer tout
                         </button>
-                        <button class="view-btn" onclick="setView('list')" id="listViewBtn">
-                            <i class="fas fa-list"></i>
-                        </button>
+                        <div class="view-controls">
+                            <button class="view-btn active" onclick="setView('grid')" id="gridViewBtn">
+                                <i class="fas fa-th"></i>
+                            </button>
+                            <button class="view-btn" onclick="setView('list')" id="listViewBtn">
+                                <i class="fas fa-list"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -174,6 +180,30 @@
                 <button class="btn btn-danger" onclick="confirmDelete()">
                     <i class="fas fa-trash"></i>
                     Supprimer
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de confirmation de suppression de tous les CV -->
+    <div class="modal" id="deleteAllModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Confirmer la suppression de tous les CV</h3>
+                <button class="close-btn" onclick="closeModal('deleteAllModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p><strong>⚠️ Attention !</strong></p>
+                <p>Vous êtes sur le point de supprimer <strong>tous vos CV</strong>. Cette action est définitive et irréversible.</p>
+                <p>Tous vos CV seront définitivement supprimés de notre système.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('deleteAllModal')">Annuler</button>
+                <button class="btn btn-danger" onclick="confirmDeleteAll()">
+                    <i class="fas fa-trash-alt"></i>
+                    Supprimer tous les CV
                 </button>
             </div>
         </div>

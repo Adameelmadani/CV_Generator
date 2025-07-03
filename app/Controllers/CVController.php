@@ -36,8 +36,10 @@ class CVController extends Controller {
     
     public function getCVData() {
         $userId = $this->requireAuth();
+        error_log("CVController::getCVData - User ID: " . $userId);
         
         if (!isset($_GET['cv_id'])) {
+            error_log("CVController::getCVData - Missing cv_id parameter");
             $this->jsonResponse([
                 'status' => 'error',
                 'message' => 'CV ID is required'
@@ -46,11 +48,14 @@ class CVController extends Controller {
         }
         
         $cvId = intval($_GET['cv_id']);
+        error_log("CVController::getCVData - CV ID: " . $cvId);
         
         try {
             $xmlContent = $this->cvModel->getCVData($cvId, $userId);
+            error_log("CVController::getCVData - XML content length: " . strlen($xmlContent ?? ''));
             
             if (!$xmlContent) {
+                error_log("CVController::getCVData - CV not found or access denied");
                 $this->jsonResponse([
                     'status' => 'error',
                     'message' => 'CV not found'
@@ -58,9 +63,15 @@ class CVController extends Controller {
                 return;
             }
             
+            error_log("CVController::getCVData - Success, returning CV data");
             $this->jsonResponse([
                 'status' => 'success',
-                'xml_content' => $xmlContent
+                'cv_id' => $cvId,
+                'cv_data' => $xmlContent,           // For form.js compatibility
+                'xml_content' => $xmlContent,       // For backward compatibility
+                'cv' => [                           // For home.html compatibility
+                    'data' => $xmlContent
+                ]
             ]);
             
         } catch (Exception $e) {
@@ -146,6 +157,27 @@ class CVController extends Controller {
             $this->jsonResponse([
                 'status' => 'error',
                 'message' => 'Error deleting CV'
+            ], 500);
+        }
+    }
+    
+    public function deleteAllCVs() {
+        $userId = $this->requireAuth();
+        
+        try {
+            // Delete all CVs for the user
+            $this->cvModel->deleteAllUserCVs($userId);
+            
+            $this->jsonResponse([
+                'status' => 'success',
+                'message' => 'All CVs deleted successfully'
+            ]);
+            
+        } catch (Exception $e) {
+            error_log("Error in deleteAllCVs: " . $e->getMessage());
+            $this->jsonResponse([
+                'status' => 'error',
+                'message' => 'Error deleting all CVs'
             ], 500);
         }
     }

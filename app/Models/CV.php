@@ -67,6 +67,13 @@ class CV extends Model {
         ]);
     }
     
+    public function deleteAllUserCVs($userId) {
+        $sql = "DELETE FROM {$this->table} WHERE user_id = :user_id";
+        return $this->execute($sql, [
+            ':user_id' => $userId
+        ]);
+    }
+    
     public function getCVData($cvId, $userId) {
         $sql = "SELECT xml_content FROM {$this->table} 
                 WHERE id = :cv_id AND user_id = :user_id";

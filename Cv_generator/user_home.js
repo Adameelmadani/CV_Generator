@@ -124,14 +124,17 @@ Contact support if this persists.
 function displayCVs() {
     const emptyElement = document.getElementById('emptyCVs');
     const gridElement = document.getElementById('cvGrid');
+    const deleteAllBtn = document.getElementById('deleteAllBtn');
     
     if (userCVs.length === 0) {
         emptyElement.style.display = 'block';
         gridElement.innerHTML = '';
+        deleteAllBtn.style.display = 'none';
         return;
     }
     
     emptyElement.style.display = 'none';
+    deleteAllBtn.style.display = 'inline-block';
     gridElement.className = `cv-grid ${currentView === 'list' ? 'list-view' : ''}`;
     
     gridElement.innerHTML = userCVs.map(cv => `
@@ -218,9 +221,9 @@ async function previewCV(cvId) {
         }
         loadingDiv.style.display = 'flex';
         
-        // Générer l'aperçu PDF avec LaTeX (preview_cv.php)
+        // Générer l'aperçu PDF avec LaTeX (generate_preview_mvc.php)
         console.log('Generating LaTeX preview for CV ID:', cvId);
-        const response = await fetch('preview_cv_mvc.php', {
+        const response = await fetch('generate_preview_mvc.php', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -349,6 +352,62 @@ async function confirmDelete() {
     }
     
     currentCVForDelete = null;
+}
+
+// Supprimer tous les CV
+function deleteAllCVs() {
+    // Vérifier s'il y a des CV à supprimer
+    if (!userCVs || userCVs.length === 0) {
+        alert('Aucun CV à supprimer');
+        return;
+    }
+    
+    document.getElementById('deleteAllModal').classList.add('show');
+}
+
+// Confirmer la suppression de tous les CV
+async function confirmDeleteAll() {
+    try {
+        const response = await fetch('delete_all_cvs_mvc.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+        
+        const result = await response.json();
+        
+        if (result.status === 'success') {
+            closeModal('deleteAllModal');
+            loadUserCVs(); // Recharger la liste
+            // Show success message briefly
+            const successMessage = document.createElement('div');
+            successMessage.className = 'alert alert-success';
+            successMessage.textContent = 'Tous vos CV ont été supprimés avec succès';
+            successMessage.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #28a745;
+                color: white;
+                padding: 1rem 2rem;
+                border-radius: 8px;
+                z-index: 1000;
+                box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            `;
+            document.body.appendChild(successMessage);
+            
+            // Remove message after 3 seconds
+            setTimeout(() => {
+                successMessage.remove();
+            }, 3000);
+        } else {
+            alert('Erreur lors de la suppression: ' + result.message);
+        }
+    } catch (error) {
+        console.error('Erreur:', error);
+        alert('Erreur lors de la suppression de tous les CV');
+    }
 }
 
 // Télécharger le CV en cours de prévisualisation

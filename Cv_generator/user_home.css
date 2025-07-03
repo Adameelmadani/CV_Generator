@@ -200,6 +200,11 @@ body {
     box-shadow: 0 10px 20px rgba(255, 107, 107, 0.3);
 }
 
+.btn-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+}
+
 /* CV Section */
 .cv-section {
     background: rgba(255, 255, 255, 0.95);
@@ -219,6 +224,12 @@ body {
 .section-header h2 {
     font-size: 1.8rem;
     color: #333;
+}
+
+.header-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
 }
 
 .view-controls {
