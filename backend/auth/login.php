@@ -41,18 +41,28 @@ require_once('../db_connection.php');
 
 try {
     // Prepare SQL statement to find user by email
-    $stmt = $pdo->prepare("SELECT id, email, first_name, last_name, hashed_password FROM users WHERE email = ?");
+    $stmt = $pdo->prepare("
+        SELECT a.auth_id, a.email, a.mot_de_passe, u.id, u.prenom, u.nom
+        FROM auth a
+        INNER JOIN utilisateurs u ON a.auth_id = u.auth_id
+        WHERE a.email = ?
+    ");
     $stmt->execute([$email]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
     
     // Verify if user exists and password is correct
-    if ($user && password_verify($password, $user['hashed_password'])) {
+    if ($user && password_verify($password, $user['mot_de_passe'])) {
+        // Update last login time
+        $updateStmt = $pdo->prepare("UPDATE auth SET derniere_connexion = CURDATE() WHERE auth_id = ?");
+        $updateStmt->execute([$user['auth_id']]);
+        
         // Password is correct - create session
         $_SESSION['user'] = [
             'id' => $user['id'],
+            'auth_id' => $user['auth_id'],
             'email' => $user['email'],
-            'first_name' => $user['first_name'],
-            'last_name' => $user['last_name'],
+            'first_name' => $user['prenom'],
+            'last_name' => $user['nom'],
             'loggedIn' => true
         ];
         
@@ -64,8 +74,8 @@ try {
         $response['success'] = true;
         $response['redirect'] = '/dashboard';
         $response['user'] = [
-            'firstName' => $user['first_name'],
-            'lastName' => $user['last_name'],
+            'firstName' => $user['prenom'],
+            'lastName' => $user['nom'],
             'email' => $user['email']
         ];
     } else {

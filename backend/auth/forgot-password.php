@@ -32,15 +32,37 @@ if (!empty($response['errors'])) {
     exit;
 }
 
-// Here you would typically:
-// 1. Check if the email exists in your database
-// 2. Generate a secure token
-// 3. Store the token with an expiry time
-// 4. Send an email with a reset link
+// Connect to database
+require_once('../db_connection.php');
 
-// For this example, we'll simulate success
-$response['success'] = true;
-$response['message'] = 'Password reset email sent successfully';
+try {
+    // Check if the email exists
+    $stmt = $pdo->prepare("SELECT auth_id FROM auth WHERE email = ?");
+    $stmt->execute([$email]);
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    if ($user) {
+        // Generate a secure token
+        $token = bin2hex(random_bytes(32));
+        
+        // Store the token in the database
+        $stmt = $pdo->prepare("UPDATE auth SET token = ? WHERE auth_id = ?");
+        $stmt->execute([$token, $user['auth_id']]);
+        
+        // In a real application, send an email with the reset link
+        // For this example, we'll simulate that step
+        
+        $response['success'] = true;
+        $response['message'] = 'Password reset email sent successfully';
+    } else {
+        // We don't want to reveal if an email exists or not for security reasons
+        // So we'll still return success even if email doesn't exist
+        $response['success'] = true;
+        $response['message'] = 'If your email exists in our system, you will receive a password reset link';
+    }
+} catch (PDOException $e) {
+    $response['errors']['general'] = 'Database error: ' . $e->getMessage();
+}
 
 echo json_encode($response);
 ?>

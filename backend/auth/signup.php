@@ -68,7 +68,7 @@ require_once('../db_connection.php');
 
 try {
     // Check if email already exists
-    $stmt = $pdo->prepare("SELECT COUNT(*) FROM users WHERE email = ?");
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM auth WHERE email = ?");
     $stmt->execute([$email]);
     $emailExists = (bool)$stmt->fetchColumn();
     
@@ -78,18 +78,31 @@ try {
         exit;
     }
     
+    // Begin transaction to ensure both records are created
+    $pdo->beginTransaction();
+    
     // Hash the password
     $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
     
-    // Insert the user into the database
-    $stmt = $pdo->prepare("INSERT INTO users (email, first_name, last_name, hashed_password, created_at) VALUES (?, ?, ?, ?, NOW())");
-    $stmt->execute([$email, $firstName, $lastName, $hashedPassword]);
+    // Insert the auth record
+    $stmt = $pdo->prepare("INSERT INTO auth (email, mot_de_passe, date_creation) VALUES (?, ?, CURDATE())");
+    $stmt->execute([$email, $hashedPassword]);
+    
+    $authId = $pdo->lastInsertId();
+    
+    // Insert the user record
+    $stmt = $pdo->prepare("INSERT INTO utilisateurs (nom, prenom, date_inscription, auth_id) VALUES (?, ?, CURDATE(), ?)");
+    $stmt->execute([$lastName, $firstName, $authId]);
     
     $userId = $pdo->lastInsertId();
+    
+    // Commit the transaction
+    $pdo->commit();
     
     // Create session for the new user
     $_SESSION['user'] = [
         'id' => $userId,
+        'auth_id' => $authId,
         'email' => $email,
         'first_name' => $firstName,
         'last_name' => $lastName,
@@ -105,6 +118,10 @@ try {
     $response['redirect'] = $redirectUrl;
     
 } catch (PDOException $e) {
+    // Roll back the transaction if something failed
+    if ($pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
     $response['errors']['general'] = 'Database error: ' . $e->getMessage();
 }
 

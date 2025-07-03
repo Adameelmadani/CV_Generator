@@ -1,4 +1,3 @@
-
 <?php
 // Add CORS headers
 header("Access-Control-Allow-Origin: http://localhost:3000"); 
@@ -48,15 +47,33 @@ if (!empty($response['errors'])) {
     exit;
 }
 
-// Here you would:
-// 1. Validate the token in your database
-// 2. Check if it's expired
-// 3. Update the user's password
-// 4. Invalidate the token so it can't be used again
+// Connect to database
+require_once('../db_connection.php');
 
-// For this example, we'll simulate a successful password reset
-$response['success'] = true;
-$response['message'] = 'Password has been successfully reset';
+try {
+    // Find the user with the given token
+    $stmt = $pdo->prepare("SELECT auth_id FROM auth WHERE token = ?");
+    $stmt->execute([$token]);
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    if (!$user) {
+        $response['errors']['general'] = 'Invalid or expired token';
+        echo json_encode($response);
+        exit;
+    }
+    
+    // Hash the new password
+    $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+    
+    // Update the user's password and clear the token
+    $stmt = $pdo->prepare("UPDATE auth SET mot_de_passe = ?, token = NULL WHERE auth_id = ?");
+    $stmt->execute([$hashedPassword, $user['auth_id']]);
+    
+    $response['success'] = true;
+    $response['message'] = 'Password has been successfully reset';
+} catch (PDOException $e) {
+    $response['errors']['general'] = 'Database error: ' . $e->getMessage();
+}
 
 echo json_encode($response);
 ?>

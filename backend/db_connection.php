@@ -1,6 +1,6 @@
 <?php
 // Database connection configuration
-$dsn = "mysql:host=localhost;dbname=cv_generator";
+$dsn = "mysql:host=localhost;dbname=cv_craft";
 $dbusername = "root";
 $dbpassword = "";
 
