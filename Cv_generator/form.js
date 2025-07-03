@@ -327,7 +327,7 @@ async function loadCVForEdit(cvId) {
     console.log('🚀 Chargement du CV pour édition, ID:', cvId);
     
     try {
-        const response = await fetch(`get_edit_cv_data.php?cv_id=${cvId}`, {
+        const response = await fetch(`get_cv_data_simple.php?cv_id=${cvId}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',

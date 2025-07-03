@@ -74,7 +74,7 @@
       <div class="main-content">
         <!-- Form Section -->
         <div class="form-section">
-          <form id="cvForm" action="generate_cv.php" method="POST" enctype="multipart/form-data">
+          <form id="cvForm" method="POST" enctype="multipart/form-data" action="javascript:void(0);" onsubmit="return false;">
             <div class="form-container">
               <!-- Hidden field for CV editing -->
               <input type="hidden" id="editing_cv_id" name="editing_cv_id" value="" />
@@ -317,7 +317,7 @@
           <button type="button" class="nav-btn" id="nextBtn" onclick="changeStep(1)">
             Suivant →
           </button>
-          <button type="submit" class="nav-btn" id="submitBtn" style="display: none">
+          <button type="button" class="nav-btn" id="submitBtn" style="display: none">
             Générer CV
           </button>
         </div>
@@ -465,6 +465,13 @@
 
       // Add form submission debugging
       document.addEventListener('DOMContentLoaded', function() {
+        console.log('🚀 DOM Content Loaded - Initializing form...');
+        
+        // Optional session check on load - don't redirect if it fails
+        checkSessionStatus().catch(error => {
+          console.warn('⚠️ Initial session check failed, but continuing:', error);
+        });
+        
         const form = document.getElementById('cvForm');
         
         // Initialize live preview
@@ -506,53 +513,172 @@
           });
         }
         
-        form.addEventListener('submit', function(e) {
-          console.log('🔥 Form submission started!');
-          console.log('Form action:', this.action);
-          console.log('Form method:', this.method);
+        if (form) {
+          // Remove any existing action to prevent redirect
+          form.removeAttribute('action');
+          form.setAttribute('action', 'javascript:void(0);');
+          form.setAttribute('onsubmit', 'return false;');
           
-          // Check only the required fields that should be filled
-          const basicRequiredFields = [
-            'nom', 'prenom', 'location', 'email', 'telephone', 'profil_description'
-          ];
+          // Multiple ways to prevent form submission
+          form.addEventListener('submit', function(e) {
+            console.log('🚫 Form submit intercepted!');
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            
+            // Call our custom handler instead
+            handleFormSubmissionDirectly();
+            return false;
+          }, true); // Use capture phase
           
-          let missingFields = [];
+          // Override form submit method
+          form.submit = function() {
+            console.log('🚫 Form.submit() method overridden!');
+            handleFormSubmissionDirectly();
+            return false;
+          };
           
-          basicRequiredFields.forEach(fieldName => {
-            const field = document.querySelector(`[name="${fieldName}"]`);
-            if (field && !field.value.trim()) {
-              missingFields.push(field.placeholder || fieldName);
-            }
+          console.log('✅ Form submission completely blocked');
+        } else {
+          console.error('❌ Form not found!');
+        }
+        
+        // Additional safeguard: Override form onsubmit
+        if (form) {
+          form.onsubmit = function(e) {
+            console.log('🚫 Form onsubmit override triggered!');
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // Call our custom handler instead
+            handleFormSubmissionDirectly();
+            return false;
+          };
+          
+          console.log('✅ Form submission handlers installed successfully');
+        }
+        
+        // Add click handler to submit button
+        const submitBtn = document.getElementById('submitBtn');
+        if (submitBtn) {
+          // Remove any existing event listeners by cloning the node
+          const newSubmitBtn = submitBtn.cloneNode(true);
+          submitBtn.parentNode.replaceChild(newSubmitBtn, submitBtn);
+          
+          // Add our custom click handler
+          newSubmitBtn.addEventListener('click', function(e) {
+            console.log('🖱️ Submit button clicked!');
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            
+            // Don't trigger form submission - handle directly
+            handleFormSubmissionDirectly();
           });
           
-          if (missingFields.length > 0) {
-            console.log('❌ Missing required fields:', missingFields);
-            alert('Veuillez remplir tous les champs obligatoires:\n' + missingFields.join('\n'));
+          // Also prevent any form submission that might be triggered
+          newSubmitBtn.addEventListener('submit', function(e) {
+            console.log('🚫 Submit event on button intercepted!');
             e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
             return false;
-          } else {
-            console.log('✅ All required fields filled');
-          }
+          });
           
-          // Log form data
-          const formData = new FormData(this);
-          console.log('📋 Form data:');
-          for (let [key, value] of formData.entries()) {
-            console.log(`${key}: ${value}`);
-          }
+          console.log('✅ Submit button click handler installed');
+        }
+        
+        // COMPREHENSIVE FORM SUBMISSION BLOCKER
+        // This absolutely prevents any form submission from happening
+        if (form) {
+          // Replace the form's action completely
+          form.action = 'javascript:void(0);';
+          form.method = 'GET';  // Change to GET to prevent POST redirect
           
-          // Show loading message
-          const submitBtn = document.getElementById('submitBtn');
-          const originalText = submitBtn.innerHTML;
-          submitBtn.innerHTML = 'Génération en cours...';
-          submitBtn.disabled = true;
+          // Create a bulletproof event blocker
+          const blockSubmission = function(e) {
+            console.log('🛑 BLOCKING FORM SUBMISSION!');
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            
+            // Instead, call our custom handler
+            handleFormSubmissionDirectly();
+            return false;
+          };
           
-          // Reset button after download completes
-          resetButtonAfterDownload(submitBtn, originalText);
+          // Block ALL possible submission events
+          form.addEventListener('submit', blockSubmission, true);
+          form.addEventListener('submit', blockSubmission, false);
           
-          console.log('🚀 Form submitting to:', this.action);
-        });
+          // Override ALL submit-related methods
+          form.submit = blockSubmission;
+          form.onsubmit = blockSubmission;
+          
+          // Block Enter key submissions
+          form.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && e.target.type !== 'textarea') {
+              console.log('🛑 BLOCKING ENTER KEY SUBMISSION!');
+              e.preventDefault();
+              e.stopPropagation();
+              e.stopImmediatePropagation();
+              return false;
+            }
+          }, true);
+          
+          // Monitor for any button clicks that might trigger submission
+          document.addEventListener('click', function(e) {
+            if (e.target.form === form && (e.target.type === 'submit' || e.target.id === 'submitBtn')) {
+              console.log('🛑 BLOCKING BUTTON SUBMISSION!');
+              e.preventDefault();
+              e.stopPropagation();
+              e.stopImmediatePropagation();
+              
+              // Call our custom handler instead
+              handleFormSubmissionDirectly();
+              return false;
+            }
+          }, true);
+          
+          console.log('🛡️ COMPREHENSIVE FORM SUBMISSION BLOCKER INSTALLED');
+        }
+        
+        // Additional initialization for enhanced features
+        initializeEnhancedFeatures();
       });
+      
+      // Function to check session status
+      async function checkSessionStatus() {
+        try {
+          console.log('🔍 Checking session status...');
+          
+          const response = await fetch('../Login_Signup/check_session.php');
+          
+          if (!response.ok) {
+            console.warn('⚠️ Session check failed with status:', response.status);
+            // Don't fail hard if session check endpoint has issues
+            return true; // Assume session is valid for now
+          }
+          
+          const result = await response.json();
+          console.log('📋 Session status:', result);
+          
+          if (!result.logged_in) {
+            console.warn('⚠️ User not logged in!');
+            alert('Session expirée. Vous allez être redirigé vers la page de connexion.');
+            window.location.href = '../Login_Signup/auth.html';
+            return false;
+          }
+          
+          console.log('✅ User session valid:', result);
+          return true;
+        } catch (error) {
+          console.error('❌ Error checking session:', error);
+          // Don't fail the form submission if session check has network issues
+          console.log('⚠️ Session check failed, continuing anyway...');
+          return true;
+        }
+      }
 
       function showStep(step) {
         // Hide all step contents
@@ -703,7 +829,7 @@
             headerTitle.textContent = 'Chargement du CV...';
           }
           
-          const response = await fetch(`get_cv_data.php?cv_id=${cvId}`);
+          const response = await fetch(`get_cv_data_mvc.php?cv_id=${cvId}`);
           const result = await response.json();
           
           if (result.status === 'success' && result.cv.data) {
@@ -1347,8 +1473,8 @@
             </div>
           `;
           
-          // Make API call to generate PDF preview
-          const response = await fetch('generate_live_preview.php', {
+          // Make API call to generate PDF preview (using actual MVC endpoint)
+          const response = await fetch('generate_live_preview_mvc.php', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -1356,7 +1482,23 @@
             body: JSON.stringify(jsonData)
           });
           
-          const result = await response.json();
+          // Check if response is OK and contains JSON
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          
+          const responseText = await response.text();
+          // console.log('🔍 Raw response from server:', responseText); // Removed for cleaner console
+          
+          // Try to parse JSON, catch any errors
+          let result;
+          try {
+            result = JSON.parse(responseText);
+          } catch (parseError) {
+            console.error('❌ JSON Parse Error:', parseError);
+            // console.error('📄 Raw response that failed to parse:', responseText); // Removed for cleaner console
+            throw new Error(`Server returned invalid JSON. Check server logs for details.`);
+          }
           
           if (result.success && result.pdf_base64) {
             // Display PDF using embedded PDF viewer
@@ -1930,6 +2072,103 @@
       document.addEventListener('DOMContentLoaded', function() {
         initializeColorPicker();
       });
+
+      // ============ FORM SUBMISSION HANDLER ============
+      
+      async function handleFormSubmissionDirectly() {
+        console.log('🚀 Custom form submission handler called');
+        
+        const submitBtn = document.getElementById('submitBtn');
+        const originalText = submitBtn.innerHTML;
+        
+        // Disable button and show loading state
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Génération en cours...';
+        
+        try {
+          // Check session first
+          const sessionValid = await checkSessionStatus();
+          if (!sessionValid) {
+            return; // checkSessionStatus will handle redirect
+          }
+          
+          // Get form data
+          const form = document.getElementById('cvForm');
+          const formData = new FormData(form);
+          
+          // Add additional data
+          const editingCvId = document.getElementById('editing_cv_id')?.value;
+          if (editingCvId) {
+            formData.append('editing_cv_id', editingCvId);
+          }
+          
+          console.log('📤 Sending form data...');
+          
+          // Debug: Log the selected format
+          const selectedFormat = document.querySelector('input[name="format"]:checked')?.value || 'pdf';
+          console.log('🎯 Selected download format:', selectedFormat);
+          
+          // Make the API call with proper headers
+          const response = await fetch('generate_cv_mvc.php', {
+            method: 'POST',
+            headers: {
+              'X-Requested-With': 'XMLHttpRequest',
+              'Accept': 'application/json',
+            },
+            body: formData
+          });
+          
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          
+          const result = await response.json();
+          console.log('📥 Server response:', result);
+          
+          if (result.success === true || result.status === 'success') {
+            console.log('✅ CV generated successfully!');
+            
+            // Update button to show success
+            submitBtn.innerHTML = '<i class="fas fa-check"></i> CV généré avec succès!';
+            submitBtn.style.background = '#28a745';
+            
+            // Trigger download immediately without notification
+            if (result.download_url) {
+              window.location.href = result.download_url;
+            } else if (result.pdf_path) {
+              window.location.href = result.pdf_path;
+            } else if (result.cv_id) {
+              // Fallback: construct download URL from CV ID with correct parameters
+              // Get the selected format from the form
+              const selectedFormat = document.querySelector('input[name="format"]:checked')?.value || 'pdf';
+              window.location.href = 'download_cv_mvc.php?id=' + result.cv_id + '&format=' + selectedFormat;
+            }
+            
+            // Reset button after download
+            resetButtonAfterDownload(submitBtn, originalText);
+            
+          } else {
+            console.error('❌ Server error:', result.message);
+            alert('Erreur: ' + (result.message || 'Erreur inconnue lors de la génération du CV'));
+            
+            // Reset button
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+            submitBtn.style.background = '';
+          }
+          
+        } catch (error) {
+          console.error('❌ Form submission error:', error);
+          alert('Erreur lors de la génération du CV: ' + error.message);
+          
+          // Reset button
+          submitBtn.innerHTML = originalText;
+          submitBtn.disabled = false;
+          submitBtn.style.background = '';
+        }
+      }
+      
+      // ============ END FORM SUBMISSION HANDLER ============
     </script>
   </body>
 </html>

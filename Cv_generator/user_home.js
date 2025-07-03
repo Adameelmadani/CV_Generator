@@ -40,20 +40,81 @@ async function loadUserCVs() {
     emptyElement.style.display = 'none';
     gridElement.innerHTML = '';
     
+    console.log('Loading user CVs...');
+    
     try {
-        const response = await fetch('get_user_cvs.php');
-        const result = await response.json();
+        const response = await fetch('get_user_cvs_mvc.php');
+        console.log('Response status:', response.status);
+        console.log('Response headers:', [...response.headers.entries()]);
+        
+        const text = await response.text();
+        console.log('Raw response:', text);
+        
+        // Check if response is actually JSON
+        if (!text.startsWith('{') && !text.startsWith('[')) {
+            console.error('Response is not JSON. Likely PHP error output:', text);
+            
+            // Show helpful error message
+            const errorMessage = `
+Server Error Detected:
+
+The server returned HTML/PHP error output instead of JSON. This usually means:
+
+1. PHP errors/warnings are being displayed
+2. Missing database table 'user_cvs'
+3. PHP configuration issues
+
+Raw server response:
+${text.substring(0, 500)}${text.length > 500 ? '...' : ''}
+
+To fix this:
+1. Open browser console and run: debugSessionAndDB()
+2. Or visit: check_db_table.php directly
+3. Or run: setup_database.php to create missing tables
+
+Contact support if this persists.
+            `;
+            
+            console.error(errorMessage);
+            
+            // Show user-friendly popup
+            if (confirm('Server configuration error detected. Would you like to run automatic diagnostics?')) {
+                await debugSessionAndDB();
+            }
+            
+            throw new Error('Server returned non-JSON response. Check server logs for PHP errors.');
+        }
+        
+        const result = JSON.parse(text);
+        console.log('Parsed result:', result);
         
         if (result.status === 'success') {
             userCVs = result.cvs;
+            console.log('CVs loaded:', userCVs.length, 'CVs found');
             displayCVs();
         } else {
-            console.error('Erreur lors du chargement des CV:', result.message);
+            console.error('Error loading CVs:', result.message);
+            if (result.debug) {
+                console.log('Debug info:', result.debug);
+            }
             emptyElement.style.display = 'block';
+            
+            // If it's an authentication error, redirect to login
+            if (result.message && result.message.includes('Authentication')) {
+                alert('Session expired. Redirecting to login...');
+                window.location.href = '../Login_Signup/auth.html';
+                return;
+            }
         }
     } catch (error) {
-        console.error('Erreur réseau:', error);
+        console.error('Network/Parse error:', error);
+        console.error('This usually indicates PHP errors being output before JSON response');
         emptyElement.style.display = 'block';
+        
+        // Show user-friendly error message
+        if (error.message.includes('Unexpected token')) {
+            console.error('JSON Parse Error - Server likely returned HTML/PHP errors instead of JSON');
+        }
     } finally {
         loadingElement.style.display = 'none';
     }
@@ -159,7 +220,7 @@ async function previewCV(cvId) {
         
         // Générer l'aperçu PDF avec LaTeX (preview_cv.php)
         console.log('Generating LaTeX preview for CV ID:', cvId);
-        const response = await fetch('preview_cv.php', {
+        const response = await fetch('preview_cv_mvc.php', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -209,7 +270,7 @@ async function previewCV(cvId) {
 
 // Modifier un CV
 function editCV(cvId) {
-    window.location.href = `get_cv_for_edit.php?cv_id=${cvId}`;
+    window.location.href = `get_cv_for_edit_mvc.php?cv_id=${cvId}`;
 }
 
 // Télécharger un CV (fonction modifiée pour utiliser la modale de sélection)
@@ -220,7 +281,7 @@ function downloadCV(cvId) {
 // Ancienne fonction de téléchargement direct (conservée pour compatibilité)
 async function downloadCVDirect(cvId, format = 'pdf') {
     try {
-        const response = await fetch('download_cv.php', {
+        const response = await fetch('download_cv_mvc.php', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -266,7 +327,7 @@ async function confirmDelete() {
     if (!currentCVForDelete) return;
     
     try {
-        const response = await fetch('delete_cv.php', {
+        const response = await fetch('delete_cv_mvc.php', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -325,7 +386,7 @@ async function confirmDownload() {
     const format = selectedFormat.value;
     
     try {
-        const response = await fetch('download_cv.php', {
+        const response = await fetch('download_cv_mvc.php', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -521,7 +582,7 @@ function setupEventListeners() {
         importBtn.disabled = true;
         
         try {
-            const response = await fetch('import_cv.php', {
+            const response = await fetch('import_cv_mvc.php', {
                 method: 'POST',
                 body: formData
             });
@@ -567,3 +628,28 @@ function setupEventListeners() {
         }
     });
 }
+
+// Debug function to help troubleshoot issues
+async function debugSessionAndDB() {
+    try {
+        const response = await fetch('debug_session_and_db.php');
+        const debugInfo = await response.json();
+        console.log('=== DEBUG INFO ===');
+        console.log(debugInfo);
+        
+        // Display in a more user-friendly way
+        const debugWindow = window.open('', 'debug', 'width=800,height=600');
+        debugWindow.document.write('<html><head><title>Debug Info</title></head><body>');
+        debugWindow.document.write('<h1>Debug Information</h1>');
+        debugWindow.document.write('<pre>' + JSON.stringify(debugInfo, null, 2) + '</pre>');
+        debugWindow.document.write('</body></html>');
+        
+        return debugInfo;
+    } catch (error) {
+        console.error('Debug request failed:', error);
+        alert('Debug request failed: ' + error.message);
+    }
+}
+
+// Add debug to window for console access
+window.debugSessionAndDB = debugSessionAndDB;

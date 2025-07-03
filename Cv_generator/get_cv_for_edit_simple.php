@@ -1,17 +1,29 @@
 <?php
-session_start();
-include('../Login_Signup/db_connection.php');
+// Simple working version of get_cv_for_edit
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
-// Vérifier si l'utilisateur est connecté
+session_start();
+
+// Simple database connection
+try {
+    $pdo = new PDO("mysql:host=localhost;dbname=cv_generator;charset=utf8mb4", "root", "", [
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+    ]);
+} catch (PDOException $e) {
+    header('Location: user_home.html?error=database_error');
+    exit();
+}
+
+// Check if user is logged in
 if (!isset($_SESSION['userId'])) {
-    // Rediriger vers la page de connexion si pas connecté
     header('Location: ../Login_Signup/auth.html');
     exit();
 }
 
-// Vérifier que le CV ID est fourni via GET
+// Check CV ID parameter
 if (!isset($_GET['cv_id']) || empty($_GET['cv_id'])) {
-    // Rediriger vers la page d'accueil utilisateur si pas de CV ID
     header('Location: user_home.html?error=cv_id_required');
     exit();
 }
@@ -20,25 +32,23 @@ $cvId = intval($_GET['cv_id']);
 $userId = $_SESSION['userId'];
 
 try {
-    // Vérifier que le CV existe et appartient à l'utilisateur
+    // Verify CV exists and belongs to user
     $sql = "SELECT id FROM user_cvs WHERE id = :cv_id AND user_id = :user_id";
     $stmt = $pdo->prepare($sql);
     $stmt->execute([':cv_id' => $cvId, ':user_id' => $userId]);
-    $cv = $stmt->fetch(PDO::FETCH_ASSOC);
+    $cv = $stmt->fetch();
     
     if (!$cv) {
-        // Rediriger vers la page d'accueil avec message d'erreur
         header('Location: user_home.html?error=cv_not_found');
         exit();
     }
     
-    // Rediriger vers home.html avec le paramètre d'édition
+    // Redirect to home.html with edit parameter
     header('Location: home.html?edit=' . $cvId);
     exit();
     
 } catch (Exception $e) {
-    // Logger l'erreur et rediriger avec message d'erreur
-    error_log("Erreur get_cv_for_edit.php: " . $e->getMessage());
+    error_log("Error in get_cv_for_edit_simple: " . $e->getMessage());
     header('Location: user_home.html?error=database_error');
     exit();
 }
