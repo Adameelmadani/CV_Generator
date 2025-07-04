@@ -475,10 +475,10 @@ class CVController extends Controller {
             for ($i = 0; $i < count($education_dates); $i++) {
                 if (!empty($education_degree[$i]) || !empty($education_dates[$i])) {
                     $xmlContent .= "    <degree>\n"
-                                . "      <title>"      . htmlspecialchars($education_degree[$i] ?? '')    . "</title>\n"
-                                . "      <period>"     . htmlspecialchars($education_dates[$i] ?? '')     . "</period>\n"
-                                . "      <institution>". htmlspecialchars($education_university[$i] ?? '') . "</institution>\n"
-                                . "      <field>"      . htmlspecialchars($education_field[$i] ?? '')      . "</field>\n";
+                                . "      <title>"      . ($education_degree[$i] ?? '')    . "</title>\n"
+                                . "      <period>"     . ($education_dates[$i] ?? '')     . "</period>\n"
+                                . "      <institution>". ($education_university[$i] ?? '') . "</institution>\n"
+                                . "      <field>"      . ($education_field[$i] ?? '')      . "</field>\n";
                     if (trim($education_details[$i] ?? '') !== "") {
                         $xmlContent .= "      <description>" . ($education_details[$i] ?? ''). "</description>\n";
                     }
@@ -683,12 +683,8 @@ class CVController extends Controller {
                 if (!empty($detail)) {
                     $highlights .= "\\item " . $detail . "\n            ";
                 }
-                if (!empty($field)) {
-                    $highlights .= "\\item Field: " . $field . "\n            ";
-                }
-
-                $sectionEducation .= "    \\educationentry{" . $dates . "}{" . $degreeTitle . "}{" . $university . "}{}{" . $highlights . "}\n\n";
-                    }
+                $sectionEducation .= "    \\experienceentry{" . $dates . "}{}{" . $degreeTitle . " en " . $field . "}{" . $university . "}{" . $highlights . "}\n\n";
+            }
         }
         
         // Certificates Section
@@ -786,8 +782,8 @@ class CVController extends Controller {
         }
         
         $sectionFooter = "\\end{document}";
-        
-        $latexContent = $sectionHeader . $sectionProfil . $sectionEducation . $sectionCertificates . $sectionExperience . $sectionProjects . $sectionSkills . $sectionLanguages . $sectionFooter;
+
+        $latexContent = $sectionHeader . $sectionProfil . $sectionEducation . $sectionExperience . $sectionProjects . $sectionCertificates . $sectionSkills . $sectionLanguages . $sectionFooter;
 
         // Write LaTeX file
         // Generate LaTeX filename based on mode

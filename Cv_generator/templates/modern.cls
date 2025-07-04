@@ -201,15 +201,20 @@
             \kern 0.25 cm%
             \AND%
             \kern 0.25 cm%
-            \mbox{\hrefWithoutArrow{#6}{{\footnotesize\faLink}\hspace*{0.13cm}Website}}%
-            \kern 0.25 cm%
-            \AND%
-            \kern 0.25 cm%
-            \mbox{\hrefWithoutArrow{#7}{{\footnotesize\faLinkedinIn}\hspace*{0.13cm}LinkedIn}}%
-            \kern 0.25 cm%
-            \AND%
-            \kern 0.25 cm%
-            \mbox{\hrefWithoutArrow{#8}{{\footnotesize\faGithub}\hspace*{0.13cm}GitHub}}%
+            \ifx\empty#6\empty\else%
+                \mbox{\hrefWithoutArrow{#6}{{\footnotesize\faLink}\hspace*{0.13cm}Website}}%
+                \kern 0.25 cm%
+                \ifx\empty#7\empty\else\AND\kern 0.25 cm\fi%
+                \ifx\empty#8\empty\else\AND\kern 0.25 cm\fi%
+            \fi%
+            \ifx\empty#7\empty\else%
+                \mbox{\hrefWithoutArrow{#7}{{\footnotesize\faLinkedinIn}\hspace*{0.13cm}LinkedIn}}%
+                \kern 0.25 cm%
+                \ifx\empty#8\empty\else\AND\kern 0.25 cm\fi%
+            \fi%
+            \ifx\empty#8\empty\else%
+                \mbox{\hrefWithoutArrow{#8}{{\footnotesize\faGithub}\hspace*{0.13cm}GitHub}}%
+            \fi%
         }{
             \begin{minipage}{0.2\textwidth}
                 \begin{tikzpicture}
