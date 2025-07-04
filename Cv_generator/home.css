@@ -398,6 +398,7 @@ textarea {
   margin: 0;
 }
 
+/* 
 .preview-header {
   display: flex;
   justify-content: space-between;
@@ -429,7 +430,9 @@ textarea {
 .preview-header h3.error {
   color: #dc3545;
 }
+*/
 
+/*
 .preview-toggle-btn {
   background: rgba(255,255,255,0.2);
   border: none;
@@ -444,11 +447,12 @@ textarea {
 .preview-toggle-btn:hover {
   background: rgba(255,255,255,0.3);
 }
+*/
 
 .preview-container {
   padding: 20px;
   background: white;
-  border-radius: 0 0 15px 15px;
+  border-radius: 15px;
   max-height: 75vh;
   overflow-y: auto;
   position: relative;
