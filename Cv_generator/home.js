@@ -1280,7 +1280,7 @@ let currentStep = 1;
           // Education
           fillFirstEntry('education', {
             'education_degree[]': 'Master en Informatique',
-            'education_dates[]': 'Sept 2018 – Juin 2020',
+            'education_dates[]': '2020',
             'education_university[]': 'Université Pierre et Marie Curie',
             'education_field[]': 'Génie Logiciel',
             'education_details[]': 'Mention Bien - Spécialisation en développement web et architecture logicielle'

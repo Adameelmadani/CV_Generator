@@ -178,37 +178,88 @@
 }
 
 % Header command
-\newcommand{\makeheader}[6]{
+\newcommand{\makeheader}[8]{
     \begin{header}
-        \fontsize{30 pt}{30 pt}
-        \textbf{\@author}
+        % Check if photo parameter is provided and not empty
+        \ifthenelse{\equal{#1}{}}{
+            % No photo case - centered layout
+            \fontsize{30 pt}{30 pt}
+            \textbf{#2}
 
-        \vspace{0.3 cm}
+            \vspace{0.3 cm}
 
-        \normalsize
-        \mbox{{\footnotesize\faMapMarker*}\hspace*{0.13cm}#1}%
-        \kern 0.25 cm%
-        \AND%
-        \kern 0.25 cm%
-        \mbox{\hrefWithoutArrow{mailto:#2}{{\footnotesize\faEnvelope[regular]}\hspace*{0.13cm}#2}}%
-        \kern 0.25 cm%
-        \AND%
-        \kern 0.25 cm%
-        \mbox{\hrefWithoutArrow{tel:#3}{{\footnotesize\faPhone*}\hspace*{0.13cm}#3}}%
-        \kern 0.25 cm%
-        \AND%
-        \kern 0.25 cm%
-        \mbox{\hrefWithoutArrow{#4}{{\footnotesize\faLink}\hspace*{0.13cm}#4}}%
-        \kern 0.25 cm%
-        \AND%
-        \kern 0.25 cm%
-        \mbox{\hrefWithoutArrow{#5}{{\footnotesize\faLinkedinIn}\hspace*{0.13cm}#5}}%
-        \kern 0.25 cm%
-        \AND%
-        \kern 0.25 cm%
-        \mbox{\hrefWithoutArrow{#6}{{\footnotesize\faGithub}\hspace*{0.13cm}#6}}%
+            \normalsize
+            \mbox{{\footnotesize\faMapMarker*}\hspace*{0.13cm}#3}%
+            \kern 0.25 cm%
+            \AND%
+            \kern 0.25 cm%
+            \mbox{\hrefWithoutArrow{mailto:#4}{{\footnotesize\faEnvelope[regular]}\hspace*{0.13cm}#4}}%
+            \kern 0.25 cm%
+            \AND%
+            \kern 0.25 cm%
+            \mbox{\hrefWithoutArrow{tel:#5}{{\footnotesize\faPhone*}\hspace*{0.13cm}#5}}%
+            \kern 0.25 cm%
+            \AND%
+            \kern 0.25 cm%
+            \mbox{\hrefWithoutArrow{#6}{{\footnotesize\faLink}\hspace*{0.13cm}Website}}%
+            \kern 0.25 cm%
+            \AND%
+            \kern 0.25 cm%
+            \mbox{\hrefWithoutArrow{#7}{{\footnotesize\faLinkedinIn}\hspace*{0.13cm}LinkedIn}}%
+            \kern 0.25 cm%
+            \AND%
+            \kern 0.25 cm%
+            \mbox{\hrefWithoutArrow{#8}{{\footnotesize\faGithub}\hspace*{0.13cm}GitHub}}%
+        }{
+            \begin{minipage}{0.2\textwidth}
+                \begin{tikzpicture}
+                    \clip (0,0) circle (1.5cm);
+                    \node at (0,0) {\includegraphics[width=3cm, height=3cm]{#1}};
+                \end{tikzpicture}
+            \end{minipage}
+            \hspace{0.02\textwidth}%
+            \begin{minipage}[t]{0.75\textwidth}
+                \raggedright
+                \fontsize{30 pt}{30 pt}
+                \textbf{#2}
+
+                \vspace{0.3 cm}
+
+                \normalsize
+                \mbox{{\footnotesize\faMapMarker*}\hspace*{0.13cm}#3}%
+                \kern 0.25 cm%
+                \AND%
+                \kern 0.25 cm%
+                \mbox{\hrefWithoutArrow{mailto:#4}{{\footnotesize\faEnvelope[regular]}\hspace*{0.13cm}#4}}%
+                \kern 0.25 cm%
+                \AND%
+                \kern 0.25 cm%
+                \mbox{\hrefWithoutArrow{tel:#5}{{\footnotesize\faPhone*}\hspace*{0.13cm}#5}}%
+                \kern 0.25 cm%
+                \AND%
+                \kern 0.25 cm%
+                \mbox{\hrefWithoutArrow{#6}{{\footnotesize\faLink}\hspace*{0.13cm}Website}}%
+                \kern 0.25 cm%
+                \AND%
+                \kern 0.25 cm%
+                \mbox{\hrefWithoutArrow{#7}{{\footnotesize\faLinkedinIn}\hspace*{0.13cm}LinkedIn}}%
+                \kern 0.25 cm%
+                \AND%
+                \kern 0.25 cm%
+                \mbox{\hrefWithoutArrow{#8}{{\footnotesize\faGithub}\hspace*{0.13cm}GitHub}}%
+            \end{minipage}
+        }
     \end{header}
     \vspace{0.3 cm}
+}
+
+% Profil entry command
+\newcommand{\proflentry}[1]{
+    \begin{samepage}
+        \begin{onecolentry}
+            #1
+        \end{onecolentry}
+    \end{samepage}
 }
 
 % Publication entry command
@@ -224,7 +275,7 @@
     \end{samepage}
 }
 
-% Experience entry command  
+% Experience entry command
 \newcommand{\experienceentry}[5]{
     \begin{twocolentry}{#1 \\ #2}
         \textbf{#3}, #4

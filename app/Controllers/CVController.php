@@ -635,9 +635,10 @@ class CVController extends Controller {
         // Color definitions
         $primaryColorRGB = $this->hexToRgb($primaryColor);
         $sectionHeader .= "\\definecolor{primaryColor}{RGB}{" . $primaryColorRGB['r'] . ", " . $primaryColorRGB['g'] . ", " . $primaryColorRGB['b'] . "}\n\n";
-
+        
+        $sectionHeader .= "\\author{" . $prenom . " " . $nom . "}\n\n";
+        
         $sectionHeader .= "\\begin{document}\n";
-        $sectionHeader .= "    \\begin{header}\n";
         
         // Handle photo
         $photoForLatex = '';
@@ -654,46 +655,9 @@ class CVController extends Controller {
                 $photoForLatex = '';
             }
         }
+        // Use the class's makeheader command - fixed parameter order
+        $sectionHeader .= "    \\makeheader{" . $photoForLatex . "}{" . $prenom . " " . $nom . "}{" . $location . "}{" . $email . "}{" . $telephone . "}{" . $website . "}{" . $linkedin . "}{" . $github . "}\n\n";
         
-        if (!empty($photoForLatex) && file_exists($workingDir . $photoForLatex)) {
-            $sectionHeader .= "        % Photo and name in a minipage\n";
-            $sectionHeader .= "        \\begin{minipage}{0.2\\textwidth}\n";
-            $sectionHeader .= "            \\begin{tikzpicture}\n";
-            $sectionHeader .= "                \\clip (0,0) circle (1.25cm);\n";
-            $sectionHeader .= "                \\node[anchor=center] at (0,0) {\\includegraphics[width=2.5cm, height=2.5cm]{" . $photoForLatex . "}};\n";
-            $sectionHeader .= "            \\end{tikzpicture}\n";
-            $sectionHeader .= "        \\end{minipage}%\n";
-            $sectionHeader .= "        \\begin{minipage}{0.75\\textwidth}\n";
-        } else {
-            $sectionHeader .= "        \\begin{minipage}{0.95\\textwidth}\n";
-        }
-        
-        $sectionHeader .= "            \\raggedright\n";
-        $sectionHeader .= "            \\fontsize{22 pt}{22 pt}\n";
-        $sectionHeader .= "            \\textbf{" . $prenom . " " . $nom . "}\n\n";
-        $sectionHeader .= "            \\vspace{0.1 cm}\n\n";
-        $sectionHeader .= "            \\normalsize\n";
-        $sectionHeader .= "            \\mbox{{\\footnotesize\\faMapMarker*}\\hspace*{0.1cm}" . $location . "}%\n";
-        $sectionHeader .= "            \\kern 0.1 cm%\n";
-        $sectionHeader .= "            \\AND%\n";
-        $sectionHeader .= "            \\kern 0.1cm\n";
-        $sectionHeader .= "            \\mbox{\\hrefWithoutArrow{mailto:" . $email . "}{{\\footnotesize\\faEnvelope[regular]}\\hspace*{0.1cm}" . $email . "}}%\n";
-        $sectionHeader .= "            \\kern 0.1 cm%\n";
-        $sectionHeader .= "            \\AND%\n";
-        $sectionHeader .= "            \\kern 0.1 cm%\n";
-        $sectionHeader .= "            \\mbox{\\hrefWithoutArrow{tel:" . $telephone . "}{{\\footnotesize\\faPhone*}\\hspace*{0.1cm}" . $telephone . "}}%\n";
-        $sectionHeader .= "            \\kern 0.1 cm%\n";
-        $sectionHeader .= "            \\AND%\n";
-        $sectionHeader .= "            \\kern 0.1 cm%\n";
-        $sectionHeader .= "            \\mbox{\\hrefWithoutArrow{" . $linkedin . "}{{\\footnotesize\\faLinkedinIn}\\hspace*{0.1cm} Linkedin}}%\n";
-        $sectionHeader .= "            \\kern 0.1 cm%\n";
-        $sectionHeader .= "            \\AND%\n";
-        $sectionHeader .= "            \\mbox{\\hrefWithoutArrow{" . $github. "}{\\footnotesize\\faGithub\\hspace*{0.1cm} Github}}%\n";
-        $sectionHeader .= "            \\kern 0.1cm\n";
-        $sectionHeader .= "        \\end{minipage}\n";
-        $sectionHeader .= "    \\end{header}\n\n";
-        $sectionHeader .= "    \\vspace{0.1 cm}\n\n";
-
         // Profile section
         $sectionProfil = "";
         if (!empty($profil)) {
@@ -714,24 +678,18 @@ class CVController extends Controller {
                 $field = (string)$degree->field;
                 $detail = (string)$degree->description;
 
-                $sectionEducation .= "    \\begin{onecolentry}\n";
-                $sectionEducation .= "        \\textbf{" . htmlspecialchars($degreeTitle) . "} \\hfill " . htmlspecialchars($dates) . " \\\\\n";
-                if (!empty($university)) {
-                    $sectionEducation .= "        \\textit{" . htmlspecialchars($university) . "}";
-                    if (!empty($field)) {
-                        $sectionEducation .= " \\hfill " . htmlspecialchars($field);
-                    }
-                    $sectionEducation .= " \\\\\n";
-                }
+                // Prepare highlights
+                $highlights = "";
                 if (!empty($detail)) {
-                    $sectionEducation .= "        " . $detail . "\n";
+                    $highlights .= "\\item " . $detail . "\n            ";
                 }
-                $sectionEducation .= "    \\end{onecolentry}\n\n";
-                $sectionEducation .= "    \\vspace{0.05 cm}\n\n";
-            }
-        }
+                if (!empty($field)) {
+                    $highlights .= "\\item Field: " . $field . "\n            ";
+                }
 
-        // Similar sections for certificates, experiences, projects, skills, and languages...
+                $sectionEducation .= "    \\educationentry{" . $dates . "}{" . $degreeTitle . "}{" . $university . "}{}{" . $highlights . "}\n\n";
+                    }
+        }
         
         // Certificates Section
         $sectionCertificates = "";
@@ -744,29 +702,15 @@ class CVController extends Controller {
                 $certLocation = (string)$cert->location;
                 $certDescription = (string)$cert->description;
 
-                if (!empty($certName)) {
-                    $sectionCertificates .= "    \\begin{onecolentry}\n";
-                    $sectionCertificates .= "        \\textbf{" . htmlspecialchars($certName) . "}";
-                    if (!empty($certDate)) {
-                        $sectionCertificates .= " \\hfill " . htmlspecialchars($certDate);
-                    }
-                    $sectionCertificates .= " \\\\\n";
-                    
-                    if (!empty($certIssuer)) {
-                        $sectionCertificates .= "        \\textit{" . htmlspecialchars($certIssuer) . "}";
-                        if (!empty($certLocation)) {
-                            $sectionCertificates .= " \\hfill " . htmlspecialchars($certLocation);
-                        }
-                        $sectionCertificates .= " \\\\\n";
-                    }
-                    
-                    if (!empty($certDescription)) {
-                        $sectionCertificates .= "        " . htmlspecialchars($certDescription) . "\n";
-                    }
-                    
-                    $sectionCertificates .= "    \\end{onecolentry}\n\n";
-                    $sectionCertificates .= "    \\vspace{0.05 cm}\n\n";
+               $highlights = "";
+                if (!empty($certDescription)) {
+                    $highlights .= "\\item " . $certDescription . "\n            ";
                 }
+                if (!empty($certLocation)) {
+                    $highlights .= "\\item Location: " . $certLocation . "\n            ";
+                }
+
+                $sectionCertificates .= "    \\experienceentry{" . $certDate . "}{}{" . $certName . "}{" . $certIssuer . "}{" . $highlights . "}\n\n";
             }
         }
 
@@ -781,29 +725,18 @@ class CVController extends Controller {
                 $expLocation = (string)$exp->location;
                 $expDescription = (string)$exp->description;
 
-                if (!empty($expPosition) || !empty($expCompany)) {
-                    $sectionExperience .= "    \\begin{onecolentry}\n";
-                    $sectionExperience .= "        \\textbf{" . htmlspecialchars($expPosition) . "}";
-                    if (!empty($expDates)) {
-                        $sectionExperience .= " \\hfill " . htmlspecialchars($expDates);
-                    }
-                    $sectionExperience .= " \\\\\n";
-                    
-                    if (!empty($expCompany)) {
-                        $sectionExperience .= "        \\textit{" . htmlspecialchars($expCompany) . "}";
-                        if (!empty($expLocation)) {
-                            $sectionExperience .= " \\hfill " . htmlspecialchars($expLocation);
+                 // Convert description to highlights format
+                $highlights = "";
+                if (!empty($expDescription)) {
+                    $descriptionLines = array_filter(array_map('trim', explode("\n", $expDescription)));
+                    foreach ($descriptionLines as $line) {
+                        if (!empty($line)) {
+                            $highlights .= "\\item " . $line . "\n            ";
                         }
-                        $sectionExperience .= " \\\\\n";
                     }
-                    
-                    if (!empty($expDescription)) {
-                        $sectionExperience .= "        " . htmlspecialchars($expDescription) . "\n";
-                    }
-                    
-                    $sectionExperience .= "    \\end{onecolentry}\n\n";
-                    $sectionExperience .= "    \\vspace{0.05 cm}\n\n";
                 }
+
+                $sectionExperience .= "    \\experienceentry{" . $expDates . "}{" . $expLocation . "}{" . $expPosition . "}{" . $expCompany . "}{" . $highlights . "}\n\n";
             }
         }
 
@@ -816,21 +749,15 @@ class CVController extends Controller {
                 $projectLink = (string)$project->link;
                 $projectDescription = (string)$project->description;
 
-                if (!empty($projectName)) {
-                    $sectionProjects .= "    \\begin{onecolentry}\n";
-                    $sectionProjects .= "        \\textbf{" . htmlspecialchars($projectName) . "}";
-                    if (!empty($projectLink)) {
-                        $sectionProjects .= " \\hfill \\href{" . htmlspecialchars($projectLink) . "}{Lien}";
-                    }
-                    $sectionProjects .= " \\\\\n";
-                    
-                    if (!empty($projectDescription)) {
-                        $sectionProjects .= "        " . htmlspecialchars($projectDescription) . "\n";
-                    }
-                    
-                    $sectionProjects .= "    \\end{onecolentry}\n\n";
-                    $sectionProjects .= "    \\vspace{0.05 cm}\n\n";
+                $highlights = "";
+                if (!empty($projectDescription)) {
+                    $highlights .= "\\item " . $projectDescription . "\n            ";
                 }
+                if (!empty($projectLink)) {
+                    $highlights .= "\\item GitHub: \\href{" . $projectLink . "}{" . $projectName . "}\n            ";
+                }
+
+                $sectionProjects .= "    \\projectentry{}{" . $projectName . "}{" . $highlights . "}\n\n";
             }
         }
 
@@ -842,12 +769,7 @@ class CVController extends Controller {
                 $skillCategory = (string)$skill->category;
                 $skillItems = (string)$skill->items;
 
-                if (!empty($skillCategory) && !empty($skillItems)) {
-                    $sectionSkills .= "    \\begin{onecolentry}\n";
-                    $sectionSkills .= "        \\textbf{" . htmlspecialchars($skillCategory) . ":} " . htmlspecialchars($skillItems) . "\n";
-                    $sectionSkills .= "    \\end{onecolentry}\n\n";
-                    $sectionSkills .= "    \\vspace{0.05 cm}\n\n";
-                }
+                $sectionSkills .= "    \\skillsentry{" . $skillCategory . "}{" . $skillItems . "}\n\n";
             }
         }
 
@@ -855,19 +777,12 @@ class CVController extends Controller {
         $sectionLanguages = "";
         if (isset($xml->languages->language)) {
             $sectionLanguages = "    \\section{Langues}\n";
-            $sectionLanguages .= "    \\begin{onecolentry}\n";
-            $languagesList = [];
             foreach ($xml->languages->language as $language) {
                 $langName = (string)$language->name;
                 $langLevel = (string)$language->level;
-                if (!empty($langName) && !empty($langLevel)) {
-                    $languagesList[] = "\\textbf{" . htmlspecialchars($langName) . ":} " . htmlspecialchars($langLevel);
-                }
+                $lang_items[] = $langName . " (" . $langLevel . ")";
             }
-            if (!empty($languagesList)) {
-                $sectionLanguages .= "        " . implode(", ", $languagesList) . "\n";
-            }
-            $sectionLanguages .= "    \\end{onecolentry}\n\n";
+            $sectionLanguages .= "\    \skillsentry{Langues}{" . implode(", ", $lang_items) . "}\n\n";
         }
         
         $sectionFooter = "\\end{document}";
