@@ -207,7 +207,7 @@ class AuthController extends Controller {
         $this->jsonResponse([
             'status' => 'success',
             'message' => 'Déconnexion réussie',
-            'redirect' => 'auth.html'
+            'redirect' => 'Login_Signup/auth.html'
         ]);
     }
     
