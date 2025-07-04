@@ -4,10 +4,12 @@ require_once __DIR__ . '/../../core/bootstrap.php';
 
 class CVController extends Controller {
     private $cvModel;
+    private $userModel;
     
     public function __construct() {
         parent::__construct();
         $this->cvModel = new CV();
+        $this->userModel = new User();
     }
     
     public function getUserCVs() {
@@ -188,8 +190,17 @@ class CVController extends Controller {
         error_log("User Agent: " . ($_SERVER['HTTP_USER_AGENT'] ?? 'N/A'));
         error_log("Request headers: " . print_r(getallheaders(), true));
         
-        $userId = $this->requireAuth();
-        error_log("User ID authenticated: " . $userId);
+        // Check if this is a guest mode request
+        $isGuestMode = isset($_POST['guest_mode']) && $_POST['guest_mode'] === 'true';
+        error_log("Guest mode detected: " . ($isGuestMode ? 'true' : 'false'));
+        
+        $userId = null;
+        if (!$isGuestMode) {
+            $userId = $this->requireAuth();
+            error_log("User ID authenticated: " . $userId);
+        } else {
+            error_log("Guest mode - skipping authentication");
+        }
         
         if ($_SERVER["REQUEST_METHOD"] !== "POST") {
             error_log("Invalid request method: " . $_SERVER["REQUEST_METHOD"]);
@@ -205,6 +216,16 @@ class CVController extends Controller {
         try {
             $editingCVId = isset($_POST['editing_cv_id']) ? intval($_POST['editing_cv_id']) : null;
             
+            // In guest mode, don't allow editing existing CVs
+            if ($isGuestMode && $editingCVId) {
+                error_log("Guest mode - editing not allowed");
+                $this->jsonResponse([
+                    'status' => 'error',
+                    'message' => 'Editing CVs requires authentication'
+                ], 403);
+                return;
+            }
+            
             // Extract and sanitize form data
             $formData = $this->sanitizeInput($_POST);
             
@@ -217,31 +238,53 @@ class CVController extends Controller {
             // Generate CV name
             $cvName = $this->generateCVName($formData);
             
-            if ($editingCVId) {
+            if ($editingCVId && !$isGuestMode) {
                 // Update existing CV
                 $this->cvModel->updateCV($editingCVId, $userId, $cvName, $xmlContent);
                 $cvId = $editingCVId;
-            } else {
-                // Create new CV
+            } else if (!$isGuestMode) {
+                // Create new CV for authenticated users
                 $cvId = $this->cvModel->createCV($userId, $cvName, $xmlContent);
+            } else {
+                // Guest mode - generate temporary CV ID for PDF generation
+                $cvId = 'guest_' . time() . '_' . rand(1000, 9999);
             }
             
             // Generate LaTeX and PDF
-            $pdfResult = $this->generatePDF($xmlContent, $cvId);
+            $pdfResult = $this->generatePDF($xmlContent, $cvId, $isGuestMode);
             
             // Get the selected format from form data (default to pdf)
             $selectedFormat = isset($_POST['format']) ? $_POST['format'] : 'pdf';
             
-            // Return success response with download information
-            $this->jsonResponse([
-                'success' => true,  // Changed from 'status' => 'success' to match frontend expectation
-                'status' => 'success',
-                'cv_id' => $cvId,
-                'message' => $editingCVId ? 'CV updated successfully' : 'CV created successfully',
-                'download_url' => 'download_cv_mvc.php?id=' . $cvId . '&format=' . $selectedFormat,
-                'pdf_path' => 'download_cv_mvc.php?id=' . $cvId . '&format=' . $selectedFormat,
-                'selected_format' => $selectedFormat
-            ]);
+            // Force PDF format for guest users
+            if ($isGuestMode) {
+                $selectedFormat = 'pdf';
+                error_log("Guest mode - forcing PDF format");
+            }
+            
+            if ($isGuestMode) {
+                // For guest mode, return direct PDF download
+                $this->jsonResponse([
+                    'success' => true,
+                    'status' => 'success',
+                    'guest_mode' => true,
+                    'message' => 'CV generated successfully',
+                    'download_url' => 'download_cv_mvc.php?guest_id=' . $cvId . '&format=' . $selectedFormat,
+                    'pdf_path' => 'download_cv_mvc.php?guest_id=' . $cvId . '&format=' . $selectedFormat,
+                    'selected_format' => $selectedFormat
+                ]);
+            } else {
+                // Return success response with download information for authenticated users
+                $this->jsonResponse([
+                    'success' => true,
+                    'status' => 'success',
+                    'cv_id' => $cvId,
+                    'message' => $editingCVId ? 'CV updated successfully' : 'CV created successfully',
+                    'download_url' => 'download_cv_mvc.php?id=' . $cvId . '&format=' . $selectedFormat,
+                    'pdf_path' => 'download_cv_mvc.php?id=' . $cvId . '&format=' . $selectedFormat,
+                    'selected_format' => $selectedFormat
+                ]);
+            }
             
         } catch (Exception $e) {
             error_log("Error in generateCV: " . $e->getMessage());
@@ -372,6 +415,16 @@ class CVController extends Controller {
     }
     
     private function generateCVName($formData) {
+        // Check if a custom CV name was provided
+        if (isset($formData['custom_cv_name']) && !empty(trim($formData['custom_cv_name']))) {
+            $customName = trim($formData['custom_cv_name']);
+            // Sanitize the custom name
+            $customName = preg_replace('/[^a-zA-Z0-9\s\-_]/', '', $customName);
+            $customName = str_replace(' ', '_', $customName);
+            return $customName;
+        }
+        
+        // Fallback to default naming scheme
         $nom = $formData['nom'] ?? '';
         $prenom = $formData['prenom'] ?? '';
         $timestamp = date('Y-m-d H:i:s');
@@ -546,7 +599,7 @@ class CVController extends Controller {
         return $xmlContent;
     }
     
-    private function generatePDF($xmlContent, $cvId) {
+    private function generatePDF($xmlContent, $cvId, $isGuestMode = false) {
         // Start output buffering to catch any unwanted output
         ob_start();
         
@@ -822,7 +875,12 @@ class CVController extends Controller {
         $latexContent = $sectionHeader . $sectionProfil . $sectionEducation . $sectionCertificates . $sectionExperience . $sectionProjects . $sectionSkills . $sectionLanguages . $sectionFooter;
 
         // Write LaTeX file
-        $texFile = $workingDir . "CV_" . $prenom . "_" . $nom . ".tex";
+        // Generate LaTeX filename based on mode
+        if ($isGuestMode) {
+            $texFile = $workingDir . "cv_" . $cvId . ".tex";
+        } else {
+            $texFile = $workingDir . "CV_" . $prenom . "_" . $nom . ".tex";
+        }
         file_put_contents($texFile, $latexContent);
 
         // Change to the working directory
@@ -847,6 +905,14 @@ class CVController extends Controller {
 
         // Clean up any output buffering and return result
         ob_end_clean();
+        
+        // For guest mode, also save XML and LaTeX files for later download
+        if ($isGuestMode) {
+            $xmlFile = str_replace('.pdf', '.xml', $pdfFile);
+            $xmlFile = str_replace('.tex', '.xml', $texFile);
+            file_put_contents($xmlFile, $xmlContent);
+            error_log("Saved XML file for guest: " . $xmlFile);
+        }
         
         return [
             'tex_file' => $texFile,
@@ -880,7 +946,13 @@ class CVController extends Controller {
     }
 
     public function downloadCV() {
-        $userId = $this->requireAuth();
+        // Check if this is a guest download request
+        $isGuestMode = isset($_GET['guest_id']) || isset($_POST['guest_id']);
+        
+        $userId = null;
+        if (!$isGuestMode) {
+            $userId = $this->requireAuth();
+        }
         
         $cvId = null;
         $format = 'pdf';
@@ -888,51 +960,103 @@ class CVController extends Controller {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $input = $this->getJsonInput();
             
-            if (!isset($input['cv_id'])) {
-                http_response_code(400);
-                exit('CV ID required');
+            if ($isGuestMode) {
+                if (!isset($input['guest_id'])) {
+                    http_response_code(400);
+                    exit('Guest CV ID required');
+                }
+                $cvId = $input['guest_id'];
+            } else {
+                if (!isset($input['cv_id'])) {
+                    http_response_code(400);
+                    exit('CV ID required');
+                }
+                $cvId = $input['cv_id'];
             }
             
-            $cvId = $input['cv_id'];
             $format = isset($input['format']) ? $input['format'] : 'pdf';
         } else {
             // Handle GET requests
-            if (!isset($_GET['id']) || !isset($_GET['format'])) {
-                http_response_code(400);
-                exit('Missing parameters');
+            if ($isGuestMode) {
+                if (!isset($_GET['guest_id']) || !isset($_GET['format'])) {
+                    http_response_code(400);
+                    exit('Missing parameters for guest download');
+                }
+                $cvId = $_GET['guest_id'];
+                $format = $_GET['format'];
+            } else {
+                if (!isset($_GET['id']) || !isset($_GET['format'])) {
+                    http_response_code(400);
+                    exit('Missing parameters');
+                }
+                $cvId = intval($_GET['id']);
+                $format = $_GET['format'];
             }
-            
-            $cvId = intval($_GET['id']);
-            $format = $_GET['format'];
         }
         
         try {
-            // Get CV from database
-            $cv = $this->cvModel->getUserCV($cvId, $userId);
-            
-            if (!$cv) {
-                http_response_code(404);
-                exit('CV not found');
-            }
-            
-            $xmlContent = $cv['xml_content'];
-            $cvName = $cv['cv_name'];
-            
-            // Parse XML to get personal info
-            $xml = simplexml_load_string($xmlContent);
-            $prenom = (string)$xml->personalInfo->firstname;
-            $nom = (string)$xml->personalInfo->lastname;
-            
-            $workingDir = __DIR__ . '/../../Cv_generator/';
-            
-            switch ($format) {
-                case 'xml':
-                    $this->downloadXML($xmlContent, $prenom, $nom);
-                    break;
+            if ($isGuestMode) {
+                // For guest mode, only PDF downloads are allowed
+                error_log("Guest download attempt - CV ID: " . $cvId . ", Format: " . $format);
+                
+                // Restrict guests to PDF only
+                if ($format !== 'pdf') {
+                    http_response_code(403);
+                    $restrictedFormat = strtoupper($format);
+                    exit($restrictedFormat . ' download requires authentication. Please create an account to access this format.');
+                }
+                
+                $workingDir = __DIR__ . '/../../Cv_generator/';
+                error_log("Working directory: " . $workingDir);
+                
+                // Only handle PDF for guests
+                $pdfPath = $workingDir . 'cv_' . $cvId . '.pdf';
+                error_log("Looking for PDF at: " . $pdfPath);
+                
+                if (!file_exists($pdfPath)) {
+                    error_log("Working directory exists: " . (is_dir($workingDir) ? 'yes' : 'no'));
+                    // List files in working directory for debugging
+                    $files = scandir($workingDir);
+                    error_log("Files in working directory: " . implode(', ', $files));
                     
-                case 'latex':
-                    $this->downloadLaTeX($xmlContent, $prenom, $nom, $workingDir);
-                    break;
+                    http_response_code(404);
+                    exit('PDF file not found. Expected: ' . basename($pdfPath));
+                }
+                
+                $filename = 'CV_Guest_' . date('Y-m-d') . '.pdf';
+                header('Content-Type: application/pdf');
+                header('Content-Disposition: attachment; filename="' . $filename . '"');
+                header('Content-Length: ' . filesize($pdfPath));
+                readfile($pdfPath);
+                unlink($pdfPath);
+                exit();
+            } else {
+                // Get CV from database for authenticated users
+                $cv = $this->cvModel->getUserCV($cvId, $userId);
+                
+                if (!$cv) {
+                    http_response_code(404);
+                    exit('CV not found');
+                }
+                
+                $xmlContent = $cv['xml_content'];
+                $cvName = $cv['cv_name'];
+                
+                // Parse XML to get personal info
+                $xml = simplexml_load_string($xmlContent);
+                $prenom = (string)$xml->personalInfo->firstname;
+                $nom = (string)$xml->personalInfo->lastname;
+                
+                $workingDir = __DIR__ . '/../../Cv_generator/';
+                
+                switch ($format) {
+                    case 'xml':
+                        $this->downloadXML($xmlContent, $prenom, $nom);
+                        break;
+                        
+                    case 'latex':
+                        $this->downloadLaTeX($xmlContent, $prenom, $nom, $workingDir);
+                        break;
                     
                 case 'all':
                     $this->downloadAll($xmlContent, $prenom, $nom, $workingDir);
@@ -941,6 +1065,7 @@ class CVController extends Controller {
                 default: // pdf
                     $this->downloadPDF($xmlContent, $prenom, $nom, $workingDir);
                     break;
+                }
             }
             
         } catch (Exception $e) {

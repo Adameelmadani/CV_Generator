@@ -228,6 +228,31 @@ textarea {
   background: rgba(102, 126, 234, 0.05);
 }
 
+/* Styling for disabled format options (guest mode) */
+.format-option input[type="radio"]:disabled {
+  cursor: not-allowed;
+}
+
+.format-option:has(input[type="radio"]:disabled) {
+  opacity: 0.5;
+  cursor: not-allowed;
+  border-color: #dee2e6;
+  background: #f8f9fa;
+}
+
+.format-option:has(input[type="radio"]:disabled):hover {
+  border-color: #dee2e6;
+  background: #f8f9fa;
+}
+
+.format-option:has(input[type="radio"]:disabled) .format-label {
+  color: #6c757d;
+}
+
+.format-option:has(input[type="radio"]:disabled) .format-description {
+  color: #adb5bd;
+}
+
 .format-option input[type="radio"] {
   margin-right: 12px;
   width: auto;
@@ -1379,4 +1404,88 @@ textarea {
   .pdf-preview-container embed {
     min-height: 500px;
   }
+}
+
+/* New styles for home.html integration */
+.photo-name-section {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.photo-upload-section {
+  flex-shrink: 0;
+}
+
+.name-fields-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.download-format-section {
+  margin-top: 40px;
+}
+
+#myCvsLink,
+#logoutBtn,
+#photo-upload,
+#remove-photo-btn,
+.entry-item .remove-btn,
+#prevBtn,
+#submitBtn,
+#previewSection {
+  display: none;
+}
+
+#fillTestBtn {
+  background-color: #ff6b35;
+  color: white;
+}
+
+#previewToggleBtn {
+  background-color: #28a745;
+  color: white;
+}
+
+#previewStatus i {
+  color: #28a745;
+}
+
+.color-presets .color-preset[data-color="#667eea"] { background-color: #667eea; }
+.color-presets .color-preset[data-color="#ff6b35"] { background-color: #ff6b35; }
+.color-presets .color-preset[data-color="#28a745"] { background-color: #28a745; }
+.color-presets .color-preset[data-color="#dc3545"] { background-color: #dc3545; }
+.color-presets .color-preset[data-color="#6f42c1"] { background-color: #6f42c1; }
+.color-presets .color-preset[data-color="#fd7e14"] { background-color: #fd7e14; }
+.color-presets .color-preset[data-color="#20c997"] { background-color: #20c997; }
+.color-presets .color-preset[data-color="#6c757d"] { background-color: #6c757d; }
+
+/* Guest mode styles */
+.guest-note {
+  background: rgba(255, 255, 255, 0.15);
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.guest-note a {
+  color: white;
+  text-decoration: underline;
+  font-weight: 500;
+}
+
+.guest-note a:hover {
+  color: #f0f0f0;
+  text-decoration: none;
+}
+
+.guest-note i {
+  opacity: 0.8;
 }

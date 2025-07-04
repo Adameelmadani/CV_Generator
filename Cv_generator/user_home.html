@@ -17,21 +17,22 @@
                     <span>CV Generator</span>
                 </div>
             </div>
-            <div class="header-right">
-                <div class="user-info">
-                    <span id="userEmail">utilisateur@email.com</span>
-                    <div class="user-menu">
-                        <button class="user-btn" onclick="toggleUserMenu()">
-                            <i class="fas fa-user-circle"></i>
-                        </button>
-                        <div class="user-dropdown" id="userDropdown">
-                            <a href="#" onclick="logout()">
-                                <i class="fas fa-sign-out-alt"></i>
-                                Déconnexion
-                            </a>
-                        </div>
+            <div class="header-right">            <div class="user-info">
+                <span id="userEmail">utilisateur@email.com</span>
+                <div class="user-menu">
+                    <button class="user-btn" onclick="toggleUserMenu()">
+                        <i class="fas fa-user-circle"></i>
+                        <!-- Badge de notification (optionnel) -->
+                        <span class="notification-badge" id="notificationBadge" style="display: none;"></span>
+                    </button>
+                    <div class="user-dropdown" id="userDropdown">
+                        <a href="#" onclick="logout()">
+                            <i class="fas fa-sign-out-alt"></i>
+                            Déconnexion
+                        </a>
                     </div>
                 </div>
+            </div>
             </div>
         </header>
 
@@ -268,6 +269,33 @@
                 <button class="btn btn-primary" onclick="confirmDownload()">
                     <i class="fas fa-download"></i>
                     Télécharger
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal pour nommer un nouveau CV -->
+    <div class="modal" id="newCVModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Créer un nouveau CV</h3>
+                <button class="close-btn" onclick="closeModal('newCVModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Donnez un nom à votre nouveau CV :</p>
+                <div class="input-group">
+                    <input type="text" id="cvNameInput" placeholder="Ex: CV_Marketing_2025" maxlength="100" autocomplete="off">
+                    <small class="help-text">Le nom vous aidera à identifier votre CV dans votre liste</small>
+                </div>
+                <div class="error-message" id="cvNameError" style="display: none;"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('newCVModal')">Annuler</button>
+                <button class="btn btn-primary" onclick="confirmCreateCV()" id="createCVBtn">
+                    <i class="fas fa-plus"></i>
+                    Créer le CV
                 </button>
             </div>
         </div>

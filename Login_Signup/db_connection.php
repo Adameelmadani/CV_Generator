@@ -1,14 +1,10 @@
 <?php
-// Database connection configuration
-$dsn = "mysql:host=localhost;dbname=cv_generator";
-$dbusername = "root";
-$dbpassword = "";
+require_once __DIR__ . '/../core/bootstrap.php';
 
-// Connect to the database using PDO
 try {
-    $pdo = new PDO($dsn, $dbusername, $dbpassword);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
+    $database = Database::getInstance();
+    $pdo = $database->getConnection();
+} catch (Exception $e) {
     echo "Connection failed: " . $e->getMessage();
     exit();
 }

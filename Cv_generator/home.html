@@ -4,25 +4,25 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Europass CV Generator</title>
-    <link rel="stylesheet" href="styles1.css">
+    <link rel="stylesheet" href="home.css">
   </head>
   <body>
     <div class="container">
       <div class="header">
         <div class="header-actions">
-          <a href="user_home.html" class="btn-link" id="myCvsLink" style="display: none;">
+          <a href="user_home.html" class="btn-link" id="myCvsLink">
             Mes CV
           </a>
           <a href="user_home.html" class="btn-link" id="userHomeBtn">
             Mes CV sauvegardés
           </a>
-          <button class="btn-link" id="fillTestBtn" onclick="fillTestData()" style="background: #ff6b35; color: white;">
+          <button class="btn-link" id="fillTestBtn" onclick="fillTestData()">
             Fill Test Data
           </button>
-          <button class="btn-link" id="previewToggleBtn" onclick="togglePreview()" style="background: #28a745; color: white;">
+          <button class="btn-link" id="previewToggleBtn" onclick="togglePreview()">
             <i class="fas fa-eye"></i> Aperçu
           </button>
-          <button class="logout-btn" onclick="logout()" style="display: none" id="logoutBtn">
+          <button class="logout-btn" onclick="logout()" id="logoutBtn">
             Déconnexion
           </button>
         </div>
@@ -88,21 +88,25 @@
             <div class="section">
               <h3>Informations Personnelles</h3>
               
-              <!-- Photo upload section -->
-              <div class="photo-upload-section">
-                <label for="photo-upload" class="photo-upload-label">
-                  <div class="photo-preview" id="photo-preview">
-                    <i class="fas fa-camera"></i>
-                    <span>Ajouter une photo (optionnel)</span>
-                  </div>
-                </label>
-                <input type="file" id="photo-upload" name="photo" accept="image/*" style="display: none;" onchange="handlePhotoUpload(this)" />
-                <button type="button" class="remove-photo-btn" id="remove-photo-btn" onclick="removePhoto()" style="display: none;">Supprimer la photo</button>
-              </div>
-              
-              <div class="two-column">
-                <input type="text" name="nom" placeholder="Nom *" required />
-                <input type="text" name="prenom" placeholder="Prénom *" required />
+              <!-- Photo and Name Section -->
+              <div class="photo-name-section">
+                <!-- Photo upload section -->
+                <div class="photo-upload-section">
+                  <label for="photo-upload" class="photo-upload-label">
+                    <div class="photo-preview" id="photo-preview">
+                      <i class="fas fa-camera"></i>
+                      <span>Ajouter une photo (optionnel)</span>
+                    </div>
+                  </label>
+                  <input type="file" id="photo-upload" name="photo" accept="image/*" onchange="handlePhotoUpload(this)" />
+                  <button type="button" class="remove-photo-btn" id="remove-photo-btn" onclick="removePhoto()">Supprimer la photo</button>
+                </div>
+                
+                <!-- Name fields section -->
+                <div class="name-fields-section">
+                  <input type="text" name="nom" placeholder="Nom *" required />
+                  <input type="text" name="prenom" placeholder="Prénom *" required />
+                </div>
               </div>
               <input type="text" name="location" placeholder="Localisation (ex: Paris, France)" required />
               <input type="email" name="email" placeholder="Email *" required />
@@ -136,7 +140,7 @@
                     <input type="text" name="education_field[]" placeholder="Domaine d'études" />
                   </div>
                   <textarea name="education_details[]" placeholder="Détails (GPA, cours pertinents, distinctions, etc.)"></textarea>
-                  <button type="button" class="remove-btn" onclick="removeEducation(this)" style="display: none;">Supprimer</button>
+                  <button type="button" class="remove-btn" onclick="removeEducation(this)">Supprimer</button>
                 </div>
               </div>
               <button type="button" class="add-btn" onclick="addEducation()">+ Ajouter une formation</button>
@@ -158,7 +162,7 @@
                     <input type="text" name="certificate_location[]" placeholder="Lieu" />
                   </div>
                   <textarea name="certificate_description[]" placeholder="Description du certificat"></textarea>
-                  <button type="button" class="remove-btn" onclick="removeCertificate(this)" style="display: none;">Supprimer</button>
+                  <button type="button" class="remove-btn" onclick="removeCertificate(this)">Supprimer</button>
                 </div>
               </div>
               <button type="button" class="add-btn" onclick="addCertificate()">+ Ajouter un certificat</button>
@@ -180,7 +184,7 @@
                     <input type="text" name="experience_position[]" placeholder="Poste" />
                   </div>
                   <textarea name="experience_description[]" placeholder="Description des responsabilités et réalisations (une responsabilité par ligne)"></textarea>
-                  <button type="button" class="remove-btn" onclick="removeExperience(this)" style="display: none;">Supprimer</button>
+                  <button type="button" class="remove-btn" onclick="removeExperience(this)">Supprimer</button>
                 </div>
               </div>
               <button type="button" class="add-btn" onclick="addExperience()">+ Ajouter une expérience</button>
@@ -198,7 +202,7 @@
                     <input type="text" name="project_link[]" placeholder="Lien (GitHub, site web, etc.)" />
                   </div>
                   <textarea name="project_description[]" placeholder="Description du projet, réalisations et technologies utilisées"></textarea>
-                  <button type="button" class="remove-btn" onclick="removeProject(this)" style="display: none;">Supprimer</button>
+                  <button type="button" class="remove-btn" onclick="removeProject(this)">Supprimer</button>
                 </div>
               </div>
               <button type="button" class="add-btn" onclick="addProject()">+ Ajouter un projet</button>
@@ -213,7 +217,7 @@
                 <div class="entry-item skill-entry">
                   <input type="text" name="skill_category[]" placeholder="Catégorie (ex: Langages de programmation)" />
                   <textarea name="skill_items[]" placeholder="Compétences (séparées par des virgules)"></textarea>
-                  <button type="button" class="remove-btn" onclick="removeSkill(this)" style="display: none;">Supprimer</button>
+                  <button type="button" class="remove-btn" onclick="removeSkill(this)">Supprimer</button>
                 </div>
               </div>
               <button type="button" class="add-btn" onclick="addSkill()">+ Ajouter une catégorie de compétences</button>
@@ -239,7 +243,7 @@
                       <option value="A1">A1 - Débutant</option>
                     </select>
                   </div>
-                  <button type="button" class="remove-btn" onclick="removeLanguage(this)" style="display: none;">Supprimer</button>
+                  <button type="button" class="remove-btn" onclick="removeLanguage(this)">Supprimer</button>
                 </div>
               </div>
               <button type="button" class="add-btn" onclick="addLanguage()">+ Ajouter une langue</button>
@@ -256,48 +260,48 @@
                 <div class="color-picker-container">
                   <input type="color" id="primary_color_external" value="#667eea" class="color-picker">
                   <div class="color-presets">
-                    <div class="color-preset" data-color="#667eea" style="background-color: #667eea;" title="Bleu (défaut)"></div>
-                    <div class="color-preset" data-color="#ff6b35" style="background-color: #ff6b35;" title="Orange"></div>
-                    <div class="color-preset" data-color="#28a745" style="background-color: #28a745;" title="Vert"></div>
-                    <div class="color-preset" data-color="#dc3545" style="background-color: #dc3545;" title="Rouge"></div>
-                    <div class="color-preset" data-color="#6f42c1" style="background-color: #6f42c1;" title="Violet"></div>
-                    <div class="color-preset" data-color="#fd7e14" style="background-color: #fd7e14;" title="Orange foncé"></div>
-                    <div class="color-preset" data-color="#20c997" style="background-color: #20c997;" title="Turquoise"></div>
-                    <div class="color-preset" data-color="#6c757d" style="background-color: #6c757d;" title="Gris"></div>
+                    <div class="color-preset" data-color="#667eea" title="Bleu (défaut)"></div>
+                    <div class="color-preset" data-color="#ff6b35" title="Orange"></div>
+                    <div class="color-preset" data-color="#28a745" title="Vert"></div>
+                    <div class="color-preset" data-color="#dc3545" title="Rouge"></div>
+                    <div class="color-preset" data-color="#6f42c1" title="Violet"></div>
+                    <div class="color-preset" data-color="#fd7e14" title="Orange foncé"></div>
+                    <div class="color-preset" data-color="#20c997" title="Turquoise"></div>
+                    <div class="color-preset" data-color="#6c757d" title="Gris"></div>
                   </div>
                 </div>
                 <small class="help-text">Modifiez la couleur en temps réel et voyez le résultat dans l'aperçu</small>
               </div>
               
-              <div class="section" style="margin-top: 40px;">
+              <div class="section download-format-section">
                 <h3>Format de téléchargement</h3>
                 <div class="format-selection">
                   <label class="format-option">
                     <input type="radio" name="format" value="pdf" checked>
                     <div class="format-content">
                       <span class="format-label">PDF uniquement</span>
-                      <span class="format-description">Télécharger seulement le CV au format PDF</span>
+                      <span class="format-description">Télécharger le CV au format PDF (disponible pour tous)</span>
                     </div>
                   </label>
                   <label class="format-option">
                     <input type="radio" name="format" value="xml">
                     <div class="format-content">
                       <span class="format-label">XML uniquement</span>
-                      <span class="format-description">Télécharger seulement le CV au format XML</span>
+                      <span class="format-description">Télécharger le CV au format XML (nécessite un compte)</span>
                     </div>
                   </label>
                   <label class="format-option">
                     <input type="radio" name="format" value="latex">
                     <div class="format-content">
                       <span class="format-label">LaTeX uniquement</span>
-                      <span class="format-description">Télécharger le code source LaTeX du CV</span>
+                      <span class="format-description">Télécharger le code source LaTeX du CV (nécessite un compte)</span>
                     </div>
                   </label>
                   <label class="format-option">
                     <input type="radio" name="format" value="all">
                     <div class="format-content">
                       <span class="format-label">PDF + XML + LaTeX (ZIP)</span>
-                      <span class="format-description">Télécharger les trois formats dans un fichier ZIP</span>
+                      <span class="format-description">Télécharger les trois formats dans un fichier ZIP (nécessite un compte)</span>
                     </div>
                   </label>
                 </div>
@@ -308,7 +312,7 @@
 
         <!-- Navigation des étapes -->
         <div class="step-navigation">
-          <button type="button" class="nav-btn" id="prevBtn" onclick="changeStep(-1)" style="display: none">
+          <button type="button" class="nav-btn" id="prevBtn" onclick="changeStep(-1)">
             ← Précédent
           </button>
           <div class="step-info">
@@ -317,7 +321,7 @@
           <button type="button" class="nav-btn" id="nextBtn" onclick="changeStep(1)">
             Suivant →
           </button>
-          <button type="button" class="nav-btn" id="submitBtn" style="display: none">
+          <button type="button" class="nav-btn" id="submitBtn">
             Générer CV
           </button>
         </div>
@@ -325,12 +329,12 @@
     </div>
 
     <!-- Live Preview Section -->
-    <div class="preview-section" id="previewSection" style="display: none;">
+    <div class="preview-section" id="previewSection">
       <div class="preview-header">
         <h3><i class="fas fa-eye"></i> Aperçu en temps réel</h3>
         <div class="preview-controls">
           <div class="preview-status" id="previewStatus">
-            <i class="fas fa-circle" style="color: #28a745;"></i>
+            <i class="fas fa-circle"></i>
             <span>Synchronisé</span>
           </div>
           <button type="button" class="preview-toggle-btn" onclick="togglePreview()">

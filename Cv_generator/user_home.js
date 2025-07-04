@@ -15,11 +15,13 @@ document.addEventListener('DOMContentLoaded', function() {
 // Vérifier la session utilisateur
 async function checkUserSession() {
     try {
-        const response = await fetch('../Login_Signup/check_session.php');
+        const response = await fetch('../Login_Signup/check_session_mvc.php');
         const result = await response.json();
         
         if (result.status === 'success' && result.logged_in) {
-            document.getElementById('userEmail').textContent = result.user_email;
+            // Afficher le username au lieu de l'email
+            const displayName = result.username || result.user_email;
+            document.getElementById('userEmail').textContent = displayName;
         } else {
             // Rediriger vers la page de connexion si pas connecté
             window.location.href = '../Login_Signup/auth.html';
@@ -185,7 +187,136 @@ function setView(view) {
 
 // Créer un nouveau CV
 function createNewCV() {
+    console.log('🚀 createNewCV function called');
+    
+    // Show the CV naming modal instead of directly redirecting
+    const modal = document.getElementById('newCVModal');
+    console.log('📋 Modal element found:', modal);
+    
+    if (modal) {
+        modal.classList.add('show');
+        console.log('✅ Modal show class added');
+    } else {
+        console.error('❌ Modal element not found!');
+        return;
+    }
+    
+    // Clear any previous input
+    const cvNameInput = document.getElementById('cvNameInput');
+    console.log('📝 Input element found:', cvNameInput);
+    
+    if (cvNameInput) {
+        cvNameInput.value = '';
+        cvNameInput.focus();
+        console.log('✅ Input cleared and focused');
+    } else {
+        console.error('❌ Input element not found!');
+    }
+    
+    // Clear any previous error
+    const errorElement = document.getElementById('cvNameError');
+    if (errorElement) {
+        errorElement.style.display = 'none';
+        errorElement.textContent = '';
+        console.log('✅ Error element cleared');
+    }
+    
+    // Enable the create button
+    const createBtn = document.getElementById('createCVBtn');
+    if (createBtn) {
+        createBtn.disabled = false;
+        console.log('✅ Create button enabled');
+    } else {
+        console.error('❌ Create button not found!');
+    }
+}
+
+// Confirm CV creation with name
+function confirmCreateCV() {
+    const cvNameInput = document.getElementById('cvNameInput');
+    const cvName = cvNameInput.value.trim();
+    const errorElement = document.getElementById('cvNameError');
+    const createBtn = document.getElementById('createCVBtn');
+    
+    // Clear previous errors
+    errorElement.style.display = 'none';
+    errorElement.textContent = '';
+    
+    // Validate CV name
+    if (!cvName) {
+        showCVNameError('Veuillez saisir un nom pour votre CV');
+        cvNameInput.focus();
+        return;
+    }
+    
+    if (cvName.length < 3) {
+        showCVNameError('Le nom du CV doit contenir au moins 3 caractères');
+        cvNameInput.focus();
+        return;
+    }
+    
+    if (cvName.length > 100) {
+        showCVNameError('Le nom du CV ne peut pas dépasser 100 caractères');
+        cvNameInput.focus();
+        return;
+    }
+    
+    // Check for invalid characters
+    const invalidChars = /[<>:"/\\|?*]/g;
+    if (invalidChars.test(cvName)) {
+        showCVNameError('Le nom ne peut pas contenir les caractères: < > : " / \\ | ? *');
+        cvNameInput.focus();
+        return;
+    }
+    
+    // Disable button to prevent double submission
+    createBtn.disabled = true;
+    createBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Création...';
+    
+    // Store the CV name in session storage and redirect
+    sessionStorage.setItem('newCVName', cvName);
+    
+    // Close modal and redirect
+    closeModal('newCVModal');
     window.location.href = 'home.html';
+}
+
+// Show CV name validation error
+function showCVNameError(message) {
+    const errorElement = document.getElementById('cvNameError');
+    errorElement.textContent = message;
+    errorElement.style.display = 'block';
+}
+
+// Setup event listeners for CV name input
+function setupCVNameInputListeners() {
+    const cvNameInput = document.getElementById('cvNameInput');
+    const createBtn = document.getElementById('createCVBtn');
+    
+    if (cvNameInput) {
+        // Enable/disable create button based on input
+        cvNameInput.addEventListener('input', function() {
+            const cvName = this.value.trim();
+            createBtn.disabled = cvName.length < 3;
+        });
+        
+        // Handle Enter key
+        cvNameInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if (!createBtn.disabled) {
+                    confirmCreateCV();
+                }
+            }
+        });
+        
+        // Handle Escape key
+        cvNameInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal('newCVModal');
+            }
+        });
+    }
 }
 
 // Importer un CV
@@ -519,14 +650,19 @@ function selectFile() {
 // Gestion du menu utilisateur
 function toggleUserMenu() {
     const dropdown = document.getElementById('userDropdown');
+    const userMenu = dropdown.closest('.user-menu');
+    const userInfo = dropdown.closest('.user-info');
+    
     dropdown.classList.toggle('show');
+    userMenu.classList.toggle('active');
+    userInfo.classList.toggle('active');
 }
 
 // Déconnexion
 async function logout() {
     if (confirm('Êtes-vous sûr de vouloir vous déconnecter ?')) {
         try {
-            const response = await fetch('../Login_Signup/logout.php', {
+            const response = await fetch('../Login_Signup/logout_mvc.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
@@ -571,6 +707,9 @@ function closeModal(modalId) {
 
 // Configuration des event listeners
 function setupEventListeners() {
+    // Setup CV name input listeners
+    setupCVNameInputListeners();
+    
     // Fermer les modals en cliquant à l'extérieur
     document.addEventListener('click', function(e) {
         if (e.target.classList.contains('modal')) {
@@ -579,7 +718,15 @@ function setupEventListeners() {
         
         // Fermer le menu utilisateur
         if (!e.target.closest('.user-menu')) {
-            document.getElementById('userDropdown').classList.remove('show');
+            const dropdown = document.getElementById('userDropdown');
+            const userMenu = document.querySelector('.user-menu');
+            const userInfo = document.querySelector('.user-info');
+            
+            if (dropdown.classList.contains('show')) {
+                dropdown.classList.remove('show');
+                userMenu?.classList.remove('active');
+                userInfo?.classList.remove('active');
+            }
         }
     });
     

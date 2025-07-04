@@ -112,10 +112,26 @@ let currentStep = 1;
       document.addEventListener('DOMContentLoaded', function() {
         console.log('🚀 DOM Content Loaded - Initializing form...');
         
-        // Optional session check on load - don't redirect if it fails
-        checkSessionStatus().catch(error => {
-          console.warn('⚠️ Initial session check failed, but continuing:', error);
-        });
+        // Check for custom CV name from user_home.html
+        const customCVName = sessionStorage.getItem('newCVName');
+        if (customCVName) {
+          showCustomCVNameNotification(customCVName);
+        }
+        
+        // Check if user is in guest mode (came from main page without authentication)
+        const urlParams = new URLSearchParams(window.location.search);
+        const isGuestMode = urlParams.get('mode') === 'guest';
+        
+        // Hide authentication-related buttons in guest mode
+        if (isGuestMode) {
+          console.log('👤 Guest mode detected - hiding authentication-related buttons');
+          hideAuthButtons();
+        } else {
+          // Optional session check on load - don't redirect if it fails
+          checkSessionStatus(false).catch(error => {
+            console.warn('⚠️ Initial session check failed, but continuing:', error);
+          });
+        }
         
         const form = document.getElementById('cvForm');
         
@@ -123,7 +139,6 @@ let currentStep = 1;
         initializeLivePreview();
         
         // Check if we're in edit mode
-        const urlParams = new URLSearchParams(window.location.search);
         const editCvId = urlParams.get('edit');
         
         if (editCvId) {
@@ -293,11 +308,11 @@ let currentStep = 1;
       });
       
       // Function to check session status
-      async function checkSessionStatus() {
+      async function checkSessionStatus(isGuestMode = false) {
         try {
           console.log('🔍 Checking session status...');
           
-          const response = await fetch('../Login_Signup/check_session.php');
+          const response = await fetch('../Login_Signup/check_session_mvc.php');
           
           if (!response.ok) {
             console.warn('⚠️ Session check failed with status:', response.status);
@@ -309,10 +324,15 @@ let currentStep = 1;
           console.log('📋 Session status:', result);
           
           if (!result.logged_in) {
-            console.warn('⚠️ User not logged in!');
-            alert('Session expirée. Vous allez être redirigé vers la page de connexion.');
-            window.location.href = '../Login_Signup/auth.html';
-            return false;
+            if (isGuestMode) {
+              console.log('👤 User not logged in but in guest mode - continuing...');
+              return false; // Return false but don't redirect
+            } else {
+              console.warn('⚠️ User not logged in!');
+              alert('Session expirée. Vous allez être redirigé vers la page de connexion.');
+              window.location.href = '../Login_Signup/auth.html';
+              return false;
+            }
           }
           
           console.log('✅ User session valid:', result);
@@ -322,6 +342,82 @@ let currentStep = 1;
           // Don't fail the form submission if session check has network issues
           console.log('⚠️ Session check failed, continuing anyway...');
           return true;
+        }
+      }
+
+      // Function to hide authentication-related buttons for guest users
+      function hideAuthButtons() {
+        const authButtons = [
+          'myCvsLink',
+          'userHomeBtn', 
+          'logoutBtn'
+        ];
+        
+        authButtons.forEach(buttonId => {
+          const button = document.getElementById(buttonId);
+          if (button) {
+            button.style.display = 'none';
+            console.log(`🚫 Hidden button: ${buttonId}`);
+          }
+        });
+        
+        // Disable XML, LaTeX, and ZIP download options for guest users (only PDF allowed)
+        const restrictedFormats = ['xml', 'latex', 'all'];
+        restrictedFormats.forEach(formatValue => {
+          const option = document.querySelector(`input[name="format"][value="${formatValue}"]`);
+          if (option) {
+            option.disabled = true;
+            const label = option.closest('label');
+            if (label) {
+              label.style.opacity = '0.5';
+              label.style.cursor = 'not-allowed';
+              
+              // Add a note about the restriction
+              const formatContent = label.querySelector('.format-content');
+              if (formatContent) {
+                const restriction = document.createElement('span');
+                restriction.style.cssText = 'color: #dc3545; font-size: 12px; font-style: italic; display: block; margin-top: 4px;';
+                restriction.textContent = 'Non disponible en mode invité - Créez un compte pour cette option';
+                formatContent.appendChild(restriction);
+              }
+            }
+            console.log(`🚫 Disabled ${formatValue.toUpperCase()} download option for guest user`);
+          }
+        });
+        
+        // Add a note for guest users
+        const headerActions = document.querySelector('.header-actions');
+        if (headerActions) {
+          const guestNote = document.createElement('span');
+          guestNote.className = 'guest-note';
+          guestNote.innerHTML = '<i class="fas fa-info-circle"></i> Mode invité - Téléchargement PDF uniquement. <a href="../Login_Signup/auth.html">Créez un compte</a> pour accéder à tous les formats';
+          guestNote.style.cssText = 'color: #666; font-size: 14px; margin-right: 15px;';
+          headerActions.insertBefore(guestNote, headerActions.firstChild);
+        }
+      }
+
+      // Function to show a notification about the custom CV name
+      function showCustomCVNameNotification(cvName) {
+        // Update page title
+        document.title = 'CV Generator - Création: ' + cvName;
+        
+        // Update header title
+        const headerTitle = document.querySelector('.header h2');
+        if (headerTitle) {
+          headerTitle.textContent = 'Nouveau CV: ' + cvName;
+        }
+        
+        // Show notification
+        const header = document.querySelector('.header');
+        if (header) {
+          const notification = document.createElement('div');
+          notification.style.cssText = 'background: #d4edda; color: #155724; border: 1px solid #c3e6cb; border-radius: 8px; padding: 12px 16px; margin: 10px 0; display: flex; align-items: center; gap: 10px; font-size: 14px;';
+          notification.innerHTML = '<i class="fas fa-info-circle"></i><span>Création du CV: <strong>' + cvName + '</strong></span>';
+          header.appendChild(notification);
+          setTimeout(function() { 
+            if (notification.parentElement) notification.remove(); 
+          }, 5000);
+          console.log('📋 Showing CV name notification:', cvName);
         }
       }
 
@@ -2141,15 +2237,33 @@ let currentStep = 1;
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Génération en cours...';
         
         try {
-          // Check session first
-          const sessionValid = await checkSessionStatus();
-          if (!sessionValid) {
+          // Check if we're in guest mode
+          const urlParams = new URLSearchParams(window.location.search);
+          const isGuestMode = urlParams.get('mode') === 'guest';
+          
+          // Check session first (only redirect if not in guest mode)
+          const sessionValid = await checkSessionStatus(isGuestMode);
+          if (!sessionValid && !isGuestMode) {
             return; // checkSessionStatus will handle redirect
           }
           
           // Get form data
           const form = document.getElementById('cvForm');
           const formData = new FormData(form);
+          
+          // Add guest mode indicator if applicable
+          if (isGuestMode) {
+            formData.append('guest_mode', 'true');
+          }
+          
+          // Check for custom CV name from session storage (if coming from user_home.html)
+          const customCVName = sessionStorage.getItem('newCVName');
+          if (customCVName) {
+            formData.append('custom_cv_name', customCVName);
+            console.log('📝 Using custom CV name:', customCVName);
+            // Clear it after use
+            sessionStorage.removeItem('newCVName');
+          }
           
           // Add additional data
           const editingCvId = document.getElementById('editing_cv_id')?.value;

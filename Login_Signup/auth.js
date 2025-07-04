@@ -78,7 +78,7 @@ document
     hideAllAlerts();
 
     try {
-      const response = await fetch("login_handler.php", {
+      const response = await fetch("login_handler_mvc.php", {
         method: "POST",
         body: formData,
       });
@@ -129,12 +129,24 @@ document
   .addEventListener("submit", async function (e) {
     e.preventDefault();
 
+    // Validation côté client pour le username
+    const username = document.getElementById("signup_username").value.trim();
+    if (username.length < 3 || username.length > 30) {
+      showAlert("error", "Le nom d'utilisateur doit contenir entre 3 et 30 caractères.", "signup");
+      return;
+    }
+    
+    if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+      showAlert("error", "Le nom d'utilisateur ne peut contenir que des lettres, chiffres et underscores.", "signup");
+      return;
+    }
+
     const formData = new FormData(this);
     toggleLoading("signup", true);
     hideAllAlerts();
 
     try {
-      const response = await fetch("signup_handler.php", {
+      const response = await fetch("signup_handler_mvc.php", {
         method: "POST",
         body: formData,
       });
@@ -216,3 +228,40 @@ document
       this.style.borderColor = "#e1e5e9";
     }
   });
+
+// Validation en temps réel pour le champ username
+document.addEventListener("DOMContentLoaded", function() {
+  const usernameInput = document.getElementById("signup_username");
+  if (usernameInput) {
+    usernameInput.addEventListener("input", function() {
+      const username = this.value.trim();
+      const helpText = this.nextElementSibling;
+      
+      // Reset styles
+      this.style.borderColor = "";
+      helpText.style.color = "";
+      
+      if (username.length > 0) {
+        if (username.length < 3) {
+          this.style.borderColor = "#dc3545";
+          helpText.style.color = "#dc3545";
+          helpText.textContent = "Trop court (minimum 3 caractères)";
+        } else if (username.length > 30) {
+          this.style.borderColor = "#dc3545";
+          helpText.style.color = "#dc3545";
+          helpText.textContent = "Trop long (maximum 30 caractères)";
+        } else if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+          this.style.borderColor = "#dc3545";
+          helpText.style.color = "#dc3545";
+          helpText.textContent = "Caractères non autorisés (lettres, chiffres et _ uniquement)";
+        } else {
+          this.style.borderColor = "#28a745";
+          helpText.style.color = "#28a745";
+          helpText.textContent = "Nom d'utilisateur valide ✓";
+        }
+      } else {
+        helpText.textContent = "3-30 caractères, lettres, chiffres et _ uniquement";
+      }
+    });
+  }
+});
