@@ -1456,12 +1456,7 @@ let currentStep = 1;
       function schedulePreviewUpdate(delay = 200) {
         if (!previewVisible) return;
         
-        // Show that preview is out of sync
-        const previewStatus = document.getElementById('previewStatus');
-        if (previewStatus && !isPreviewUpdating) {
-          previewStatus.className = 'preview-status updating';
-          previewStatus.innerHTML = '<i class="fas fa-clock"></i><span>En attente...</span>';
-        }
+        // Show that preview is out of sync (removed preview status indicator)
         
         clearTimeout(previewUpdateTimeout);
         previewUpdateTimeout = setTimeout(() => {
@@ -1473,19 +1468,10 @@ let currentStep = 1;
         if (isPreviewUpdating) return;
         
         isPreviewUpdating = true;
-        const previewHeader = document.querySelector('.preview-header h3');
         const previewContainer = document.querySelector('.preview-container');
         const cvPreview = document.querySelector('.cv-preview');
-        const previewStatus = document.getElementById('previewStatus');
-        const originalText = previewHeader.innerHTML;
         
-        // Update status indicator
-        previewStatus.className = 'preview-status updating';
-        previewStatus.innerHTML = '<i class="fas fa-sync fa-spin"></i><span>Compilation...</span>';
-        
-        // Show updating indicator like Overleaf
-        previewHeader.innerHTML = '<i class="fas fa-sync fa-spin"></i> Compilation PDF...';
-        previewHeader.className = 'updating';
+        // Show updating indicator
         previewContainer.classList.add('updating');
         cvPreview.classList.add('updating');
         
@@ -1493,41 +1479,17 @@ let currentStep = 1;
           // Wait for the async PDF generation
           await updatePreview();
           
-          // Update status to success
-          previewStatus.className = 'preview-status success';
-          previewStatus.innerHTML = '<i class="fas fa-check"></i><span>PDF Compilé</span>';
-          
-          // Show success indicator in header briefly
-          previewHeader.innerHTML = '<i class="fas fa-check"></i> PDF mis à jour';
-          previewHeader.className = 'success';
-          
         } catch (error) {
           console.error('Preview update failed:', error);
-          
-          // Update status to error
-          previewStatus.className = 'preview-status error';
-          previewStatus.innerHTML = '<i class="fas fa-exclamation-triangle"></i><span>Erreur</span>';
-          
-          // Show error indicator
-          previewHeader.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Erreur de compilation';
-          previewHeader.className = 'error';
         }
         
         // Remove updating classes
         previewContainer.classList.remove('updating');
         cvPreview.classList.remove('updating');
         
-        // Reset header to original after brief moment
+        // Reset status after delay
         setTimeout(() => {
-          previewHeader.innerHTML = originalText;
-          previewHeader.className = '';
-          
-          // Reset status to normal after delay
-          setTimeout(() => {
-            previewStatus.className = 'preview-status';
-            previewStatus.innerHTML = '<i class="fas fa-circle"></i><span>Synchronisé</span>';
-            isPreviewUpdating = false;
-          }, 1000);
+          isPreviewUpdating = false;
         }, 800);
       }
 
