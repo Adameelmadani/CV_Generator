@@ -1034,28 +1034,55 @@ class CVController extends Controller {
     }
     
     private function downloadLaTeX($xmlContent, $prenom, $nom, $workingDir) {
+        if (!class_exists('ZipArchive')) {
+            http_response_code(500);
+            exit('ZIP extension not available');
+        }
+        
         try {
             $files = $this->generatePDF($xmlContent, 0);
             $texFile = $files['tex_file'];
-            $filename = "CV_{$prenom}_{$nom}.tex";
+            $zipFileName = $workingDir . "CV_{$prenom}_{$nom}_LaTeX.zip";
             
-            header('Content-Type: text/plain');
-            header('Content-Disposition: attachment; filename="' . $filename . '"');
-            header('Content-Length: ' . filesize($texFile));
-            header('Cache-Control: no-cache, must-revalidate');
-            header('Pragma: no-cache');
-            header('Expires: 0');
+            // Template file path
+            $templatePath = $workingDir . 'templates/modern.cls';
             
-            readfile($texFile);
-            
-            // Clean up
-            $this->cleanupFiles($files);
-            exit();
+            $zip = new ZipArchive();
+            if ($zip->open($zipFileName, ZipArchive::CREATE) === TRUE) {
+                // Add LaTeX file
+                $zip->addFile($texFile, "CV_{$prenom}_{$nom}.tex");
+                
+                // Add template file if it exists
+                if (file_exists($templatePath)) {
+                    $zip->addFile($templatePath, "modern.cls");
+                } else {
+                    error_log("Template file not found: " . $templatePath);
+                }
+                
+                $zip->close();
+                
+                header('Content-Type: application/zip');
+                header('Content-Disposition: attachment; filename="CV_' . $prenom . '_' . $nom . '_LaTeX.zip"');
+                header('Content-Length: ' . filesize($zipFileName));
+                header('Cache-Control: no-cache, must-revalidate');
+                header('Pragma: no-cache');
+                header('Expires: 0');
+                
+                readfile($zipFileName);
+                
+                // Clean up
+                $this->cleanupFiles($files);
+                @unlink($zipFileName);
+                exit();
+                
+            } else {
+                throw new Exception("Failed to create ZIP file");
+            }
             
         } catch (Exception $e) {
-            error_log("Error generating LaTeX: " . $e->getMessage());
+            error_log("Error generating LaTeX ZIP: " . $e->getMessage());
             http_response_code(500);
-            exit('Error generating LaTeX file');
+            exit('Error generating LaTeX ZIP file');
         }
     }
     
@@ -1093,22 +1120,33 @@ class CVController extends Controller {
         
         try {
             $files = $this->generatePDF($xmlContent, 0);
-            $zipFileName = $workingDir . "CV_{$prenom}_{$nom}.zip";
+            $zipFileName = $workingDir . "CV_{$prenom}_{$nom}_Complete.zip";
             
             // Create XML file
             $xmlFile = $workingDir . "CV_{$prenom}_{$nom}.xml";
             file_put_contents($xmlFile, $xmlContent);
             
+            // Template file path
+            $templatePath = $workingDir . 'templates/modern.cls';
+            
             $zip = new ZipArchive();
             if ($zip->open($zipFileName, ZipArchive::CREATE) === TRUE) {
-                // Add files to ZIP
+                // Add all files to ZIP
                 $zip->addFile($files['pdf_file'], "CV_{$prenom}_{$nom}.pdf");
                 $zip->addFile($xmlFile, "CV_{$prenom}_{$nom}.xml");
                 $zip->addFile($files['tex_file'], "CV_{$prenom}_{$nom}.tex");
+                
+                // Add template file if it exists
+                if (file_exists($templatePath)) {
+                    $zip->addFile($templatePath, "modern.cls");
+                } else {
+                    error_log("Template file not found: " . $templatePath);
+                }
+                
                 $zip->close();
                 
                 header('Content-Type: application/zip');
-                header('Content-Disposition: attachment; filename="CV_' . $prenom . '_' . $nom . '.zip"');
+                header('Content-Disposition: attachment; filename="CV_' . $prenom . '_' . $nom . '_Complete.zip"');
                 header('Content-Length: ' . filesize($zipFileName));
                 header('Cache-Control: no-cache, must-revalidate');
                 header('Pragma: no-cache');
@@ -1127,9 +1165,9 @@ class CVController extends Controller {
             }
             
         } catch (Exception $e) {
-            error_log("Error generating ZIP: " . $e->getMessage());
+            error_log("Error generating complete ZIP: " . $e->getMessage());
             http_response_code(500);
-            exit('Error generating ZIP file');
+            exit('Error generating complete ZIP file');
         }
     }
     
