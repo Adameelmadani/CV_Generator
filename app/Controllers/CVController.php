@@ -1,15 +1,18 @@
 <?php
 
 require_once __DIR__ . '/../../core/bootstrap.php';
+require_once __DIR__ . '/../Models/CVSectionsManager.php';
 
 class CVController extends Controller {
     private $cvModel;
     private $userModel;
+    private $sectionsManager;
     
     public function __construct() {
         parent::__construct();
         $this->cvModel = new CV();
         $this->userModel = new User();
+        $this->sectionsManager = new CVSectionsManager();
     }
     
     public function getUserCVs() {
@@ -65,8 +68,18 @@ class CVController extends Controller {
                 return;
             }
             
+            // Try to get structured data from section tables
+            $sectionsData = null;
+            try {
+                $sectionsData = $this->sectionsManager->getAllSections($cvId, $userId);
+                error_log("CVController::getCVData - Retrieved sections data");
+            } catch (Exception $e) {
+                error_log("CVController::getCVData - Could not retrieve sections data: " . $e->getMessage());
+                // If sections data is not available, we'll just use XML
+            }
+            
             error_log("CVController::getCVData - Success, returning CV data");
-            $this->jsonResponse([
+            $response = [
                 'status' => 'success',
                 'cv_id' => $cvId,
                 'cv_data' => $xmlContent,           // For form.js compatibility
@@ -74,7 +87,14 @@ class CVController extends Controller {
                 'cv' => [                           // For home.html compatibility
                     'data' => $xmlContent
                 ]
-            ]);
+            ];
+            
+            // Add structured data if available
+            if ($sectionsData) {
+                $response['sections_data'] = $sectionsData;
+            }
+            
+            $this->jsonResponse($response);
             
         } catch (Exception $e) {
             error_log("Error in getCVData: " . $e->getMessage());
@@ -146,8 +166,11 @@ class CVController extends Controller {
                 return;
             }
             
-            // Delete the CV
+            // Delete the CV from main table
             $this->cvModel->deleteUserCV($cvId, $userId);
+            
+            // Also delete from section tables
+            $this->sectionsManager->deleteAllSections($cvId, $userId);
             
             $this->jsonResponse([
                 'status' => 'success',
@@ -242,9 +265,17 @@ class CVController extends Controller {
                 // Update existing CV
                 $this->cvModel->updateCV($editingCVId, $userId, $cvName, $xmlContent);
                 $cvId = $editingCVId;
+                
+                // Also save to individual section tables
+                $this->sectionsManager->saveAllSections($cvId, $userId, $formData);
+                
             } else if (!$isGuestMode) {
                 // Create new CV for authenticated users
                 $cvId = $this->cvModel->createCV($userId, $cvName, $xmlContent);
+                
+                // Save to individual section tables
+                $this->sectionsManager->saveAllSections($cvId, $userId, $formData);
+                
             } else {
                 // Guest mode - generate temporary CV ID for PDF generation
                 $cvId = 'guest_' . time() . '_' . rand(1000, 9999);
@@ -610,16 +641,16 @@ class CVController extends Controller {
                 throw new Exception("Invalid XML content");
             }
         
-        $prenom = (string)$xml->personalInfo->firstname;
-        $nom = (string)$xml->personalInfo->lastname;
-        $location = (string)$xml->personalInfo->location;
-        $email = (string)$xml->personalInfo->email;
-        $telephone = (string)$xml->personalInfo->phone;
-        $website = (string)$xml->personalInfo->website;
-        $linkedin = (string)$xml->personalInfo->linkedin;
-        $github = (string)$xml->personalInfo->github;
+        $prenom = $this->cleanForLatex((string)$xml->personalInfo->firstname);
+        $nom = $this->cleanForLatex((string)$xml->personalInfo->lastname);
+        $location = $this->cleanForLatex((string)$xml->personalInfo->location);
+        $email = $this->cleanForLatex((string)$xml->personalInfo->email);
+        $telephone = $this->cleanForLatex((string)$xml->personalInfo->phone);
+        $website = $this->cleanForLatex((string)$xml->personalInfo->website);
+        $linkedin = $this->cleanForLatex((string)$xml->personalInfo->linkedin);
+        $github = $this->cleanForLatex((string)$xml->personalInfo->github);
         $photoPath = (string)$xml->personalInfo->photo;
-        $profil = (string)$xml->profil->description;
+        $profil = (string)$xml->profil->description; // Don't clean here, will be cleaned when used
         $primaryColor = (string)$xml->personalization->primaryColor ?: '#667eea';
         
         $latexClass = "templates/modern";
@@ -661,9 +692,10 @@ class CVController extends Controller {
         // Profile section
         $sectionProfil = "";
         if (!empty($profil)) {
+            $cleanProfil = $this->cleanForLatex($profil);
             $sectionProfil = "     \\section{Profil}\n";
             $sectionProfil .= "        \\begin{onecolentry}\n";
-            $sectionProfil .= "        " . $profil;
+            $sectionProfil .= "        " . $cleanProfil;
             $sectionProfil .= "        \\end{onecolentry}\n";
         }
 
@@ -672,11 +704,11 @@ class CVController extends Controller {
         if (isset($xml->education->degree)) {
             $sectionEducation = "    \\section{Formation}\n";
             foreach ($xml->education->degree as $degree) {
-                $degreeTitle = (string)$degree->title;
-                $dates = (string)$degree->period;
-                $university = (string)$degree->institution;
-                $field = (string)$degree->field;
-                $detail = (string)$degree->description;
+                $degreeTitle = $this->cleanForLatex((string)$degree->title);
+                $dates = $this->cleanForLatex((string)$degree->period);
+                $university = $this->cleanForLatex((string)$degree->institution);
+                $field = $this->cleanForLatex((string)$degree->field);
+                $detail = $this->cleanForLatex((string)$degree->description);
 
                 // Prepare highlights
                 $highlights = "";
@@ -692,11 +724,11 @@ class CVController extends Controller {
         if (isset($xml->certificates->certificate)) {
             $sectionCertificates = "    \\section{Certificats}\n";
             foreach ($xml->certificates->certificate as $cert) {
-                $certName = (string)$cert->name;
-                $certDate = (string)$cert->date;
-                $certIssuer = (string)$cert->issuer;
-                $certLocation = (string)$cert->location;
-                $certDescription = (string)$cert->description;
+                $certName = $this->cleanForLatex((string)$cert->name);
+                $certDate = $this->cleanForLatex((string)$cert->date);
+                $certIssuer = $this->cleanForLatex((string)$cert->issuer);
+                $certLocation = $this->cleanForLatex((string)$cert->location);
+                $certDescription = $this->cleanForLatex((string)$cert->description);
 
                $highlights = "";
                 if (!empty($certDescription)) {
@@ -715,11 +747,11 @@ class CVController extends Controller {
         if (isset($xml->experiences->experience)) {
             $sectionExperience = "    \\section{Expérience}\n";
             foreach ($xml->experiences->experience as $exp) {
-                $expPosition = (string)$exp->position;
-                $expCompany = (string)$exp->company;
-                $expDates = (string)$exp->period;
-                $expLocation = (string)$exp->location;
-                $expDescription = (string)$exp->description;
+                $expPosition = $this->cleanForLatex((string)$exp->position);
+                $expCompany = $this->cleanForLatex((string)$exp->company);
+                $expDates = $this->cleanForLatex((string)$exp->period);
+                $expLocation = $this->cleanForLatex((string)$exp->location);
+                $expDescription = $this->cleanForLatex((string)$exp->description);
 
                  // Convert description to highlights format
                 $highlights = "";
@@ -741,9 +773,9 @@ class CVController extends Controller {
         if (isset($xml->projects->project)) {
             $sectionProjects = "    \\section{Projets}\n";
             foreach ($xml->projects->project as $project) {
-                $projectName = (string)$project->name;
-                $projectLink = (string)$project->link;
-                $projectDescription = (string)$project->description;
+                $projectName = $this->cleanForLatex((string)$project->name);
+                $projectLink = $this->cleanForLatex((string)$project->link);
+                $projectDescription = $this->cleanForLatex((string)$project->description);
 
                 $highlights = "";
                 if (!empty($projectDescription)) {
@@ -762,8 +794,8 @@ class CVController extends Controller {
         if (isset($xml->skills->skill)) {
             $sectionSkills = "    \\section{Compétences}\n";
             foreach ($xml->skills->skill as $skill) {
-                $skillCategory = (string)$skill->category;
-                $skillItems = (string)$skill->items;
+                $skillCategory = $this->cleanForLatex((string)$skill->category);
+                $skillItems = $this->cleanForLatex((string)$skill->items);
 
                 $sectionSkills .= "    \\skillsentry{" . $skillCategory . "}{" . $skillItems . "}\n\n";
             }
@@ -773,9 +805,10 @@ class CVController extends Controller {
         $sectionLanguages = "";
         if (isset($xml->languages->language)) {
             $sectionLanguages = "    \\section{Langues}\n";
+            $lang_items = [];
             foreach ($xml->languages->language as $language) {
-                $langName = (string)$language->name;
-                $langLevel = (string)$language->level;
+                $langName = $this->cleanForLatex((string)$language->name);
+                $langLevel = $this->cleanForLatex((string)$language->level);
                 $lang_items[] = $langName . " (" . $langLevel . ")";
             }
             $sectionLanguages .= "\    \skillsentry{Langues}{" . implode(", ", $lang_items) . "}\n\n";
@@ -1282,5 +1315,33 @@ class CVController extends Controller {
         }
         
         return null;
+    }
+
+    /**
+     * Clean text for LaTeX by decoding HTML entities and escaping LaTeX special characters
+     */
+    private function cleanForLatex($text) {
+        // First decode HTML entities
+        $text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        
+        // Escape LaTeX special characters
+        $latexSpecialChars = [
+            '\\' => '\\textbackslash{}',
+            '{' => '\\{',
+            '}' => '\\}',
+            '$' => '\\$',
+            '&' => '\\&',
+            '%' => '\\%',
+            '#' => '\\#',
+            '^' => '\\textasciicircum{}',
+            '_' => '\\_',
+            '~' => '\\textasciitilde{}'
+        ];
+        
+        foreach ($latexSpecialChars as $char => $replacement) {
+            $text = str_replace($char, $replacement, $text);
+        }
+        
+        return $text;
     }
 }
