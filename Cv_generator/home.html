@@ -46,15 +46,15 @@
         </div>
         <div class="step" data-step="4">
           <div class="step-number">4</div>
-          <div class="step-title">Certificats</div>
+          <div class="step-title">Expérience</div>
         </div>
         <div class="step" data-step="5">
           <div class="step-number">5</div>
-          <div class="step-title">Expérience</div>
+          <div class="step-title">Projets</div>
         </div>
         <div class="step" data-step="6">
           <div class="step-number">6</div>
-          <div class="step-title">Projets</div>
+          <div class="step-title">Certificats</div>
         </div>
         <div class="step" data-step="7">
           <div class="step-number">7</div>
@@ -147,30 +147,8 @@
             </div>
           </div>
 
-          <!-- Étape 4: Certificats -->
+          <!-- Étape 4: Expérience Professionnelle -->
           <div class="step-content" data-step="4">
-            <div class="section">
-              <h3>Certificats</h3>
-              <div id="certificates">
-                <div class="entry-item certificate-entry">
-                  <div class="two-column">
-                    <input type="text" name="certificate_name[]" placeholder="Nom du certificat" />
-                    <input type="text" name="certificate_date[]" placeholder="Date d'obtention" />
-                  </div>
-                  <div class="two-column">
-                    <input type="text" name="certificate_issuer[]" placeholder="Organisme émetteur" />
-                    <input type="text" name="certificate_location[]" placeholder="Lieu" />
-                  </div>
-                  <textarea name="certificate_description[]" placeholder="Description du certificat"></textarea>
-                  <button type="button" class="remove-btn" onclick="removeCertificate(this)">Supprimer</button>
-                </div>
-              </div>
-              <button type="button" class="add-btn" onclick="addCertificate()">+ Ajouter un certificat</button>
-            </div>
-          </div>
-
-          <!-- Étape 5: Expérience Professionnelle -->
-          <div class="step-content" data-step="5">
             <div class="section">
               <h3>Expérience Professionnelle</h3>
               <div id="experiences">
@@ -191,8 +169,8 @@
             </div>
           </div>
 
-          <!-- Étape 6: Projets -->
-          <div class="step-content" data-step="6">
+          <!-- Étape 5: Projets -->
+          <div class="step-content" data-step="5">
             <div class="section">
               <h3>Projets</h3>
               <div id="projects">
@@ -206,6 +184,28 @@
                 </div>
               </div>
               <button type="button" class="add-btn" onclick="addProject()">+ Ajouter un projet</button>
+            </div>
+          </div>
+
+          <!-- Étape 6: Certificats -->
+          <div class="step-content" data-step="6">
+            <div class="section">
+              <h3>Certificats</h3>
+              <div id="certificates">
+                <div class="entry-item certificate-entry">
+                  <div class="two-column">
+                    <input type="text" name="certificate_name[]" placeholder="Nom du certificat" />
+                    <input type="text" name="certificate_date[]" placeholder="Date d'obtention" />
+                  </div>
+                  <div class="two-column">
+                    <input type="text" name="certificate_issuer[]" placeholder="Organisme émetteur" />
+                    <input type="text" name="certificate_location[]" placeholder="Lieu" />
+                  </div>
+                  <textarea name="certificate_description[]" placeholder="Description du certificat"></textarea>
+                  <button type="button" class="remove-btn" onclick="removeCertificate(this)">Supprimer</button>
+                </div>
+              </div>
+              <button type="button" class="add-btn" onclick="addCertificate()">+ Ajouter un certificat</button>
             </div>
           </div>
 

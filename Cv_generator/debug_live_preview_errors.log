@@ -1,0 +1,78 @@
+[05-Jul-2025 17:30:57 Europe/Berlin] === Auth Check ===
+[05-Jul-2025 17:30:57 Europe/Berlin] Session status: 2
+[05-Jul-2025 17:30:57 Europe/Berlin] Session ID: lc2kg7g25gs1sg0ovs63n9hibk
+[05-Jul-2025 17:30:57 Europe/Berlin] Session data: Array
+(
+    [userId] => 4
+    [userEmail] => itzzbida@gmail.com
+    [username] => Zbida
+    [userTel] => 0767671765
+)
+
+[05-Jul-2025 17:30:57 Europe/Berlin] UserId in session: 4
+[05-Jul-2025 17:30:57 Europe/Berlin] Authentication successful - userId: 4
+[05-Jul-2025 17:30:57 Europe/Berlin] Live Preview form data received:
+[05-Jul-2025 17:30:57 Europe/Berlin] Certificate data: Array
+(
+    [0] => AWS Certified Developer
+)
+
+[05-Jul-2025 17:30:57 Europe/Berlin] Project data: Array
+(
+    [0] => E-Commerce Platform
+)
+
+[05-Jul-2025 17:30:57 Europe/Berlin] Skill data: Array
+(
+    [0] => Langages de programmation
+)
+
+[05-Jul-2025 17:30:57 Europe/Berlin] Language data: Array
+(
+    [0] => Français
+)
+
+[05-Jul-2025 17:30:57 Europe/Berlin] Live Preview XML structure check:
+[05-Jul-2025 17:30:57 Europe/Berlin] Has certificates: YES
+[05-Jul-2025 17:30:57 Europe/Berlin] Has projects: YES
+[05-Jul-2025 17:30:57 Europe/Berlin] Has skills: YES
+[05-Jul-2025 17:30:57 Europe/Berlin] Has languages: YES
+[05-Jul-2025 17:31:01 Europe/Berlin] === Auth Check ===
+[05-Jul-2025 17:31:01 Europe/Berlin] Session status: 2
+[05-Jul-2025 17:31:01 Europe/Berlin] Session ID: lc2kg7g25gs1sg0ovs63n9hibk
+[05-Jul-2025 17:31:01 Europe/Berlin] Session data: Array
+(
+    [userId] => 4
+    [userEmail] => itzzbida@gmail.com
+    [username] => Zbida
+    [userTel] => 0767671765
+)
+
+[05-Jul-2025 17:31:01 Europe/Berlin] UserId in session: 4
+[05-Jul-2025 17:31:01 Europe/Berlin] Authentication successful - userId: 4
+[05-Jul-2025 17:31:01 Europe/Berlin] Live Preview form data received:
+[05-Jul-2025 17:31:01 Europe/Berlin] Certificate data: Array
+(
+    [0] => AWS Certified Developer
+)
+
+[05-Jul-2025 17:31:01 Europe/Berlin] Project data: Array
+(
+    [0] => E-Commerce Platform
+)
+
+[05-Jul-2025 17:31:01 Europe/Berlin] Skill data: Array
+(
+    [0] => Langages de programmation
+)
+
+[05-Jul-2025 17:31:01 Europe/Berlin] Language data: Array
+(
+    [0] => Français
+)
+
+[05-Jul-2025 17:31:01 Europe/Berlin] Live Preview XML structure check:
+[05-Jul-2025 17:31:01 Europe/Berlin] Has certificates: YES
+[05-Jul-2025 17:31:01 Europe/Berlin] Has projects: YES
+[05-Jul-2025 17:31:01 Europe/Berlin] Has skills: YES
+[05-Jul-2025 17:31:01 Europe/Berlin] Has languages: YES
