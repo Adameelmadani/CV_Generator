@@ -1118,23 +1118,30 @@ textarea {
 .photo-upload-section {
   margin-bottom: 15px;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  height: 105px; /* Match height of two inputs + gap (45px + 15px + 45px) */
+  justify-content: center;
 }
 
 .photo-upload-label {
   display: inline-block;
   cursor: pointer;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .photo-preview {
-  width: 100px;
-  height: 100px;
+  width: 105px;
+  height: 105px;
   border: 2px dashed #ddd;
   border-radius: 50%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 8px;
   background: #f9f9f9;
   transition: all 0.3s ease;
   overflow: hidden;
@@ -1182,8 +1189,9 @@ textarea {
   border-radius: 12px;
   font-size: 11px;
   cursor: pointer;
-  margin-top: 4px;
   transition: background 0.3s ease;
+  margin-top: 4px;
+  align-self: center;
 }
 
 .remove-photo-btn:hover {
