@@ -22,17 +22,23 @@ class AuthController extends Controller {
         
         try {
             // Récupérer et nettoyer les données
-            $username = trim($_POST['signup_username'] ?? '');
+            $nom = trim($_POST['signup_nom'] ?? '');
+            $prenom = trim($_POST['signup_prenom'] ?? '');
             $email = trim($_POST['signup_email'] ?? '');
             $password = $_POST['signup_password'] ?? '';
             $telephone = trim($_POST['signup_tel'] ?? '');
+            $filiereId = !empty($_POST['signup_filiere']) ? intval($_POST['signup_filiere']) : null;
             
             // Validation des données
             $errors = [];
             
-            // Valider le username
-            $usernameErrors = $this->userModel->validateUsername($username);
-            $errors = array_merge($errors, $usernameErrors);
+            // Valider le nom
+            $nomErrors = $this->userModel->validateNom($nom);
+            $errors = array_merge($errors, $nomErrors);
+            
+            // Valider le prénom
+            $prenomErrors = $this->userModel->validatePrenom($prenom);
+            $errors = array_merge($errors, $prenomErrors);
             
             // Valider l'email
             $emailErrors = $this->userModel->validateEmail($email);
@@ -56,21 +62,14 @@ class AuthController extends Controller {
                 return;
             }
             
-            // Vérifier l'unicité de l'email et du username
-            $existingUser = $this->userModel->findByEmailOrUsername($email, $username);
+            // Vérifier l'unicité de l'email
+            $existingUser = $this->userModel->findByEmail($email);
             
             if ($existingUser) {
-                if ($existingUser['email'] === $email) {
-                    $this->jsonResponse([
-                        'status' => 'error',
-                        'message' => "L'email est déjà utilisé."
-                    ], 409);
-                } else {
-                    $this->jsonResponse([
-                        'status' => 'error',
-                        'message' => "Le nom d'utilisateur est déjà pris."
-                    ], 409);
-                }
+                $this->jsonResponse([
+                    'status' => 'error',
+                    'message' => "L'email est déjà utilisé."
+                ], 409);
                 return;
             }
             
@@ -78,12 +77,13 @@ class AuthController extends Controller {
             $hashedPassword = $this->userModel->hashPassword($password);
             
             // Créer l'utilisateur
-            $userId = $this->userModel->createUser($username, $email, $hashedPassword, $telephone);
+            $userId = $this->userModel->createUser($nom, $prenom, $email, $hashedPassword, $telephone, $filiereId);
             
             // Créer la session
             $this->session['userId'] = $userId;
             $this->session['userEmail'] = $email;
-            $this->session['username'] = $username;
+            $this->session['nom'] = $nom;
+            $this->session['prenom'] = $prenom;
             
             $this->jsonResponse([
                 'status' => 'success',
@@ -125,7 +125,7 @@ class AuthController extends Controller {
             // Rechercher l'utilisateur
             $user = $this->userModel->findByEmail($email);
             
-            if (!$user || !$this->userModel->verifyPassword($password, $user['hashed_password'])) {
+            if (!$user || !$this->userModel->verifyPassword($password, $user['mot_de_passe_hash'])) {
                 $this->jsonResponse([
                     'status' => 'error',
                     'message' => 'Email ou mot de passe incorrect.'
@@ -136,8 +136,10 @@ class AuthController extends Controller {
             // Créer la session
             $this->session['userId'] = $user['id'];
             $this->session['userEmail'] = $user['email'];
-            $this->session['username'] = $user['username'] ?? 'Utilisateur';
-            $this->session['userTel'] = $user['phone_number'];
+            $this->session['nom'] = $user['nom'];
+            $this->session['prenom'] = $user['prenom'];
+            $this->session['userTel'] = $user['numero_telephone'];
+            $this->session['filiereId'] = $user['id_filiere'];
             
             $this->jsonResponse([
                 'status' => 'success',

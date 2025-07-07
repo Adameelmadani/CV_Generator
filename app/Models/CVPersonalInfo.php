@@ -3,17 +3,17 @@
 require_once __DIR__ . '/../../core/Model.php';
 
 class CVPersonalInfo extends Model {
-    protected $table = 'cv_personal_info';
+    protected $table = 'informations_personnelles';
     
-    public function getPersonalInfo($cvId, $userId) {
-        $sql = "SELECT * FROM {$this->table} WHERE cv_id = :cv_id AND user_id = :user_id";
-        $stmt = $this->execute($sql, [':cv_id' => $cvId, ':user_id' => $userId]);
+    public function getPersonalInfo($cvId) {
+        $sql = "SELECT * FROM {$this->table} WHERE id_cv = :cv_id";
+        $stmt = $this->execute($sql, [':cv_id' => $cvId]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
     
     public function savePersonalInfo($data) {
         // Check if record exists
-        $existing = $this->getPersonalInfo($data['cv_id'], $data['user_id']);
+        $existing = $this->getPersonalInfo($data['cv_id']);
         
         if ($existing) {
             return $this->updatePersonalInfo($data);
@@ -24,25 +24,24 @@ class CVPersonalInfo extends Model {
     
     private function createPersonalInfo($data) {
         $sql = "INSERT INTO {$this->table} (
-            user_id, cv_id, nom, prenom, location, email, telephone, 
-            website, linkedin, github, photo_path
+            id_cv, nom, prenom, localisation, email, telephone, 
+            site_web, linkedin, github, chemin_photo
         ) VALUES (
-            :user_id, :cv_id, :nom, :prenom, :location, :email, :telephone,
-            :website, :linkedin, :github, :photo_path
+            :cv_id, :nom, :prenom, :localisation, :email, :telephone,
+            :site_web, :linkedin, :github, :chemin_photo
         )";
         
         $this->execute($sql, [
-            ':user_id' => $data['user_id'],
             ':cv_id' => $data['cv_id'],
             ':nom' => $data['nom'],
             ':prenom' => $data['prenom'],
-            ':location' => $data['location'],
+            ':localisation' => $data['localisation'],
             ':email' => $data['email'],
             ':telephone' => $data['telephone'],
-            ':website' => $data['website'] ?? null,
+            ':site_web' => $data['site_web'] ?? null,
             ':linkedin' => $data['linkedin'] ?? null,
             ':github' => $data['github'] ?? null,
-            ':photo_path' => $data['photo_path'] ?? null
+            ':chemin_photo' => $data['chemin_photo'] ?? null
         ]);
         
         return $this->db->lastInsertId();
@@ -50,28 +49,27 @@ class CVPersonalInfo extends Model {
     
     private function updatePersonalInfo($data) {
         $sql = "UPDATE {$this->table} SET 
-            nom = :nom, prenom = :prenom, location = :location, email = :email,
-            telephone = :telephone, website = :website, linkedin = :linkedin,
-            github = :github, photo_path = :photo_path, updated_at = CURRENT_TIMESTAMP
-            WHERE cv_id = :cv_id AND user_id = :user_id";
+            nom = :nom, prenom = :prenom, localisation = :localisation, email = :email,
+            telephone = :telephone, site_web = :site_web, linkedin = :linkedin,
+            github = :github, chemin_photo = :chemin_photo
+            WHERE id_cv = :cv_id";
         
         return $this->execute($sql, [
-            ':user_id' => $data['user_id'],
             ':cv_id' => $data['cv_id'],
             ':nom' => $data['nom'],
             ':prenom' => $data['prenom'],
-            ':location' => $data['location'],
+            ':localisation' => $data['localisation'],
             ':email' => $data['email'],
             ':telephone' => $data['telephone'],
-            ':website' => $data['website'] ?? null,
+            ':site_web' => $data['site_web'] ?? null,
             ':linkedin' => $data['linkedin'] ?? null,
             ':github' => $data['github'] ?? null,
-            ':photo_path' => $data['photo_path'] ?? null
+            ':chemin_photo' => $data['chemin_photo'] ?? null
         ]);
     }
     
-    public function deletePersonalInfo($cvId, $userId) {
-        $sql = "DELETE FROM {$this->table} WHERE cv_id = :cv_id AND user_id = :user_id";
-        return $this->execute($sql, [':cv_id' => $cvId, ':user_id' => $userId]);
+    public function deletePersonalInfo($cvId) {
+        $sql = "DELETE FROM {$this->table} WHERE id_cv = :cv_id";
+        return $this->execute($sql, [':cv_id' => $cvId]);
     }
 }

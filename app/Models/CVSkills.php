@@ -3,64 +3,54 @@
 require_once __DIR__ . '/../../core/Model.php';
 
 class CVSkills extends Model {
-    protected $table = 'cv_skills';
+    protected $table = 'competences';
     
-    public function getSkills($cvId, $userId) {
+    public function getSkills($cvId) {
         $sql = "SELECT * FROM {$this->table} 
-                WHERE cv_id = :cv_id AND user_id = :user_id 
-                ORDER BY sort_order ASC, id ASC";
-        $stmt = $this->execute($sql, [':cv_id' => $cvId, ':user_id' => $userId]);
+                WHERE id_cv = :cv_id 
+                ORDER BY id ASC";
+        $stmt = $this->execute($sql, [':cv_id' => $cvId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     
-    public function saveSkills($cvId, $userId, $skillsData) {
+    public function saveSkills($cvId, $skillsData) {
         // First, delete existing skill entries for this CV
-        $this->deleteSkills($cvId, $userId);
+        $this->deleteSkills($cvId);
         
         // Then insert new entries
         $insertedIds = [];
         foreach ($skillsData as $index => $skill) {
-            if (!empty($skill['skill_category']) || !empty($skill['skill_items'])) {
-                $insertedIds[] = $this->createSkillEntry($cvId, $userId, $skill, $index);
+            if (!empty($skill['categorie']) || !empty($skill['competences'])) {
+                $insertedIds[] = $this->createSkillEntry($cvId, $skill);
             }
         }
         
         return $insertedIds;
     }
     
-    private function createSkillEntry($cvId, $userId, $data, $sortOrder) {
+    private function createSkillEntry($cvId, $data) {
         $sql = "INSERT INTO {$this->table} (
-            user_id, cv_id, skill_category, skill_items, sort_order
+            id_cv, categorie, competences
         ) VALUES (
-            :user_id, :cv_id, :skill_category, :skill_items, :sort_order
+            :cv_id, :categorie, :competences
         )";
         
         $this->execute($sql, [
-            ':user_id' => $userId,
             ':cv_id' => $cvId,
-            ':skill_category' => $data['skill_category'] ?? '',
-            ':skill_items' => $data['skill_items'] ?? '',
-            ':sort_order' => $sortOrder
+            ':categorie' => $data['categorie'] ?? '',
+            ':competences' => $data['competences'] ?? ''
         ]);
         
         return $this->db->lastInsertId();
     }
     
-    public function deleteSkills($cvId, $userId) {
-        $sql = "DELETE FROM {$this->table} WHERE cv_id = :cv_id AND user_id = :user_id";
-        return $this->execute($sql, [':cv_id' => $cvId, ':user_id' => $userId]);
+    public function deleteSkills($cvId) {
+        $sql = "DELETE FROM {$this->table} WHERE id_cv = :cv_id";
+        return $this->execute($sql, [':cv_id' => $cvId]);
     }
     
-    public function updateSkillsOrder($cvId, $userId, $skillIds) {
-        foreach ($skillIds as $index => $skillId) {
-            $sql = "UPDATE {$this->table} SET sort_order = :sort_order 
-                    WHERE id = :id AND cv_id = :cv_id AND user_id = :user_id";
-            $this->execute($sql, [
-                ':sort_order' => $index,
-                ':id' => $skillId,
-                ':cv_id' => $cvId,
-                ':user_id' => $userId
-            ]);
-        }
+    public function deleteSkillEntry($id, $cvId) {
+        $sql = "DELETE FROM {$this->table} WHERE id = :id AND id_cv = :cv_id";
+        return $this->execute($sql, [':id' => $id, ':cv_id' => $cvId]);
     }
 }

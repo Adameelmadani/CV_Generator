@@ -4,14 +4,14 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Authentification - CV Generator</title>
-    <link rel="stylesheet" href="auth_style.css">
+    <link rel="stylesheet" href="auth_style.css" />
   </head>
   <body>
     <div class="container">
       <div class="form-switch">
         <div class="form-content" id="formContent">
           <!-- Section Login -->
-          <div class="form-section login-section">
+          <div class="form-section login-section active">
             <h2>Connexion</h2>
             <div class="alert" id="loginAlert"></div>
 
@@ -63,18 +63,31 @@
 
             <form id="signupForm">
               <div class="form-group">
-                <label for="signup_username">Nom d'utilisateur</label>
+                <label for="signup_nom">Nom</label>
                 <input
                   type="text"
-                  id="signup_username"
-                  name="signup_username"
+                  id="signup_nom"
+                  name="signup_nom"
                   required
-                  minlength="3"
-                  maxlength="30"
-                  pattern="[a-zA-Z0-9_]+"
-                  title="Le nom d'utilisateur doit contenir uniquement des lettres, chiffres et underscores"
+                  minlength="2"
+                  maxlength="255"
+                  title="Votre nom de famille"
                 />
-                <small class="help-text">3-30 caractères, lettres, chiffres et _ uniquement</small>
+                <small class="help-text">Votre nom de famille</small>
+              </div>
+
+              <div class="form-group">
+                <label for="signup_prenom">Prénom</label>
+                <input
+                  type="text"
+                  id="signup_prenom"
+                  name="signup_prenom"
+                  required
+                  minlength="2"
+                  maxlength="255"
+                  title="Votre prénom"
+                />
+                <small class="help-text">Votre prénom</small>
               </div>
 
               <div class="form-group">
@@ -103,6 +116,14 @@
                 <input type="tel" id="signup_tel" name="signup_tel" required />
               </div>
 
+              <div class="form-group">
+                <label for="signup_filiere">Filière d'études</label>
+                <select id="signup_filiere" name="signup_filiere" required>
+                  <option value="">Sélectionnez votre filière</option>
+                </select>
+                <div class="filiere-description" id="filiereDescription"></div>
+              </div>
+
               <button type="submit" class="btn" id="signupBtn">
                 S'inscrire
               </button>
@@ -126,8 +147,6 @@
       </div>
     </div>
 
-    <script src="auth.js">
-      
-    </script>
+   <script src="auth.js"></script>
   </body>
 </html>

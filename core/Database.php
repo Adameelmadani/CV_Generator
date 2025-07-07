@@ -7,7 +7,7 @@ class Database {
     private function __construct() {
         $config = defined('APP_CONFIG') ? APP_CONFIG['database'] : [
             'host' => 'localhost',
-            'dbname' => 'cv_generator',
+            'dbname' => 'cv_craft',
             'username' => 'root',
             'password' => '',
             'charset' => 'utf8mb4'

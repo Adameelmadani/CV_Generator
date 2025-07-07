@@ -3,67 +3,55 @@
 require_once __DIR__ . '/../../core/Model.php';
 
 class CVProjects extends Model {
-    protected $table = 'cv_projects';
+    protected $table = 'projets';
     
-    public function getProjects($cvId, $userId) {
+    public function getProjects($cvId) {
         $sql = "SELECT * FROM {$this->table} 
-                WHERE cv_id = :cv_id AND user_id = :user_id 
-                ORDER BY sort_order ASC, id ASC";
-        $stmt = $this->execute($sql, [':cv_id' => $cvId, ':user_id' => $userId]);
+                WHERE id_cv = :cv_id 
+                ORDER BY id ASC";
+        $stmt = $this->execute($sql, [':cv_id' => $cvId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     
-    public function saveProjects($cvId, $userId, $projectsData) {
+    public function saveProjects($cvId, $projectsData) {
         // First, delete existing project entries for this CV
-        $this->deleteProjects($cvId, $userId);
+        $this->deleteProjects($cvId);
         
         // Then insert new entries
         $insertedIds = [];
         foreach ($projectsData as $index => $project) {
-            if (!empty($project['project_name'])) {
-                $insertedIds[] = $this->createProjectEntry($cvId, $userId, $project, $index);
+            if (!empty($project['nom_projet'])) {
+                $insertedIds[] = $this->createProjectEntry($cvId, $project);
             }
         }
         
         return $insertedIds;
     }
     
-    private function createProjectEntry($cvId, $userId, $data, $sortOrder) {
+    private function createProjectEntry($cvId, $data) {
         $sql = "INSERT INTO {$this->table} (
-            user_id, cv_id, project_name, project_link, 
-            project_description, sort_order
+            id_cv, nom_projet, lien_projet, description
         ) VALUES (
-            :user_id, :cv_id, :project_name, :project_link,
-            :project_description, :sort_order
+            :cv_id, :nom_projet, :lien_projet, :description
         )";
         
         $this->execute($sql, [
-            ':user_id' => $userId,
             ':cv_id' => $cvId,
-            ':project_name' => $data['project_name'] ?? '',
-            ':project_link' => $data['project_link'] ?? '',
-            ':project_description' => $data['project_description'] ?? '',
-            ':sort_order' => $sortOrder
+            ':nom_projet' => $data['nom_projet'] ?? '',
+            ':lien_projet' => $data['lien_projet'] ?? '',
+            ':description' => $data['description'] ?? ''
         ]);
         
         return $this->db->lastInsertId();
     }
     
-    public function deleteProjects($cvId, $userId) {
-        $sql = "DELETE FROM {$this->table} WHERE cv_id = :cv_id AND user_id = :user_id";
-        return $this->execute($sql, [':cv_id' => $cvId, ':user_id' => $userId]);
+    public function deleteProjects($cvId) {
+        $sql = "DELETE FROM {$this->table} WHERE id_cv = :cv_id";
+        return $this->execute($sql, [':cv_id' => $cvId]);
     }
     
-    public function updateProjectsOrder($cvId, $userId, $projectIds) {
-        foreach ($projectIds as $index => $projectId) {
-            $sql = "UPDATE {$this->table} SET sort_order = :sort_order 
-                    WHERE id = :id AND cv_id = :cv_id AND user_id = :user_id";
-            $this->execute($sql, [
-                ':sort_order' => $index,
-                ':id' => $projectId,
-                ':cv_id' => $cvId,
-                ':user_id' => $userId
-            ]);
-        }
+    public function deleteProjectEntry($id, $cvId) {
+        $sql = "DELETE FROM {$this->table} WHERE id = :id AND id_cv = :cv_id";
+        return $this->execute($sql, [':id' => $id, ':cv_id' => $cvId]);
     }
 }

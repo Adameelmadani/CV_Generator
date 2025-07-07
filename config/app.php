@@ -1,28 +1,25 @@
 <?php
 
-return [
+define('APP_CONFIG', [
     'database' => [
         'host' => 'localhost',
-        'dbname' => 'cv_generator',
+        'dbname' => 'cv_craft',
         'username' => 'root',
         'password' => '',
         'charset' => 'utf8mb4'
     ],
-    
     'app' => [
-        'name' => 'CV Generator',
-        'version' => '2.0.0',
-        'debug' => true
+        'name' => 'CV Craft',
+        'version' => '2.0',
+        'timezone' => 'Europe/Paris'
     ],
-    
-    'paths' => [
-        'uploads' => __DIR__ . '/../Cv_generator/uploads/',
-        'templates' => __DIR__ . '/../Cv_generator/templates/',
-        'tmp' => __DIR__ . '/../tmp/'
-    ],
-    
-    'security' => [
-        'max_file_size' => 5 * 1024 * 1024, // 5MB
-        'allowed_extensions' => ['jpg', 'jpeg', 'png', 'gif', 'xml']
+    'session' => [
+        'name' => 'CV_CRAFT_SESSION',
+        'lifetime' => 3600 * 24 * 7, // 7 days
+        'secure' => false,
+        'httponly' => true
     ]
-];
+]);
+
+// Set timezone
+date_default_timezone_set(APP_CONFIG['app']['timezone']);

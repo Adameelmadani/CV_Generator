@@ -3,69 +3,57 @@
 require_once __DIR__ . '/../../core/Model.php';
 
 class CVEducation extends Model {
-    protected $table = 'cv_education';
+    protected $table = 'formations';
     
-    public function getEducation($cvId, $userId) {
+    public function getEducation($cvId) {
         $sql = "SELECT * FROM {$this->table} 
-                WHERE cv_id = :cv_id AND user_id = :user_id 
-                ORDER BY sort_order ASC, id ASC";
-        $stmt = $this->execute($sql, [':cv_id' => $cvId, ':user_id' => $userId]);
+                WHERE id_cv = :cv_id 
+                ORDER BY id ASC";
+        $stmt = $this->execute($sql, [':cv_id' => $cvId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     
-    public function saveEducation($cvId, $userId, $educationData) {
+    public function saveEducation($cvId, $educationData) {
         // First, delete existing education entries for this CV
-        $this->deleteEducation($cvId, $userId);
+        $this->deleteEducation($cvId);
         
         // Then insert new entries
         $insertedIds = [];
         foreach ($educationData as $index => $education) {
-            if (!empty($education['education_degree']) || !empty($education['education_university'])) {
-                $insertedIds[] = $this->createEducationEntry($cvId, $userId, $education, $index);
+            if (!empty($education['diplome']) || !empty($education['universite'])) {
+                $insertedIds[] = $this->createEducationEntry($cvId, $education);
             }
         }
         
         return $insertedIds;
     }
     
-    private function createEducationEntry($cvId, $userId, $data, $sortOrder) {
+    private function createEducationEntry($cvId, $data) {
         $sql = "INSERT INTO {$this->table} (
-            user_id, cv_id, education_degree, education_dates, 
-            education_university, education_field, education_details, sort_order
+            id_cv, diplome, dates, universite, specialite, description
         ) VALUES (
-            :user_id, :cv_id, :education_degree, :education_dates,
-            :education_university, :education_field, :education_details, :sort_order
+            :cv_id, :diplome, :dates, :universite, :specialite, :description
         )";
         
         $this->execute($sql, [
-            ':user_id' => $userId,
             ':cv_id' => $cvId,
-            ':education_degree' => $data['education_degree'] ?? '',
-            ':education_dates' => $data['education_dates'] ?? '',
-            ':education_university' => $data['education_university'] ?? '',
-            ':education_field' => $data['education_field'] ?? '',
-            ':education_details' => $data['education_details'] ?? '',
-            ':sort_order' => $sortOrder
+            ':diplome' => $data['diplome'] ?? '',
+            ':dates' => $data['dates'] ?? '',
+            ':universite' => $data['universite'] ?? '',
+            ':specialite' => $data['specialite'] ?? '',
+            ':description' => $data['description'] ?? ''
         ]);
         
         return $this->db->lastInsertId();
     }
     
-    public function deleteEducation($cvId, $userId) {
-        $sql = "DELETE FROM {$this->table} WHERE cv_id = :cv_id AND user_id = :user_id";
-        return $this->execute($sql, [':cv_id' => $cvId, ':user_id' => $userId]);
+    public function deleteEducation($cvId) {
+        $sql = "DELETE FROM {$this->table} WHERE id_cv = :cv_id";
+        return $this->execute($sql, [':cv_id' => $cvId]);
     }
     
-    public function updateEducationOrder($cvId, $userId, $educationIds) {
-        foreach ($educationIds as $index => $educationId) {
-            $sql = "UPDATE {$this->table} SET sort_order = :sort_order 
-                    WHERE id = :id AND cv_id = :cv_id AND user_id = :user_id";
-            $this->execute($sql, [
-                ':sort_order' => $index,
-                ':id' => $educationId,
-                ':cv_id' => $cvId,
-                ':user_id' => $userId
-            ]);
-        }
+    public function deleteEducationEntry($id, $cvId) {
+        $sql = "DELETE FROM {$this->table} WHERE id = :id AND id_cv = :cv_id";
+        return $this->execute($sql, [':id' => $id, ':cv_id' => $cvId]);
     }
 }
