@@ -6,7 +6,7 @@ Le projet CV Generator utilise maintenant une architecture MVC (Modèle-Vue-Cont
 
 ## Structure des fichiers
 
-```
+``` bash
 /core/
 ├── bootstrap.php       # Initialisation de l'application
 ├── Controller.php      # Classe de base pour les contrôleurs
@@ -38,6 +38,7 @@ Le projet CV Generator utilise maintenant une architecture MVC (Modèle-Vue-Cont
 ## Fonctionnalités implémentées
 
 ### Authentification avec nom d'utilisateur
+
 - ✅ Champ username ajouté au formulaire d'inscription
 - ✅ Validation côté client et serveur du username
 - ✅ Vérification d'unicité du username
@@ -46,6 +47,7 @@ Le projet CV Generator utilise maintenant une architecture MVC (Modèle-Vue-Cont
 - ✅ Session mise à jour pour inclure le username
 
 ### Structure MVC
+
 - ✅ **User Model** : Gestion des utilisateurs, validation, requêtes DB
 - ✅ **AuthController** : Logique d'authentification et de session
 - ✅ **CVController** : Logique de gestion des CV (compatible avec le nouveau système)
@@ -71,6 +73,7 @@ Le projet CV Generator utilise maintenant une architecture MVC (Modèle-Vue-Cont
 ### Validation du username
 
 Le système valide que le username :
+
 - Contient entre 3 et 30 caractères
 - Ne contient que des lettres, chiffres et underscores
 - Est unique dans la base de données
@@ -96,6 +99,7 @@ Le projet utilise maintenant une gestion centralisée de la base de données :
 ### Nouvelle colonne username
 
 La table `users` a été mise à jour avec :
+
 ```sql
 ALTER TABLE users ADD COLUMN username VARCHAR(50) UNIQUE;
 ```
@@ -103,6 +107,7 @@ ALTER TABLE users ADD COLUMN username VARCHAR(50) UNIQUE;
 ### Migration
 
 Exécutez le script `database_update_username.sql` pour :
+
 - Ajouter la colonne username
 - Générer des usernames pour les utilisateurs existants
 - Ajouter les contraintes d'unicité
@@ -110,6 +115,7 @@ Exécutez le script `database_update_username.sql` pour :
 ## Test
 
 Exécutez `test_mvc_structure.php` pour vérifier que :
+
 - Toutes les classes se chargent correctement
 - La connexion à la base de données fonctionne
 - La colonne username existe
@@ -123,6 +129,7 @@ Les anciens fichiers PHP continuent de fonctionner car ils redirigent automatiqu
 ## Frontend mis à jour
 
 Les fichiers JavaScript suivants ont été mis à jour :
+
 - `auth.js` : Utilise les endpoints MVC
 - `user_home.js` : Affiche le username et utilise les endpoints MVC
 - `home.js` : Utilise les endpoints MVC pour la vérification de session
@@ -130,6 +137,7 @@ Les fichiers JavaScript suivants ont été mis à jour :
 ### Réinitialisation de mot de passe
 
 Le système inclut maintenant une fonctionnalité de réinitialisation de mot de passe :
+
 - **Validation** : Vérifie l'email et le numéro de téléphone
 - **Sécurité** : Supprime le compte permettant une réinscription
 - **Session** : Déconnecte automatiquement l'utilisateur si c'est son propre compte
