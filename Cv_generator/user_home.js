@@ -339,7 +339,7 @@ function importCV() {
     document.getElementById('importModal').classList.add('show');
 }
 
-// Prévisualiser un CV
+// Prévisualiser un CV (charge le PDF sauvegardé)
 async function previewCV(cvId) {
     currentCVForPreview = userCVs.find(cv => cv.id === cvId);
     
@@ -362,58 +362,34 @@ async function previewCV(cvId) {
         if (!loadingDiv) {
             loadingDiv = document.createElement('div');
             loadingDiv.id = 'previewLoading';
-            loadingDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i><br>Génération de l\'aperçu...';
+            loadingDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i><br>Chargement du CV...';
             iframe.parentNode.insertBefore(loadingDiv, iframe);
         }
         loadingDiv.style.display = 'flex';
         
-        // Générer l'aperçu PDF avec LaTeX (generate_preview_mvc.php)
-        console.log('Generating LaTeX preview for CV ID:', cvId);
-        const response = await fetch('generate_preview_mvc.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ cv_id: cvId })
-        });
+        // Charger le PDF sauvegardé directement
+        console.log('Loading saved PDF for CV ID:', cvId);
+        const pdfUrl = `view_saved_cv_mvc.php?cv_id=${cvId}`;
         
-        if (response.ok) {
-            const blob = await response.blob();
-            
-            // Vérifier que c'est bien un PDF
-            if (blob.type === 'application/pdf' || blob.size > 0) {
-                const url = URL.createObjectURL(blob);
-                
-                iframe.src = url;
-                iframe.style.display = 'block';
-                loadingDiv.style.display = 'none';
-                
-                console.log('LaTeX preview generated successfully');
-                
-                // Nettoyer l'URL après un délai
-                setTimeout(() => URL.revokeObjectURL(url), 60000);
-            } else {
-                throw new Error('Invalid PDF response');
-            }
-        } else {
-            const errorText = await response.text();
-            console.error('Preview generation failed:', response.status, errorText);
-            loadingDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i><br>Erreur lors de la génération de l\'aperçu LaTeX<br><small>Vérifiez que preview_cv.php existe et que LaTeX est installé</small>';
-            setTimeout(() => {
-                loadingDiv.style.display = 'none';
-                iframe.style.display = 'block';
-            }, 3000);
-        }
+        // Set iframe source to load the saved PDF
+        iframe.src = pdfUrl;
+        iframe.style.display = 'block';
+        loadingDiv.style.display = 'none';
+        
+        console.log('Saved PDF loaded successfully');
+        
     } catch (error) {
-        console.error('Preview error:', error);
+        console.error('Error loading saved CV:', error);
+        
+        // Hide loading and show error
         const loadingDiv = document.getElementById('previewLoading');
         if (loadingDiv) {
-            loadingDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i><br>Erreur lors de la génération de l\'aperçu LaTeX<br><small>' + error.message + '</small><br><a href="setup_verification.php" target="_blank">Vérifier la configuration</a>';
-            setTimeout(() => {
-                loadingDiv.style.display = 'none';
-                document.getElementById('previewFrame').style.display = 'block';
-            }, 5000);
+            loadingDiv.style.display = 'none';
         }
+        
+        const iframe = document.getElementById('previewFrame');
+        iframe.style.display = 'block';
+        iframe.src = 'data:text/html,<html><body><div style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;"><h3>Erreur de chargement</h3><p>Impossible de charger le CV. Veuillez réessayer.</p></div></body></html>';
     }
 }
 
@@ -430,7 +406,25 @@ function downloadCV(cvId) {
 // Ancienne fonction de téléchargement direct (conservée pour compatibilité)
 async function downloadCVDirect(cvId, format = 'pdf') {
     try {
-        const response = await fetch('download_cv_mvc.php', {
+        let response;
+        
+        // For PDF format, use the fast saved PDF download
+        if (format === 'pdf') {
+            // Use the new endpoint that serves saved PDFs directly
+            const downloadUrl = `download_saved_cv_mvc.php?cv_id=${cvId}`;
+            
+            // Create a temporary link and trigger download
+            const link = document.createElement('a');
+            link.href = downloadUrl;
+            link.download = ''; // Let the server set the filename
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            return;
+        }
+        
+        // For other formats (XML, LaTeX, All), use the original compilation method
+        response = await fetch('download_cv_mvc.php', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -591,6 +585,26 @@ async function confirmDownload() {
     const format = selectedFormat.value;
     
     try {
+        // For PDF format, use the fast saved PDF download
+        if (format === 'pdf') {
+            // Use the new endpoint that serves saved PDFs directly
+            const downloadUrl = `download_saved_cv_mvc.php?cv_id=${currentCVForDownload}`;
+            
+            // Create a temporary link and trigger download
+            const link = document.createElement('a');
+            link.href = downloadUrl;
+            link.download = ''; // Let the server set the filename
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            // Fermer la modale après téléchargement
+            closeModal('downloadFormatModal');
+            currentCVForDownload = null;
+            return;
+        }
+        
+        // For other formats (XML, LaTeX, All), use the original compilation method
         const response = await fetch('download_cv_mvc.php', {
             method: 'POST',
             headers: {
@@ -849,31 +863,6 @@ function setupEventListeners() {
         }
     });
 }
-
-// Debug function to help troubleshoot issues
-async function debugSessionAndDB() {
-    try {
-        const response = await fetch('debug_session_and_db.php');
-        const debugInfo = await response.json();
-        console.log('=== DEBUG INFO ===');
-        console.log(debugInfo);
-        
-        // Display in a more user-friendly way
-        const debugWindow = window.open('', 'debug', 'width=800,height=600');
-        debugWindow.document.write('<html><head><title>Debug Info</title></head><body>');
-        debugWindow.document.write('<h1>Debug Information</h1>');
-        debugWindow.document.write('<pre>' + JSON.stringify(debugInfo, null, 2) + '</pre>');
-        debugWindow.document.write('</body></html>');
-        
-        return debugInfo;
-    } catch (error) {
-        console.error('Debug request failed:', error);
-        alert('Debug request failed: ' + error.message);
-    }
-}
-
-// Add debug to window for console access
-window.debugSessionAndDB = debugSessionAndDB;
 
 // Function to clear CV session on server
 async function clearCVSession() {

@@ -254,6 +254,11 @@ class CVController extends Controller {
             // Generate LaTeX and PDF
             $pdfResult = $this->generatePDF($xmlContent, $cvId, $isGuestMode);
             
+            // Save PDF for authenticated users
+            if (!$isGuestMode && $userId) {
+                $this->savePermanentPDF($pdfResult, $cvId, $userId, $xmlContent);
+            }
+            
             // Get the selected format from form data (default to pdf)
             $selectedFormat = isset($_POST['format']) ? $_POST['format'] : 'pdf';
             
@@ -1167,53 +1172,6 @@ class CVController extends Controller {
         @unlink($baseName . '.log');
         @unlink($baseName . '.out');
     }
-
-    public function generatePreview() {
-        $userId = $this->requireAuth();
-        
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            http_response_code(405);
-            exit('Method not allowed');
-        }
-        
-        $input = $this->getJsonInput();
-        
-        if (!isset($input['cv_id'])) {
-            http_response_code(400);
-            exit('CV ID required');
-        }
-        
-        $cvId = $input['cv_id'];
-        
-        try {
-            $xmlContent = $this->cvModel->getCVData($cvId, $userId);
-            
-            if (!$xmlContent) {
-                http_response_code(404);
-                exit('CV not found');
-            }
-            
-            // Generate PDF for preview
-            $files = $this->generatePDF($xmlContent, $cvId);
-            $pdfFile = $files['pdf_file'];
-            
-            // Return PDF content
-            header('Content-Type: application/pdf');
-            header('Content-Disposition: inline; filename="preview.pdf"');
-            header('Content-Length: ' . filesize($pdfFile));
-            
-            readfile($pdfFile);
-            
-            // Clean up
-            $this->cleanupFiles($files);
-            exit();
-            
-        } catch (Exception $e) {
-            error_log("Error in generatePreview: " . $e->getMessage());
-            http_response_code(500);
-            exit('Error generating preview');
-        }
-    }
     
     public function generateLivePreview() {
         $userId = $this->requireAuth();
@@ -1629,5 +1587,159 @@ class CVController extends Controller {
             'status' => 'success',
             'message' => 'CV session cleared'
         ]);
+    }
+
+    /**
+     * Save PDF permanently for authenticated users
+     * @param array $pdfResult Result from generatePDF
+     * @param int $cvId CV ID
+     * @param int $userId User ID
+     * @param string $xmlContent XML content for filename generation
+     */
+    private function savePermanentPDF($pdfResult, $cvId, $userId, $xmlContent) {
+        try {
+            // Parse XML to get personal info for filename
+            $xml = simplexml_load_string($xmlContent);
+            $prenom = $this->cleanForLatex((string)$xml->personalInfo->firstname);
+            $nom = $this->cleanForLatex((string)$xml->personalInfo->lastname);
+            
+            // Create saved_pdfs directory if it doesn't exist
+            $savedPDFsDir = __DIR__ . '/../../Cv_generator/saved_pdfs/';
+            if (!is_dir($savedPDFsDir)) {
+                mkdir($savedPDFsDir, 0755, true);
+            }
+            
+            // Generate permanent filename
+            $permanentFileName = "CV_{$prenom}_{$nom}_{$cvId}_{$userId}.pdf";
+            $permanentPath = $savedPDFsDir . $permanentFileName;
+            
+            // Copy the temporary PDF to permanent location
+            if (isset($pdfResult['pdf_file']) && file_exists($pdfResult['pdf_file'])) {
+                if (copy($pdfResult['pdf_file'], $permanentPath)) {
+                    // Store relative path in database
+                    $relativePath = 'saved_pdfs/' . $permanentFileName;
+                    $this->cvModel->updatePDFPath($cvId, $userId, $relativePath);
+                    error_log("PDF saved permanently: " . $permanentPath);
+                } else {
+                    error_log("Failed to copy PDF to permanent location");
+                }
+            } else {
+                error_log("Source PDF file not found for saving");
+            }
+        } catch (Exception $e) {
+            error_log("Error saving permanent PDF: " . $e->getMessage());
+            // Don't throw exception as this is not critical for CV generation
+        }
+    }
+
+    public function viewSavedCV() {
+        $userId = $this->requireAuth();
+        
+        if (!isset($_GET['cv_id'])) {
+            http_response_code(400);
+            exit('CV ID required');
+        }
+        
+        $cvId = intval($_GET['cv_id']);
+        
+        try {
+            // Get CV info from database
+            $cv = $this->cvModel->getUserCV($cvId, $userId);
+            
+            if (!$cv) {
+                http_response_code(404);
+                exit('CV not found');
+            }
+            
+            // Check if saved PDF exists
+            if (!empty($cv['pdf_path'])) {
+                $pdfPath = __DIR__ . '/../../Cv_generator/' . $cv['pdf_path'];
+                
+                if (file_exists($pdfPath)) {
+                    // Serve the saved PDF
+                    header('Content-Type: application/pdf');
+                    header('Content-Disposition: inline; filename="' . basename($pdfPath) . '"');
+                    header('Content-Length: ' . filesize($pdfPath));
+                    header('Cache-Control: public, max-age=3600'); // Cache for 1 hour
+                    readfile($pdfPath);
+                    exit();
+                }
+            }
+            
+            // If no saved PDF, generate it on the fly
+            $xmlContent = $cv['xml_content'];
+            $files = $this->generatePDF($xmlContent, $cvId);
+            
+            // Save this PDF for future use
+            $this->savePermanentPDF($files, $cvId, $userId, $xmlContent);
+            
+            // Serve the PDF
+            header('Content-Type: application/pdf');
+            header('Content-Disposition: inline; filename="CV_preview.pdf"');
+            header('Content-Length: ' . filesize($files['pdf_file']));
+            readfile($files['pdf_file']);
+            
+            // Clean up temporary files
+            $this->cleanupFiles($files);
+            exit();
+            
+        } catch (Exception $e) {
+            error_log("Error in viewSavedCV: " . $e->getMessage());
+            http_response_code(500);
+            exit('Error loading CV');
+        }
+    }
+    
+    public function downloadSavedPDF() {
+        $userId = $this->requireAuth();
+        
+        if (!isset($_GET['cv_id'])) {
+            http_response_code(400);
+            exit('CV ID required');
+        }
+        
+        $cvId = intval($_GET['cv_id']);
+        
+        try {
+            // Get CV info from database
+            $cv = $this->cvModel->getUserCV($cvId, $userId);
+            
+            if (!$cv) {
+                http_response_code(404);
+                exit('CV not found');
+            }
+            
+            // Parse XML to get user's name for filename
+            $xml = simplexml_load_string($cv['xml_content']);
+            $prenom = (string)$xml->personalInfo->firstname;
+            $nom = (string)$xml->personalInfo->lastname;
+            $filename = "CV_{$prenom}_{$nom}.pdf";
+            
+            // Check if saved PDF exists
+            if (!empty($cv['pdf_path'])) {
+                $pdfPath = __DIR__ . '/../../Cv_generator/' . $cv['pdf_path'];
+                
+                if (file_exists($pdfPath)) {
+                    // Serve the saved PDF for download with user's name
+                    header('Content-Type: application/pdf');
+                    header('Content-Disposition: attachment; filename="' . $filename . '"');
+                    header('Content-Length: ' . filesize($pdfPath));
+                    header('Cache-Control: no-cache, must-revalidate');
+                    header('Pragma: no-cache');
+                    header('Expires: 0');
+                    readfile($pdfPath);
+                    exit();
+                }
+            }
+            
+            // No saved PDF found - return error
+            http_response_code(404);
+            exit('PDF not available. Please generate the CV first.');
+            
+        } catch (Exception $e) {
+            error_log("Error in downloadSavedPDF: " . $e->getMessage());
+            http_response_code(500);
+            exit('Error downloading CV');
+        }
     }
 }

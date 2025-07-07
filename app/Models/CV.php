@@ -6,7 +6,7 @@ class CV extends Model {
     protected $table = 'user_cvs';
     
     public function getUserCVs($userId) {
-        $sql = "SELECT id, cv_name, xml_content, created_at, updated_at 
+        $sql = "SELECT id, cv_name, xml_content, pdf_path, created_at, updated_at 
                 FROM {$this->table} 
                 WHERE user_id = :user_id 
                 ORDER BY updated_at DESC";
@@ -27,7 +27,7 @@ class CV extends Model {
         return $stmt->fetch();
     }
     
-    public function createCV($userId, $cvName, $xmlContent) {
+    public function createCV($userId, $cvName, $xmlContent, $pdfPath = null) {
         // Validate inputs
         if (empty($userId) || empty($cvName) || empty($xmlContent)) {
             error_log("ERROR: Invalid input data for CV creation");
@@ -38,12 +38,13 @@ class CV extends Model {
             ':user_id' => $userId,
             ':cv_name' => $cvName,
             ':xml_content' => $xmlContent,
+            ':pdf_path' => $pdfPath,
             ':created_at' => date('Y-m-d H:i:s'),
             ':updated_at' => date('Y-m-d H:i:s')
         ];
         
-        $sql = "INSERT INTO {$this->table} (user_id, cv_name, xml_content, created_at, updated_at) 
-                VALUES (:user_id, :cv_name, :xml_content, :created_at, :updated_at)";
+        $sql = "INSERT INTO {$this->table} (user_id, cv_name, xml_content, pdf_path, created_at, updated_at) 
+                VALUES (:user_id, :cv_name, :xml_content, :pdf_path, :created_at, :updated_at)";
         
         try {
             $stmt = $this->execute($sql, $data);
@@ -71,7 +72,7 @@ class CV extends Model {
         }
     }
     
-    public function updateCV($cvId, $userId, $cvName, $xmlContent) {
+    public function updateCV($cvId, $userId, $cvName, $xmlContent, $pdfPath = null) {
         $data = [
             ':cv_id' => $cvId,
             ':user_id' => $userId,
@@ -81,8 +82,14 @@ class CV extends Model {
         ];
         
         $sql = "UPDATE {$this->table} 
-                SET cv_name = :cv_name, xml_content = :xml_content, updated_at = :updated_at 
-                WHERE id = :cv_id AND user_id = :user_id";
+                SET cv_name = :cv_name, xml_content = :xml_content, updated_at = :updated_at";
+        
+        if ($pdfPath !== null) {
+            $data[':pdf_path'] = $pdfPath;
+            $sql .= ", pdf_path = :pdf_path";
+        }
+        
+        $sql .= " WHERE id = :cv_id AND user_id = :user_id";
         
         return $this->execute($sql, $data);
     }
@@ -113,5 +120,18 @@ class CV extends Model {
         
         $result = $stmt->fetch();
         return $result ? $result['xml_content'] : null;
+    }
+    
+    public function updatePDFPath($cvId, $userId, $pdfPath) {
+        $sql = "UPDATE {$this->table} 
+                SET pdf_path = :pdf_path, updated_at = :updated_at 
+                WHERE id = :cv_id AND user_id = :user_id";
+        
+        return $this->execute($sql, [
+            ':cv_id' => $cvId,
+            ':user_id' => $userId,
+            ':pdf_path' => $pdfPath,
+            ':updated_at' => date('Y-m-d H:i:s')
+        ]);
     }
 }
