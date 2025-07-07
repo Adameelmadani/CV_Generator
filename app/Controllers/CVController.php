@@ -208,25 +208,15 @@ class CVController extends Controller {
     }
     
     public function generateCV() {
-        error_log("=== CV Generation Started ===");
-        error_log("Session data: " . print_r($_SESSION, true));
-        error_log("User Agent: " . ($_SERVER['HTTP_USER_AGENT'] ?? 'N/A'));
-        error_log("Request headers: " . print_r(getallheaders(), true));
-        
         // Check if this is a guest mode request
         $isGuestMode = isset($_POST['guest_mode']) && $_POST['guest_mode'] === 'true';
-        error_log("Guest mode detected: " . ($isGuestMode ? 'true' : 'false'));
         
         $userId = null;
         if (!$isGuestMode) {
             $userId = $this->requireAuth();
-            error_log("User ID authenticated: " . $userId);
-        } else {
-            error_log("Guest mode - skipping authentication");
         }
         
         if ($_SERVER["REQUEST_METHOD"] !== "POST") {
-            error_log("Invalid request method: " . $_SERVER["REQUEST_METHOD"]);
             $this->jsonResponse([
                 'status' => 'error',
                 'message' => 'Method not allowed'
@@ -234,14 +224,11 @@ class CVController extends Controller {
             return;
         }
         
-        error_log("POST data received: " . print_r($_POST, true));
-        
         try {
             $editingCVId = isset($_POST['editing_cv_id']) ? intval($_POST['editing_cv_id']) : null;
             
             // In guest mode, don't allow editing existing CVs
             if ($isGuestMode && $editingCVId) {
-                error_log("Guest mode - editing not allowed");
                 $this->jsonResponse([
                     'status' => 'error',
                     'message' => 'Editing CVs requires authentication'
@@ -261,25 +248,8 @@ class CVController extends Controller {
             // Generate CV name
             $cvName = $this->generateCVName($formData);
             
-            if ($editingCVId && !$isGuestMode) {
-                // Update existing CV
-                $this->cvModel->updateCV($editingCVId, $userId, $cvName, $xmlContent);
-                $cvId = $editingCVId;
-                
-                // Also save to individual section tables
-                $this->sectionsManager->saveAllSections($cvId, $userId, $formData);
-                
-            } else if (!$isGuestMode) {
-                // Create new CV for authenticated users
-                $cvId = $this->cvModel->createCV($userId, $cvName, $xmlContent);
-                
-                // Save to individual section tables
-                $this->sectionsManager->saveAllSections($cvId, $userId, $formData);
-                
-            } else {
-                // Guest mode - generate temporary CV ID for PDF generation
-                $cvId = 'guest_' . time() . '_' . rand(1000, 9999);
-            }
+            // Determine CV ID using session-based logic to prevent duplicates
+            $cvId = $this->determineSessionCVId($editingCVId, $isGuestMode, $userId, $cvName, $xmlContent, $formData);
             
             // Generate LaTeX and PDF
             $pdfResult = $this->generatePDF($xmlContent, $cvId, $isGuestMode);
@@ -446,12 +416,23 @@ class CVController extends Controller {
     }
     
     private function generateCVName($formData) {
-        // Check if a custom CV name was provided
+        // First check if we have a stored custom CV name in session from previous generation
+        if (isset($_SESSION['custom_cv_name']) && !empty(trim($_SESSION['custom_cv_name']))) {
+            $customName = trim($_SESSION['custom_cv_name']);
+            // Sanitize the stored custom name
+            $customName = preg_replace('/[^a-zA-Z0-9\s\-_]/', '', $customName);
+            $customName = str_replace(' ', '_', $customName);
+            error_log("Using stored custom CV name from session: " . $customName);
+            return $customName;
+        }
+        
+        // Check if a custom CV name was provided in current request
         if (isset($formData['custom_cv_name']) && !empty(trim($formData['custom_cv_name']))) {
             $customName = trim($formData['custom_cv_name']);
             // Sanitize the custom name
             $customName = preg_replace('/[^a-zA-Z0-9\s\-_]/', '', $customName);
             $customName = str_replace(' ', '_', $customName);
+            error_log("Using custom CV name from form data: " . $customName);
             return $customName;
         }
         
@@ -460,7 +441,9 @@ class CVController extends Controller {
         $prenom = $formData['prenom'] ?? '';
         $timestamp = date('Y-m-d H:i:s');
         
-        return "CV_{$prenom}_{$nom}_{$timestamp}";
+        $defaultName = "CV_{$prenom}_{$nom}_{$timestamp}";
+        error_log("Using default CV name: " . $defaultName);
+        return $defaultName;
     }
     
     private function generateXMLContent($formData, $photoPath) {
@@ -1258,13 +1241,6 @@ class CVController extends Controller {
             // Convert JSON input to POST-like format for existing methods
             $_POST = $input;
             
-            // Debug: Log what form data is received
-            error_log("Live Preview form data received:");
-            error_log("Certificate data: " . print_r($input['certificate_name'] ?? 'MISSING', true));
-            error_log("Project data: " . print_r($input['project_name'] ?? 'MISSING', true));
-            error_log("Skill data: " . print_r($input['skill_category'] ?? 'MISSING', true));
-            error_log("Language data: " . print_r($input['language_name'] ?? 'MISSING', true));
-            
             // Extract and sanitize form data
             $formData = $this->sanitizeInput($input);
             
@@ -1381,5 +1357,277 @@ class CVController extends Controller {
         }
         
         return $text;
+    }
+    
+    /**
+     * Determines the CV ID to use based on session state to prevent duplicate entries
+     * @param int|null $editingCVId The CV ID being edited (if any)
+     * @param bool $isGuestMode Whether this is guest mode
+     * @param int|null $userId The user ID
+     * @param string $cvName The CV name
+     * @param string $xmlContent The XML content
+     * @param array $formData The form data
+     * @return int|string The CV ID to use
+     */
+    private function determineSessionCVId($editingCVId, $isGuestMode, $userId, $cvName, $xmlContent, $formData) {
+        if ($isGuestMode) {
+            // For guest mode, always generate a temporary ID
+            $cvId = 'guest_' . time() . '_' . rand(1000, 9999);
+            error_log("Guest mode - generated temporary CV ID: " . $cvId);
+            return $cvId;
+        }
+        
+        if ($editingCVId) {
+            // If editing an existing CV, always use that ID
+            $this->cvModel->updateCV($editingCVId, $userId, $cvName, $xmlContent);
+            $this->sectionsManager->saveAllSections($editingCVId, $userId, $formData);
+            
+            // Clear force_new_cv flag when editing existing CV
+            unset($_SESSION['force_new_cv']);
+            
+            // Store in session for future generations in this session
+            $_SESSION['current_cv_id'] = $editingCVId;
+            $_SESSION['cv_session_hash'] = $this->generateFormDataHash($formData);
+            $_SESSION['cv_core_hash'] = $this->generateCoreDataHash($formData);
+            $_SESSION['cv_session_start_time'] = time(); // Set session start time for editing session
+            // Store custom CV name if provided
+            if (isset($formData['custom_cv_name']) && !empty(trim($formData['custom_cv_name']))) {
+                $_SESSION['custom_cv_name'] = trim($formData['custom_cv_name']);
+            }
+            
+            error_log("Updated existing CV ID: " . $editingCVId);
+            return $editingCVId;
+        }
+        
+        // Check if we have an active CV session
+        $sessionCVId = $_SESSION['current_cv_id'] ?? null;
+        $sessionHash = $_SESSION['cv_session_hash'] ?? null;
+        $currentHash = $this->generateFormDataHash($formData);
+        $forceNewCV = $_SESSION['force_new_cv'] ?? false;
+        
+        // Get session start time - if it's recent (within 30 minutes), we're likely in the same generation session
+        $sessionStartTime = $_SESSION['cv_session_start_time'] ?? null;
+        $isRecentSession = $sessionStartTime && (time() - $sessionStartTime) < 1800; // 30 minutes
+        
+        // If force_new_cv flag is set, always create a new CV
+        if ($forceNewCV) {
+            // Clear ALL session CV data to ensure fresh start
+            unset($_SESSION['force_new_cv']); // Clear the flag
+            unset($_SESSION['current_cv_id']);
+            unset($_SESSION['cv_session_hash']);
+            unset($_SESSION['cv_core_hash']);
+            unset($_SESSION['cv_session_start_time']);
+            unset($_SESSION['custom_cv_name']);
+            
+            // Create a new CV
+            $cvId = $this->cvModel->createCV($userId, $cvName, $xmlContent);
+            if (!$cvId) {
+                error_log("ERROR: Failed to create CV in database");
+                throw new Exception("Failed to create CV in database");
+            }
+            
+            // Save sections
+            $this->sectionsManager->saveAllSections($cvId, $userId, $formData);
+            
+            // Store in session for future generations
+            $_SESSION['current_cv_id'] = $cvId;
+            $_SESSION['cv_session_hash'] = $currentHash;
+            $_SESSION['cv_core_hash'] = $this->generateCoreDataHash($formData);
+            $_SESSION['cv_session_start_time'] = time();
+            // Store custom CV name if provided
+            if (isset($formData['custom_cv_name']) && !empty(trim($formData['custom_cv_name']))) {
+                $_SESSION['custom_cv_name'] = trim($formData['custom_cv_name']);
+            }
+            
+            return $cvId;
+        }
+        
+        // If we have a session CV and it's from a recent session with similar data, reuse it
+        if ($sessionCVId && $isRecentSession && $sessionHash && $sessionHash === $currentHash) {
+            // Verify the CV still exists and belongs to this user
+            $existingCV = $this->cvModel->getUserCV($sessionCVId, $userId);
+            if ($existingCV) {
+                // Use stored custom name if available, otherwise use the generated one
+                $finalCvName = $_SESSION['custom_cv_name'] ?? $cvName;
+                
+                // Update the existing CV with the current data
+                $this->cvModel->updateCV($sessionCVId, $userId, $finalCvName, $xmlContent);
+                $this->sectionsManager->saveAllSections($sessionCVId, $userId, $formData);
+                
+                error_log("Reused session CV ID: " . $sessionCVId . " with name: " . $finalCvName);
+                return $sessionCVId;
+            } else {
+                error_log("Session CV ID $sessionCVId no longer exists or doesn't belong to user $userId");
+            }
+        }
+        
+        // Alternative check: If we have a session CV that's recent but hash doesn't match,
+        // check if it's just a format change (same core data but different format request)
+        if ($sessionCVId && $isRecentSession && $sessionHash && $sessionHash !== $currentHash) {
+            // Generate a hash without format-specific data to see if it's the same CV
+            $coreHash = $this->generateCoreDataHash($formData);
+            $sessionCoreHash = $_SESSION['cv_core_hash'] ?? null;
+            
+            if ($coreHash === $sessionCoreHash) {
+                // Same core data, just different format - reuse the CV
+                $existingCV = $this->cvModel->getUserCV($sessionCVId, $userId);
+                if ($existingCV) {
+                    $finalCvName = $_SESSION['custom_cv_name'] ?? $cvName;
+                    
+                    // Update the existing CV
+                    $this->cvModel->updateCV($sessionCVId, $userId, $finalCvName, $xmlContent);
+                    $this->sectionsManager->saveAllSections($sessionCVId, $userId, $formData);
+                    
+                    // Update session hash for this generation
+                    $_SESSION['cv_session_hash'] = $currentHash;
+                    
+                    return $sessionCVId;
+                }
+            }
+        }
+        
+        // Create a new CV
+        $cvId = $this->cvModel->createCV($userId, $cvName, $xmlContent);
+        $this->sectionsManager->saveAllSections($cvId, $userId, $formData);
+        
+        // Store in session for future generations
+        $_SESSION['current_cv_id'] = $cvId;
+        $_SESSION['cv_session_hash'] = $currentHash;
+        $_SESSION['cv_core_hash'] = $this->generateCoreDataHash($formData);
+        $_SESSION['cv_session_start_time'] = time(); // Set session start time
+        // Store custom CV name if provided
+        if (isset($formData['custom_cv_name']) && !empty(trim($formData['custom_cv_name']))) {
+            $_SESSION['custom_cv_name'] = trim($formData['custom_cv_name']);
+        }
+        
+        return $cvId;
+    }
+    
+    /**
+     * Generates a hash of the form data to detect if it's the same CV being generated
+     * @param array $formData The form data
+     * @return string Hash of the form data
+     */
+    private function generateFormDataHash($formData) {
+        // Get the custom CV name either from form data or session
+        $customCVName = '';
+        if (isset($_SESSION['custom_cv_name']) && !empty(trim($_SESSION['custom_cv_name']))) {
+            $customCVName = trim($_SESSION['custom_cv_name']);
+        } elseif (isset($formData['custom_cv_name']) && !empty(trim($formData['custom_cv_name']))) {
+            $customCVName = trim($formData['custom_cv_name']);
+        }
+        
+        // Create a comprehensive version of form data for hashing
+        $hashData = [
+            'nom' => $formData['nom'] ?? '',
+            'prenom' => $formData['prenom'] ?? '',
+            'email' => $formData['email'] ?? '',
+            'telephone' => $formData['telephone'] ?? '',
+            'profil_description' => $formData['profil_description'] ?? '',
+            'location' => $formData['location'] ?? '',
+            'website' => $formData['website'] ?? '',
+            'linkedin' => $formData['linkedin'] ?? '',
+            'github' => $formData['github'] ?? '',
+            // Include array fields to make hash more comprehensive
+            'education_degree' => $formData['education_degree'] ?? [],
+            'education_university' => $formData['education_university'] ?? [],
+            'experience_company' => $formData['experience_company'] ?? [],
+            'experience_position' => $formData['experience_position'] ?? [],
+            'project_name' => $formData['project_name'] ?? [],
+            'certificate_name' => $formData['certificate_name'] ?? [],
+            'skill_category' => $formData['skill_category'] ?? [],
+            'language_name' => $formData['language_name'] ?? [],
+            // Use consistent custom CV name from session or form
+            'custom_cv_name' => $customCVName,
+            // Add a session identifier to ensure fresh sessions create new CVs
+            'session_start_time' => $_SESSION['cv_session_start_time'] ?? null
+        ];
+        
+        $hash = md5(json_encode($hashData));
+        error_log("Generated form data hash: " . $hash . " with custom_cv_name: " . $customCVName);
+        return $hash;
+    }
+    
+    /**
+     * Generates a hash of the core form data (excluding format and other non-essential fields)
+     * This is used to detect if the same CV is being generated in different formats
+     * @param array $formData The form data
+     * @return string Hash of the core form data
+     */
+    private function generateCoreDataHash($formData) {
+        // Get the custom CV name either from form data or session
+        $customCVName = '';
+        if (isset($_SESSION['custom_cv_name']) && !empty(trim($_SESSION['custom_cv_name']))) {
+            $customCVName = trim($_SESSION['custom_cv_name']);
+        } elseif (isset($formData['custom_cv_name']) && !empty(trim($formData['custom_cv_name']))) {
+            $customCVName = trim($formData['custom_cv_name']);
+        }
+        
+        // Create a core version of form data for hashing (exclude format and other non-essential fields)
+        $coreData = [
+            'nom' => $formData['nom'] ?? '',
+            'prenom' => $formData['prenom'] ?? '',
+            'email' => $formData['email'] ?? '',
+            'telephone' => $formData['telephone'] ?? '',
+            'profil_description' => $formData['profil_description'] ?? '',
+            'location' => $formData['location'] ?? '',
+            'website' => $formData['website'] ?? '',
+            'linkedin' => $formData['linkedin'] ?? '',
+            'github' => $formData['github'] ?? '',
+            // Include array fields to make hash more comprehensive
+            'education_degree' => $formData['education_degree'] ?? [],
+            'education_university' => $formData['education_university'] ?? [],
+            'education_startdate' => $formData['education_startdate'] ?? [],
+            'education_enddate' => $formData['education_enddate'] ?? [],
+            'education_description' => $formData['education_description'] ?? [],
+            'experience_company' => $formData['experience_company'] ?? [],
+            'experience_position' => $formData['experience_position'] ?? [],
+            'experience_startdate' => $formData['experience_startdate'] ?? [],
+            'experience_enddate' => $formData['experience_enddate'] ?? [],
+            'experience_description' => $formData['experience_description'] ?? [],
+            'project_name' => $formData['project_name'] ?? [],
+            'project_description' => $formData['project_description'] ?? [],
+            'project_tech' => $formData['project_tech'] ?? [],
+            'project_link' => $formData['project_link'] ?? [],
+            'certificate_name' => $formData['certificate_name'] ?? [],
+            'certificate_organization' => $formData['certificate_organization'] ?? [],
+            'certificate_date' => $formData['certificate_date'] ?? [],
+            'certificate_link' => $formData['certificate_link'] ?? [],
+            'skill_category' => $formData['skill_category'] ?? [],
+            'skills' => $formData['skills'] ?? [],
+            'language_name' => $formData['language_name'] ?? [],
+            'language_level' => $formData['language_level'] ?? [],
+            'interest_name' => $formData['interest_name'] ?? [],
+            'reference_name' => $formData['reference_name'] ?? [],
+            'reference_position' => $formData['reference_position'] ?? [],
+            'reference_company' => $formData['reference_company'] ?? [],
+            'reference_email' => $formData['reference_email'] ?? [],
+            'reference_phone' => $formData['reference_phone'] ?? [],
+            // Use consistent custom CV name
+            'custom_cv_name' => $customCVName,
+            // NOTE: We exclude format, editing_cv_id, and other non-core fields
+        ];
+        
+        $hash = md5(json_encode($coreData));
+        error_log("Generated core data hash: " . $hash . " with custom_cv_name: " . $customCVName);
+        return $hash;
+    }
+
+    /**
+     * Clears the current CV session data (useful when starting fresh)
+     */
+    public function clearCVSession() {
+        unset($_SESSION['current_cv_id']);
+        unset($_SESSION['cv_session_hash']);
+        unset($_SESSION['cv_core_hash']);
+        unset($_SESSION['custom_cv_name']);
+        unset($_SESSION['cv_session_start_time']);
+        // Set a flag to force creation of new CV on next generation
+        $_SESSION['force_new_cv'] = true;
+        
+        $this->jsonResponse([
+            'status' => 'success',
+            'message' => 'CV session cleared'
+        ]);
     }
 }

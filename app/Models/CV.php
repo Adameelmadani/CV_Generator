@@ -28,6 +28,12 @@ class CV extends Model {
     }
     
     public function createCV($userId, $cvName, $xmlContent) {
+        // Validate inputs
+        if (empty($userId) || empty($cvName) || empty($xmlContent)) {
+            error_log("ERROR: Invalid input data for CV creation");
+            throw new Exception("Invalid input data for CV creation");
+        }
+        
         $data = [
             ':user_id' => $userId,
             ':cv_name' => $cvName,
@@ -39,8 +45,30 @@ class CV extends Model {
         $sql = "INSERT INTO {$this->table} (user_id, cv_name, xml_content, created_at, updated_at) 
                 VALUES (:user_id, :cv_name, :xml_content, :created_at, :updated_at)";
         
-        $this->execute($sql, $data);
-        return $this->db->lastInsertId();
+        try {
+            $stmt = $this->execute($sql, $data);
+            $cvId = $this->db->lastInsertId();
+            
+            if (!$cvId) {
+                error_log("ERROR: No CV ID returned from database after insertion");
+                throw new Exception("Failed to get CV ID after insertion");
+            }
+            
+            // Verify the CV was actually created
+            $verifySQL = "SELECT id, cv_name FROM {$this->table} WHERE id = :cv_id AND user_id = :user_id";
+            $verifyStmt = $this->execute($verifySQL, [':cv_id' => $cvId, ':user_id' => $userId]);
+            $verifyResult = $verifyStmt->fetch();
+            
+            if (!$verifyResult) {
+                error_log("ERROR: CV verification failed - CV not found in database after creation");
+                throw new Exception("CV verification failed after creation");
+            }
+            
+            return $cvId;
+        } catch (Exception $e) {
+            error_log("ERROR creating CV: " . $e->getMessage());
+            throw $e;
+        }
     }
     
     public function updateCV($cvId, $userId, $cvName, $xmlContent) {

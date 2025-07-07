@@ -11,14 +11,7 @@ abstract class Controller {
     }
     
     protected function requireAuth() {
-        error_log("=== Auth Check ===");
-        error_log("Session status: " . session_status());
-        error_log("Session ID: " . session_id());
-        error_log("Session data: " . print_r($_SESSION, true));
-        error_log("UserId in session: " . ($_SESSION['userId'] ?? 'NOT SET'));
-        
         if (!isset($this->session['userId']) || empty($this->session['userId'])) {
-            error_log("Authentication failed - no valid userId");
             $this->jsonResponse([
                 'status' => 'error',
                 'message' => 'Authentication required'
@@ -26,7 +19,6 @@ abstract class Controller {
             exit();
         }
         
-        error_log("Authentication successful - userId: " . $this->session['userId']);
         return $this->session['userId'];
     }
     

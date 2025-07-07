@@ -187,48 +187,50 @@ function setView(view) {
 
 // Créer un nouveau CV
 function createNewCV() {
-    console.log('🚀 createNewCV function called');
-    
-    // Show the CV naming modal instead of directly redirecting
-    const modal = document.getElementById('newCVModal');
-    console.log('📋 Modal element found:', modal);
-    
-    if (modal) {
-        modal.classList.add('show');
-        console.log('✅ Modal show class added');
-    } else {
-        console.error('❌ Modal element not found!');
-        return;
-    }
-    
-    // Clear any previous input
-    const cvNameInput = document.getElementById('cvNameInput');
-    console.log('📝 Input element found:', cvNameInput);
-    
-    if (cvNameInput) {
-        cvNameInput.value = '';
-        cvNameInput.focus();
-        console.log('✅ Input cleared and focused');
-    } else {
-        console.error('❌ Input element not found!');
-    }
-    
-    // Clear any previous error
-    const errorElement = document.getElementById('cvNameError');
-    if (errorElement) {
-        errorElement.style.display = 'none';
-        errorElement.textContent = '';
-        console.log('✅ Error element cleared');
-    }
-    
-    // Enable the create button
-    const createBtn = document.getElementById('createCVBtn');
-    if (createBtn) {
-        createBtn.disabled = false;
-        console.log('✅ Create button enabled');
-    } else {
-        console.error('❌ Create button not found!');
-    }
+    // Clear the CV session on server before starting new CV
+    clearCVSession().then(() => {
+        // Show the CV naming modal instead of directly redirecting
+        const modal = document.getElementById('newCVModal');
+        
+        if (modal) {
+            modal.classList.add('show');
+        } else {
+            console.error('❌ Modal element not found!');
+            return;
+        }
+        
+        // Clear any previous input
+        const cvNameInput = document.getElementById('cvNameInput');
+        
+        if (cvNameInput) {
+            cvNameInput.value = '';
+            cvNameInput.focus();
+        } else {
+            console.error('❌ Input element not found!');
+        }
+        
+        // Clear any previous error
+        const errorElement = document.getElementById('cvNameError');
+        if (errorElement) {
+            errorElement.style.display = 'none';
+            errorElement.textContent = '';
+        }
+        
+        // Enable the create button
+        const createBtn = document.getElementById('createCVBtn');
+        if (createBtn) {
+            createBtn.disabled = false;
+        } else {
+            console.error('❌ Create button not found!');
+        }
+    }).catch(error => {
+        console.error('❌ Error clearing CV session:', error);
+        // Still proceed with the modal even if session clear fails
+        const modal = document.getElementById('newCVModal');
+        if (modal) {
+            modal.classList.add('show');
+        }
+    });
 }
 
 // Confirm CV creation with name
@@ -272,13 +274,26 @@ function confirmCreateCV() {
     // Disable button to prevent double submission
     createBtn.disabled = true;
     createBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Création...';
-    
+
     // Store the CV name in session storage and redirect
     sessionStorage.setItem('newCVName', cvName);
-    
+
+    // Clear any previous sessionStorage for newCVName after a timeout (safety)
+    // This ensures that after the first use, the name is not reused accidentally
+    setTimeout(() => {
+        const storedName = sessionStorage.getItem('newCVName');
+        if (storedName) {
+            sessionStorage.removeItem('newCVName');
+        }
+    }, 5000); // Remove after 5s to allow home.html to pick it up (increased from 1s)
+
     // Close modal and redirect
     closeModal('newCVModal');
-    window.location.href = 'home.html';
+    
+    // Add a small delay before redirect to ensure session clearing completes
+    setTimeout(() => {
+        window.location.href = 'home.html';
+    }, 100);
 }
 
 // Show CV name validation error
@@ -859,3 +874,32 @@ async function debugSessionAndDB() {
 
 // Add debug to window for console access
 window.debugSessionAndDB = debugSessionAndDB;
+
+// Function to clear CV session on server
+async function clearCVSession() {
+    try {
+        const response = await fetch('clear_cv_session_mvc.php', {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json',
+            }
+        });
+        
+        if (response.ok) {
+            const result = await response.json();
+            if (result.status === 'success') {
+                return true;
+            } else {
+                console.error('❌ Failed to clear CV session:', result.message);
+                return false;
+            }
+        } else {
+            console.error('❌ Failed to clear CV session - HTTP', response.status);
+            return false;
+        }
+    } catch (error) {
+        console.error('❌ Error clearing CV session:', error);
+        return false;
+    }
+}

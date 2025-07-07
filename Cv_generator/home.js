@@ -110,7 +110,6 @@ let currentStep = 1;
 
       // Add form submission debugging
       document.addEventListener('DOMContentLoaded', function() {
-        console.log('🚀 DOM Content Loaded - Initializing form...');
         
         // Check for custom CV name from user_home.html
         const customCVName = sessionStorage.getItem('newCVName');
@@ -227,7 +226,6 @@ let currentStep = 1;
           
           // Add our custom click handler
           newSubmitBtn.addEventListener('click', function(e) {
-            console.log('🖱️ Submit button clicked!');
             e.preventDefault();
             e.stopPropagation();
             e.stopImmediatePropagation();
@@ -238,7 +236,6 @@ let currentStep = 1;
           
           // Also prevent any form submission that might be triggered
           newSubmitBtn.addEventListener('submit', function(e) {
-            console.log('🚫 Submit event on button intercepted!');
             e.preventDefault();
             e.stopPropagation();
             e.stopImmediatePropagation();
@@ -257,7 +254,6 @@ let currentStep = 1;
           
           // Create a bulletproof event blocker
           const blockSubmission = function(e) {
-            console.log('🛑 BLOCKING FORM SUBMISSION!');
             e.preventDefault();
             e.stopPropagation();
             e.stopImmediatePropagation();
@@ -1433,12 +1429,6 @@ let currentStep = 1;
         }
         
         // Detect which section is being edited and highlight it
-        const editingSection = detectEditingSection(e.target);
-        if (editingSection) {
-          setTimeout(() => {
-            highlightPreviewSection(editingSection);
-          }, 500); // Delay to allow preview update first
-        }
         
         // Immediate update for short text inputs
         if (e.target.type === 'text' || e.target.type === 'email' || e.target.type === 'tel') {
@@ -2189,7 +2179,6 @@ let currentStep = 1;
       // ============ FORM SUBMISSION HANDLER ============
       
       async function handleFormSubmissionDirectly() {
-        console.log('🚀 Custom form submission handler called');
         
         const submitBtn = document.getElementById('submitBtn');
         const originalText = submitBtn.innerHTML;
@@ -2222,9 +2211,8 @@ let currentStep = 1;
           const customCVName = sessionStorage.getItem('newCVName');
           if (customCVName) {
             formData.append('custom_cv_name', customCVName);
-            console.log('📝 Using custom CV name:', customCVName);
-            // Clear it after use
-            sessionStorage.removeItem('newCVName');
+            // Don't clear it yet - let the server handle session management
+            // sessionStorage.removeItem('newCVName');
           }
           
           // Add additional data
@@ -2237,7 +2225,6 @@ let currentStep = 1;
           
           // Debug: Log the selected format
           const selectedFormat = document.querySelector('input[name="format"]:checked')?.value || 'pdf';
-          console.log('🎯 Selected download format:', selectedFormat);
           
           // Make the API call with proper headers
           const response = await fetch('generate_cv_mvc.php', {
@@ -2257,7 +2244,6 @@ let currentStep = 1;
           console.log('📥 Server response:', result);
           
           if (result.success === true || result.status === 'success') {
-            console.log('✅ CV generated successfully!');
             
             // Update button to show success
             submitBtn.innerHTML = '<i class="fas fa-check"></i> CV généré avec succès!';
@@ -2273,6 +2259,12 @@ let currentStep = 1;
               // Get the selected format from the form
               const selectedFormat = document.querySelector('input[name="format"]:checked')?.value || 'pdf';
               window.location.href = 'download_cv_mvc.php?id=' + result.cv_id + '&format=' + selectedFormat;
+            }
+            
+            // Clear custom CV name from sessionStorage after first successful generation
+            // This ensures the server session now has the name stored
+            if (customCVName && sessionStorage.getItem('newCVName')) {
+              sessionStorage.removeItem('newCVName');
             }
             
             // Reset button after download
