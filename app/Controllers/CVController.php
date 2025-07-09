@@ -152,13 +152,20 @@ class CVController extends Controller {
             return;
         }
         
-        $cvId = $input['cv_id'];
+        $cvId = intval($input['cv_id']);
+        
+        // Start database transaction for atomic deletion
+        $db = Database::getInstance();
+        $conn = $db->getConnection();
         
         try {
+            $conn->beginTransaction();
+            
             // Verify CV exists and belongs to user
             $cv = $this->cvModel->getUserCV($cvId, $userId);
             
             if (!$cv) {
+                $conn->rollback();
                 $this->jsonResponse([
                     'status' => 'error',
                     'message' => 'CV not found or you do not have permission to delete it'
@@ -166,22 +173,52 @@ class CVController extends Controller {
                 return;
             }
             
-            // Delete the CV from main table
-            $this->cvModel->deleteUserCV($cvId, $userId);
+            error_log("Deleting CV ID: $cvId for User ID: $userId");
             
-            // Also delete from section tables
-            $this->sectionsManager->deleteAllSections($cvId, $userId);
-            
-            $this->jsonResponse([
-                'status' => 'success',
-                'message' => 'CV deleted successfully'
-            ]);
+            // Method 1: Try direct deletion (will work if CASCADE is set up)
+            try {
+                $this->cvModel->deleteUserCV($cvId, $userId);
+                error_log("Successfully deleted CV ID: $cvId using direct deletion");
+                $conn->commit();
+                
+                $this->jsonResponse([
+                    'status' => 'success',
+                    'message' => 'CV deleted successfully'
+                ]);
+                return;
+                
+            } catch (Exception $e) {
+                error_log("Direct deletion failed: " . $e->getMessage() . ". Trying manual section deletion.");
+                
+                // Method 2: Manual deletion of sections first, then CV
+                try {
+                    $this->sectionsManager->deleteAllSections($cvId, $userId);
+                    error_log("Successfully deleted all sections for CV ID: $cvId");
+                    
+                    $this->cvModel->deleteUserCV($cvId, $userId);
+                    error_log("Successfully deleted CV ID: $cvId from main table");
+                    
+                    $conn->commit();
+                    
+                    $this->jsonResponse([
+                        'status' => 'success',
+                        'message' => 'CV deleted successfully'
+                    ]);
+                    return;
+                    
+                } catch (Exception $e2) {
+                    error_log("Manual section deletion also failed: " . $e2->getMessage());
+                    throw $e2;
+                }
+            }
             
         } catch (Exception $e) {
+            $conn->rollback();
             error_log("Error in deleteCV: " . $e->getMessage());
+            error_log("Stack trace: " . $e->getTraceAsString());
             $this->jsonResponse([
                 'status' => 'error',
-                'message' => 'Error deleting CV'
+                'message' => 'Error deleting CV: ' . $e->getMessage()
             ], 500);
         }
     }
@@ -189,20 +226,76 @@ class CVController extends Controller {
     public function deleteAllCVs() {
         $userId = $this->requireAuth();
         
+        // Start database transaction for atomic deletion
+        $db = Database::getInstance();
+        $conn = $db->getConnection();
+        
         try {
-            // Delete all CVs for the user
-            $this->cvModel->deleteAllUserCVs($userId);
+            $conn->beginTransaction();
             
-            $this->jsonResponse([
-                'status' => 'success',
-                'message' => 'All CVs deleted successfully'
-            ]);
+            // Get all CV IDs for this user first
+            $userCVs = $this->cvModel->getUserCVs($userId);
+            $cvCount = count($userCVs);
+            
+            error_log("Deleting all CVs for User ID: $userId (Total: $cvCount CVs)");
+            
+            if ($cvCount === 0) {
+                $conn->commit();
+                $this->jsonResponse([
+                    'status' => 'success',
+                    'message' => 'No CVs to delete'
+                ]);
+                return;
+            }
+            
+            // Method 1: Try direct deletion (will work if CASCADE is set up)
+            try {
+                $this->cvModel->deleteAllUserCVs($userId);
+                error_log("Successfully deleted all CVs using direct deletion");
+                $conn->commit();
+                
+                $this->jsonResponse([
+                    'status' => 'success',
+                    'message' => "All $cvCount CVs deleted successfully"
+                ]);
+                return;
+                
+            } catch (Exception $e) {
+                error_log("Direct deletion failed: " . $e->getMessage() . ". Trying manual section deletion.");
+                
+                // Method 2: Manual deletion of sections for each CV first, then all CVs
+                try {
+                    // Delete sections for each CV
+                    foreach ($userCVs as $cv) {
+                        $this->sectionsManager->deleteAllSections($cv['id'], $userId);
+                        error_log("Deleted sections for CV ID: " . $cv['id']);
+                    }
+                    
+                    // Then delete all CVs from main table
+                    $this->cvModel->deleteAllUserCVs($userId);
+                    error_log("Deleted all CVs from main table");
+                    
+                    $conn->commit();
+                    
+                    $this->jsonResponse([
+                        'status' => 'success',
+                        'message' => "All $cvCount CVs deleted successfully"
+                    ]);
+                    return;
+                    
+                } catch (Exception $e2) {
+                    error_log("Manual section deletion also failed: " . $e2->getMessage());
+                    throw $e2;
+                }
+            }
             
         } catch (Exception $e) {
+            $conn->rollback();
             error_log("Error in deleteAllCVs: " . $e->getMessage());
+            error_log("Stack trace: " . $e->getTraceAsString());
             $this->jsonResponse([
                 'status' => 'error',
-                'message' => 'Error deleting all CVs'
+                'message' => 'Error deleting all CVs: ' . $e->getMessage()
             ], 500);
         }
     }
@@ -302,6 +395,7 @@ class CVController extends Controller {
             
         } catch (Exception $e) {
             error_log("Error in generateCV: " . $e->getMessage());
+            error_log("Stack trace: " . $e->getTraceAsString());
             $this->jsonResponse([
                 'status' => 'error',
                 'message' => 'Error generating CV: ' . $e->getMessage()
@@ -367,7 +461,7 @@ class CVController extends Controller {
             $cvName = $this->extractCVNameFromXML($xml) ?: pathinfo($file['name'], PATHINFO_FILENAME);
             
             // Save to database
-            $cvId = $this->cvModel->createCV($userId, $cvName, $xmlContent);
+            $cvId = $this->cvModel->createCV($userId, $xmlContent);
             
             $this->jsonResponse([
                 'status' => 'success',
@@ -460,6 +554,9 @@ class CVController extends Controller {
     }
     
     private function generateXMLContent($formData, $photoPath) {
+        error_log("generateXMLContent - Starting XML generation");
+        error_log("generateXMLContent - Form data keys: " . implode(', ', array_keys($formData)));
+        
         $primaryColor = $formData['primary_color'] ?? '#667eea';
         
         $xmlContent  = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
@@ -474,7 +571,7 @@ class CVController extends Controller {
         $xmlContent .= "  <personalInfo>\n";
         $xmlContent .= "    <firstname>"   . htmlspecialchars($formData['prenom'] ?? '')    . "</firstname>\n";
         $xmlContent .= "    <lastname>"    . htmlspecialchars($formData['nom'] ?? '')       . "</lastname>\n";
-        $xmlContent .= "    <location>"    . htmlspecialchars($formData['localisation'] ?? '')  . "</location>\n";
+        $xmlContent .= "    <location>"    . htmlspecialchars($formData['location'] ?? '')  . "</location>\n";
         $xmlContent .= "    <email>"       . htmlspecialchars($formData['email'] ?? '')     . "</email>\n";
         $xmlContent .= "    <phone>"       . htmlspecialchars($formData['telephone'] ?? '') . "</phone>\n";
         if (!empty($formData['website']))  $xmlContent .= "    <website>"   . htmlspecialchars($formData['website'])   . "</website>\n";
@@ -484,9 +581,9 @@ class CVController extends Controller {
         $xmlContent .= "  </personalInfo>\n\n";
 
         // Professional Profile
-        if (!empty($formData['description'])) {
+        if (!empty($formData['profil_description'])) {
             $xmlContent .= "  <profil>\n";
-            $xmlContent .= "    <description>" . htmlspecialchars($formData['description']) . "</description>\n";
+            $xmlContent .= "    <description>" . htmlspecialchars($formData['profil_description']) . "</description>\n";
             $xmlContent .= "  </profil>\n\n";
         }
 
@@ -502,12 +599,12 @@ class CVController extends Controller {
             for ($i = 0; $i < count($education_dates); $i++) {
                 if (!empty($education_degree[$i]) || !empty($education_dates[$i])) {
                     $xmlContent .= "    <degree>\n"
-                                . "      <title>"      . ($education_degree[$i] ?? '')    . "</title>\n"
-                                . "      <period>"     . ($education_dates[$i] ?? '')     . "</period>\n"
-                                . "      <institution>". ($education_university[$i] ?? '') . "</institution>\n"
-                                . "      <field>"      . ($education_field[$i] ?? '')      . "</field>\n";
+                                . "      <title>"      . htmlspecialchars($education_degree[$i] ?? '')    . "</title>\n"
+                                . "      <period>"     . htmlspecialchars($education_dates[$i] ?? '')     . "</period>\n"
+                                . "      <institution>". htmlspecialchars($education_university[$i] ?? '') . "</institution>\n"
+                                . "      <field>"      . htmlspecialchars($education_field[$i] ?? '')      . "</field>\n";
                     if (trim($education_details[$i] ?? '') !== "") {
-                        $xmlContent .= "      <description>" . ($education_details[$i] ?? ''). "</description>\n";
+                        $xmlContent .= "      <description>" . htmlspecialchars($education_details[$i] ?? ''). "</description>\n";
                     }
                     $xmlContent .= "    </degree>\n";
                 }
@@ -556,7 +653,7 @@ class CVController extends Controller {
                                 . "      <period>"     . htmlspecialchars($experience_dates[$i] ?? '')       . "</period>\n"
                                 . "      <company>"    . htmlspecialchars($experience_company[$i] ?? '')     . "</company>\n"
                                 . "      <position>"   . htmlspecialchars($experience_position[$i] ?? '')    . "</position>\n"
-                                . "      <description>". ($experience_description[$i] ?? '') . "</description>\n"
+                                . "      <description>". htmlspecialchars($experience_description[$i] ?? '') . "</description>\n"
                                 . "    </experience>\n";
                 }
             }
@@ -578,7 +675,7 @@ class CVController extends Controller {
                         $xmlContent .= "      <link>"     . htmlspecialchars($project_link[$i] ?? '')        . "</link>\n";
                     }
                     if (trim($project_description[$i] ?? '') !== "") {
-                        $xmlContent .= "      <description>" . ($project_description[$i] ?? '') . "</description>\n";
+                        $xmlContent .= "      <description>" . htmlspecialchars($project_description[$i] ?? '') . "</description>\n";
                     }
                     $xmlContent .= "    </project>\n";
                 }
@@ -622,6 +719,9 @@ class CVController extends Controller {
 
         // Close root element
         $xmlContent .= "</cv>";
+        
+        error_log("generateXMLContent - XML generation completed, length: " . strlen($xmlContent));
+        error_log("generateXMLContent - XML preview: " . substr($xmlContent, 0, 200) . "...");
         
         return $xmlContent;
     }
@@ -891,7 +991,20 @@ class CVController extends Controller {
         
         $userId = null;
         if (!$isGuestMode) {
-            $userId = $this->requireAuth();
+            try {
+                $userId = $this->requireAuth();
+            } catch (Exception $e) {
+                if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                    $this->jsonResponse([
+                        'status' => 'error',
+                        'message' => 'Authentication required'
+                    ], 401);
+                    return;
+                } else {
+                    http_response_code(401);
+                    exit('Authentication required');
+                }
+            }
         }
         
         $cvId = null;
@@ -902,14 +1015,20 @@ class CVController extends Controller {
             
             if ($isGuestMode) {
                 if (!isset($input['guest_id'])) {
-                    http_response_code(400);
-                    exit('Guest CV ID required');
+                    $this->jsonResponse([
+                        'status' => 'error',
+                        'message' => 'Guest CV ID required'
+                    ], 400);
+                    return;
                 }
                 $cvId = $input['guest_id'];
             } else {
                 if (!isset($input['cv_id'])) {
-                    http_response_code(400);
-                    exit('CV ID required');
+                    $this->jsonResponse([
+                        'status' => 'error',
+                        'message' => 'CV ID required'
+                    ], 400);
+                    return;
                 }
                 $cvId = $input['cv_id'];
             }
@@ -919,15 +1038,21 @@ class CVController extends Controller {
             // Handle GET requests
             if ($isGuestMode) {
                 if (!isset($_GET['guest_id']) || !isset($_GET['format'])) {
-                    http_response_code(400);
-                    exit('Missing parameters for guest download');
+                    $this->jsonResponse([
+                        'status' => 'error',
+                        'message' => 'Missing parameters for guest download'
+                    ], 400);
+                    return;
                 }
                 $cvId = $_GET['guest_id'];
                 $format = $_GET['format'];
             } else {
                 if (!isset($_GET['id']) || !isset($_GET['format'])) {
-                    http_response_code(400);
-                    exit('Missing parameters');
+                    $this->jsonResponse([
+                        'status' => 'error',
+                        'message' => 'Missing parameters'
+                    ], 400);
+                    return;
                 }
                 $cvId = intval($_GET['id']);
                 $format = $_GET['format'];
@@ -936,82 +1061,189 @@ class CVController extends Controller {
         
         try {
             if ($isGuestMode) {
-                // For guest mode, only PDF downloads are allowed
-                error_log("Guest download attempt - CV ID: " . $cvId . ", Format: " . $format);
-                
-                // Restrict guests to PDF only
-                if ($format !== 'pdf') {
-                    http_response_code(403);
-                    $restrictedFormat = strtoupper($format);
-                    exit($restrictedFormat . ' download requires authentication. Please create an account to access this format.');
-                }
-                
-                $workingDir = __DIR__ . '/../../Cv_generator/';
-                error_log("Working directory: " . $workingDir);
-                
-                // Only handle PDF for guests
-                $pdfPath = $workingDir . 'cv_' . $cvId . '.pdf';
-                error_log("Looking for PDF at: " . $pdfPath);
-                
-                if (!file_exists($pdfPath)) {
-                    error_log("Working directory exists: " . (is_dir($workingDir) ? 'yes' : 'no'));
-                    // List files in working directory for debugging
-                    $files = scandir($workingDir);
-                    error_log("Files in working directory: " . implode(', ', $files));
-                    
-                    http_response_code(404);
-                    exit('PDF file not found. Expected: ' . basename($pdfPath));
-                }
-                
-                $filename = 'CV_Guest_' . date('Y-m-d') . '.pdf';
-                header('Content-Type: application/pdf');
-                header('Content-Disposition: attachment; filename="' . $filename . '"');
-                header('Content-Length: ' . filesize($pdfPath));
-                readfile($pdfPath);
-                unlink($pdfPath);
-                exit();
+                $this->handleGuestDownload($cvId, $format);
             } else {
-                // Get CV from database for authenticated users
-                $cv = $this->cvModel->getUserCV($cvId, $userId);
-                
-                if (!$cv) {
-                    http_response_code(404);
-                    exit('CV not found');
-                }
-                
-                $xmlContent = $cv['xml_content'];
-                $cvName = $cv['cv_name'];
-                
-                // Parse XML to get personal info
-                $xml = simplexml_load_string($xmlContent);
-                $prenom = (string)$xml->personalInfo->firstname;
-                $nom = (string)$xml->personalInfo->lastname;
-                
-                $workingDir = __DIR__ . '/../../Cv_generator/';
-                
-                switch ($format) {
-                    case 'xml':
-                        $this->downloadXML($xmlContent, $prenom, $nom);
-                        break;
-                        
-                    case 'latex':
-                        $this->downloadLaTeX($xmlContent, $prenom, $nom, $workingDir);
-                        break;
-                    
-                case 'all':
-                    $this->downloadAll($xmlContent, $prenom, $nom, $workingDir);
-                    break;
-                    
-                default: // pdf
-                    $this->downloadPDF($xmlContent, $prenom, $nom, $workingDir);
-                    break;
-                }
+                $this->handleAuthenticatedDownload($cvId, $userId, $format);
             }
             
         } catch (Exception $e) {
             error_log("Error in downloadCV: " . $e->getMessage());
-            http_response_code(500);
-            exit('Error downloading CV');
+            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                $this->jsonResponse([
+                    'status' => 'error',
+                    'message' => 'Error downloading CV: ' . $e->getMessage()
+                ], 500);
+            } else {
+                http_response_code(500);
+                exit('Error downloading CV');
+            }
+        }
+    }
+    
+    private function handleGuestDownload($cvId, $format) {
+        // For guest mode, only PDF downloads are allowed
+        error_log("Guest download attempt - CV ID: " . $cvId . ", Format: " . $format);
+        
+        // Restrict guests to PDF only
+        if ($format !== 'pdf') {
+            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                $this->jsonResponse([
+                    'status' => 'error',
+                    'message' => strtoupper($format) . ' download requires authentication. Please create an account to access this format.'
+                ], 403);
+                return;
+            } else {
+                http_response_code(403);
+                $restrictedFormat = strtoupper($format);
+                exit($restrictedFormat . ' download requires authentication. Please create an account to access this format.');
+            }
+        }
+        
+        $workingDir = __DIR__ . '/../../Cv_generator/';
+        error_log("Working directory: " . $workingDir);
+        
+        // Only handle PDF for guests
+        $pdfPath = $workingDir . 'cv_' . $cvId . '.pdf';
+        error_log("Looking for PDF at: " . $pdfPath);
+        
+        if (!file_exists($pdfPath)) {
+            error_log("Working directory exists: " . (is_dir($workingDir) ? 'yes' : 'no'));
+            // List files in working directory for debugging
+            $files = scandir($workingDir);
+            error_log("Files in working directory: " . implode(', ', $files));
+            
+            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                $this->jsonResponse([
+                    'status' => 'error',
+                    'message' => 'PDF file not found. Expected: ' . basename($pdfPath)
+                ], 404);
+                return;
+            } else {
+                http_response_code(404);
+                exit('PDF file not found. Expected: ' . basename($pdfPath));
+            }
+        }
+        
+        $filename = 'CV_Guest_' . date('Y-m-d') . '.pdf';
+        header('Content-Type: application/pdf');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Content-Length: ' . filesize($pdfPath));
+        readfile($pdfPath);
+        unlink($pdfPath);
+        exit();
+    }
+    
+    private function handleAuthenticatedDownload($cvId, $userId, $format) {
+        // Get CV from database for authenticated users
+        $cv = $this->cvModel->getUserCV($cvId, $userId);
+        
+        if (!$cv) {
+            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                $this->jsonResponse([
+                    'status' => 'error',
+                    'message' => 'CV not found'
+                ], 404);
+                return;
+            } else {
+                http_response_code(404);
+                exit('CV not found');
+            }
+        }
+        
+        $xmlContent = $cv['contenu_xml'];
+        
+        // Debug: Log the XML content to understand what we're getting
+        error_log("Download CV - Raw XML content: " . substr($xmlContent, 0, 200) . (strlen($xmlContent) > 200 ? '...' : ''));
+        error_log("Download CV - XML content length: " . strlen($xmlContent));
+        
+        // Validate XML content before proceeding
+        if (empty($xmlContent) || trim($xmlContent) === '' || trim($xmlContent) === 'test') {
+            error_log("Download CV - Invalid XML content detected: '" . $xmlContent . "'");
+            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                $this->jsonResponse([
+                    'status' => 'error',
+                    'message' => 'CV contains invalid or missing XML content. Please regenerate the CV.'
+                ], 400);
+                return;
+            } else {
+                http_response_code(400);
+                exit('CV contains invalid XML content. Please regenerate the CV.');
+            }
+        }
+        
+        // Additional XML validation - check if it's proper XML format
+        $xml = simplexml_load_string($xmlContent);
+        if (!$xml) {
+            error_log("Download CV - XML parsing failed for CV ID: $cvId. Content: " . substr($xmlContent, 0, 200));
+            
+            // Try to regenerate XML from sections if possible
+            try {
+                error_log("Download CV - Attempting to regenerate XML from sections for CV ID: $cvId");
+                $regeneratedXML = $this->regenerateXMLFromSections($cvId, $userId);
+                
+                if ($regeneratedXML) {
+                    // Update the CV with regenerated XML
+                    $this->cvModel->updateCV($cvId, $userId, $regeneratedXML);
+                    $xmlContent = $regeneratedXML;
+                    error_log("Download CV - Successfully regenerated XML for CV ID: $cvId");
+                } else {
+                    throw new Exception("Could not regenerate XML from sections");
+                }
+            } catch (Exception $e) {
+                error_log("Download CV - XML regeneration failed: " . $e->getMessage());
+                if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                    $this->jsonResponse([
+                        'status' => 'error',
+                        'message' => 'CV contains malformed XML content and could not be regenerated. Please edit and save the CV again.'
+                    ], 400);
+                    return;
+                } else {
+                    http_response_code(400);
+                    exit('CV contains malformed XML content. Please edit and save the CV again.');
+                }
+            }
+        }
+        
+        // Generate CV name from XML content since it's not stored in the database
+        $cvName = $this->generateCVNameFromXML($xmlContent);
+        
+        // Parse XML to get personal info (re-parse since we might have regenerated it)
+        $xml = simplexml_load_string($xmlContent);
+        if (!$xml) {
+            error_log("Download CV - Failed to parse XML content after regeneration for CV ID: $cvId");
+            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                $this->jsonResponse([
+                    'status' => 'error',
+                    'message' => 'CV XML content is corrupted and could not be repaired. Please contact support.'
+                ], 500);
+                return;
+            } else {
+                http_response_code(500);
+                exit('CV XML content is corrupted. Please contact support.');
+            }
+        }
+        
+        $prenom = (string)$xml->personalInfo->firstname;
+        $nom = (string)$xml->personalInfo->lastname;
+        
+        $workingDir = __DIR__ . '/../../Cv_generator/';
+        
+        switch ($format) {
+            case 'xml':
+                $this->downloadXML($xmlContent, $prenom, $nom);
+                break;
+                
+            case 'latex':
+                $this->downloadLaTeX($xmlContent, $prenom, $nom, $workingDir);
+                break;
+            
+            case 'all':
+                $this->downloadAll($xmlContent, $prenom, $nom, $workingDir);
+                break;
+                
+            default: // pdf
+                $this->downloadPDF($xmlContent, $prenom, $nom, $workingDir);
+                break;
         }
     }
     
@@ -1345,7 +1577,7 @@ class CVController extends Controller {
         
         if ($editingCVId) {
             // If editing an existing CV, always use that ID
-            $this->cvModel->updateCV($editingCVId, $userId, $cvName, $xmlContent);
+            $this->cvModel->updateCV($editingCVId, $userId, $xmlContent);
             $this->sectionsManager->saveAllSections($editingCVId, $userId, $formData);
             
             // Clear force_new_cv flag when editing existing CV
@@ -1386,7 +1618,7 @@ class CVController extends Controller {
             unset($_SESSION['custom_cv_name']);
             
             // Create a new CV
-            $cvId = $this->cvModel->createCV($userId, $cvName, $xmlContent);
+            $cvId = $this->cvModel->createCV($userId, $xmlContent);
             if (!$cvId) {
                 error_log("ERROR: Failed to create CV in database");
                 throw new Exception("Failed to create CV in database");
@@ -1453,7 +1685,7 @@ class CVController extends Controller {
         }
         
         // Create a new CV
-        $cvId = $this->cvModel->createCV($userId, $cvName, $xmlContent);
+        $cvId = $this->cvModel->createCV($userId, $xmlContent);
         $this->sectionsManager->saveAllSections($cvId, $userId, $formData);
         
         // Store in session for future generations
@@ -1748,6 +1980,202 @@ class CVController extends Controller {
             error_log("Error in downloadSavedPDF: " . $e->getMessage());
             http_response_code(500);
             exit('Error downloading CV');
+        }
+    }
+
+    /**
+     * Generate CV name from XML content
+     * @param string $xmlContent XML content of the CV
+     * @return string Generated CV name
+     */
+    private function generateCVNameFromXML($xmlContent) {
+        try {
+            // Validate XML content first
+            if (empty($xmlContent) || trim($xmlContent) === '' || trim($xmlContent) === 'test') {
+                error_log("generateCVNameFromXML - Invalid XML content: '" . $xmlContent . "'");
+                return "CV_Unknown";
+            }
+            
+            // Suppress XML parsing errors for cleaner error handling
+            libxml_use_internal_errors(true);
+            $xml = simplexml_load_string($xmlContent);
+            
+            if ($xml) {
+                $prenom = trim((string)$xml->personalInfo->firstname);
+                $nom = trim((string)$xml->personalInfo->lastname);
+                
+                if (!empty($prenom) && !empty($nom)) {
+                    return "CV_{$prenom}_{$nom}";
+                }
+            } else {
+                // Log XML parsing errors
+                $errors = libxml_get_errors();
+                foreach ($errors as $error) {
+                    error_log("XML parsing error: " . $error->message);
+                }
+                libxml_clear_errors();
+            }
+            
+            // Restore normal error handling
+            libxml_use_internal_errors(false);
+            
+        } catch (Exception $e) {
+            error_log("Error parsing XML for CV name: " . $e->getMessage());
+        }
+        
+        // Fallback to generic name
+        return "CV_" . date('Y-m-d_H-i-s');
+    }
+    
+    /**
+     * Regenerate XML content from database sections when XML is corrupted
+     */
+    private function regenerateXMLFromSections($cvId, $userId) {
+        try {
+            $db = Database::getInstance();
+            $conn = $db->getConnection();
+            
+            error_log("regenerateXMLFromSections - Starting for CV ID: $cvId");
+            
+            $sectionData = [];
+            
+            // Personal Information
+            $stmt = $conn->prepare("SELECT * FROM informations_personnelles WHERE id_cv = ?");
+            $stmt->execute([$cvId]);
+            $personalInfo = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if ($personalInfo) {
+                $sectionData['nom'] = $personalInfo['nom'];
+                $sectionData['prenom'] = $personalInfo['prenom'];
+                $sectionData['location'] = $personalInfo['localisation'];
+                $sectionData['email'] = $personalInfo['email'];
+                $sectionData['telephone'] = $personalInfo['telephone'];
+                $sectionData['website'] = $personalInfo['site_web'];
+                $sectionData['linkedin'] = $personalInfo['linkedin'];
+                $sectionData['github'] = $personalInfo['github'];
+                $sectionData['photo_path'] = $personalInfo['chemin_photo'];
+            }
+            
+            // Profile
+            $stmt = $conn->prepare("SELECT * FROM profils WHERE id_cv = ?");
+            $stmt->execute([$cvId]);
+            $profile = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if ($profile) {
+                $sectionData['profil_description'] = $profile['description'];
+            }
+            
+            // Education
+            $stmt = $conn->prepare("SELECT * FROM formations WHERE id_cv = ?");
+            $stmt->execute([$cvId]);
+            $education = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            if (!empty($education)) {
+                $sectionData['education_degree'] = [];
+                $sectionData['education_dates'] = [];
+                $sectionData['education_university'] = [];
+                $sectionData['education_field'] = [];
+                $sectionData['education_details'] = [];
+                
+                foreach ($education as $edu) {
+                    $sectionData['education_degree'][] = $edu['diplome'];
+                    $sectionData['education_dates'][] = $edu['dates'];
+                    $sectionData['education_university'][] = $edu['universite'];
+                    $sectionData['education_field'][] = $edu['specialite'];
+                    $sectionData['education_details'][] = $edu['description'];
+                }
+            }
+            
+            // Experience
+            $stmt = $conn->prepare("SELECT * FROM experiences WHERE id_cv = ?");
+            $stmt->execute([$cvId]);
+            $experience = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            if (!empty($experience)) {
+                $sectionData['experience_company'] = [];
+                $sectionData['experience_dates'] = [];
+                $sectionData['experience_position'] = [];
+                $sectionData['experience_location'] = [];
+                $sectionData['experience_details'] = [];
+                
+                foreach ($experience as $exp) {
+                    $sectionData['experience_company'][] = $exp['entreprise'];
+                    $sectionData['experience_dates'][] = $exp['dates'];
+                    $sectionData['experience_position'][] = $exp['poste'];
+                    $sectionData['experience_location'][] = $exp['lieu'];
+                    $sectionData['experience_details'][] = $exp['description'];
+                }
+            }
+            
+            // Projects
+            $stmt = $conn->prepare("SELECT * FROM projets WHERE id_cv = ?");
+            $stmt->execute([$cvId]);
+            $projects = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            if (!empty($projects)) {
+                $sectionData['project_name'] = [];
+                $sectionData['project_link'] = [];
+                $sectionData['project_details'] = [];
+                
+                foreach ($projects as $project) {
+                    $sectionData['project_name'][] = $project['nom_projet'];
+                    $sectionData['project_link'][] = $project['lien_projet'];
+                    $sectionData['project_details'][] = $project['description'];
+                }
+            }
+            
+            // Skills
+            $stmt = $conn->prepare("SELECT * FROM competences WHERE id_cv = ?");
+            $stmt->execute([$cvId]);
+            $skills = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            if (!empty($skills)) {
+                $sectionData['skill_category'] = [];
+                $sectionData['skill_items'] = [];
+                
+                foreach ($skills as $skill) {
+                    $sectionData['skill_category'][] = $skill['categorie'];
+                    $sectionData['skill_items'][] = $skill['competences'];
+                }
+            }
+            
+            // Languages
+            $stmt = $conn->prepare("SELECT * FROM langues WHERE id_cv = ?");
+            $stmt->execute([$cvId]);
+            $languages = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            if (!empty($languages)) {
+                $sectionData['language_name'] = [];
+                $sectionData['language_level'] = [];
+                
+                foreach ($languages as $lang) {
+                    $sectionData['language_name'][] = $lang['nom_langue'];
+                    $sectionData['language_level'][] = $lang['niveau'];
+                }
+            }
+            
+            // Check if we have at least some data
+            if (empty($sectionData['nom']) && empty($sectionData['prenom'])) {
+                error_log("regenerateXMLFromSections - No personal info found for CV ID: $cvId");
+                return null;
+            }
+            
+            // Generate XML
+            $newXML = $this->generateXMLContent($sectionData, $sectionData['photo_path'] ?? null);
+            
+            // Validate the generated XML
+            $xml = simplexml_load_string($newXML);
+            if (!$xml) {
+                error_log("regenerateXMLFromSections - Generated XML is invalid for CV ID: $cvId");
+                return null;
+            }
+            
+            error_log("regenerateXMLFromSections - Successfully regenerated XML for CV ID: $cvId");
+            return $newXML;
+            
+        } catch (Exception $e) {
+            error_log("regenerateXMLFromSections - Error: " . $e->getMessage());
+            return null;
         }
     }
 }

@@ -48,9 +48,19 @@ abstract class Controller {
     }
     
     protected function jsonResponse($data, $statusCode = 200) {
+        // Clear any output buffer to ensure clean JSON response
+        if (ob_get_level()) {
+            ob_clean();
+        }
+        
         http_response_code($statusCode);
         header('Content-Type: application/json');
         echo json_encode($data);
+        
+        // End output buffering if it was started
+        if (ob_get_level()) {
+            ob_end_flush();
+        }
     }
     
     protected function redirect($url) {

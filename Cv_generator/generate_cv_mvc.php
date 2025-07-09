@@ -1,5 +1,14 @@
 <?php
 
+// Suppress all output until we're ready to send JSON
+ob_start();
+
+// Turn off error display but keep error logging
+error_reporting(E_ALL);
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);
+ini_set('error_log', __DIR__ . '/debug_cv_generation_errors.log');
+
 require_once __DIR__ . '/../core/bootstrap.php';
 require_once __DIR__ . '/../app/Controllers/CVController.php';
 
@@ -51,9 +60,19 @@ try {
     error_log("POST data keys: " . implode(', ', array_keys($_POST)));
     error_log("POST data sample: " . json_encode(array_slice($_POST, 0, 5, true)));
     
+    // Clear any output buffer before calling the method
+    if (ob_get_level()) {
+        ob_clean();
+    }
+    
     $controller->generateCV();
     error_log("=== CV Generation Request Completed Successfully ===");
 } catch (Exception $e) {
+    // Clear any output buffer
+    if (ob_get_level()) {
+        ob_clean();
+    }
+    
     error_log("CV Generation Error: " . $e->getMessage() . "\n" . $e->getTraceAsString());
     http_response_code(500);
     header('Content-Type: application/json');
@@ -63,6 +82,11 @@ try {
         'debug' => $e->getMessage() // Add debug info
     ]);
 } catch (Error $e) {
+    // Clear any output buffer
+    if (ob_get_level()) {
+        ob_clean();
+    }
+    
     error_log("CV Generation Fatal Error: " . $e->getMessage() . "\n" . $e->getTraceAsString());
     http_response_code(500);
     header('Content-Type: application/json');
@@ -71,4 +95,9 @@ try {
         'message' => 'Erreur lors de la génération du CV. Veuillez réessayer.',
         'debug' => $e->getMessage() // Add debug info
     ]);
+}
+
+// End output buffering
+if (ob_get_level()) {
+    ob_end_flush();
 }

@@ -8,7 +8,6 @@ require_once __DIR__ . '/CVProjects.php';
 require_once __DIR__ . '/CVCertificates.php';
 require_once __DIR__ . '/CVSkills.php';
 require_once __DIR__ . '/CVLanguages.php';
-require_once __DIR__ . '/CVCustomization.php';
 
 class CVSectionsManager {
     private $personalInfo;
@@ -19,7 +18,6 @@ class CVSectionsManager {
     private $certificates;
     private $skills;
     private $languages;
-    private $customization;
     
     public function __construct() {
         $this->personalInfo = new CVPersonalInfo();
@@ -30,7 +28,6 @@ class CVSectionsManager {
         $this->certificates = new CVCertificates();
         $this->skills = new CVSkills();
         $this->languages = new CVLanguages();
-        $this->customization = new CVCustomization();
     }
     
     /**
@@ -62,7 +59,7 @@ class CVSectionsManager {
                         'cv_id' => $cvId,
                         'nom' => $cleanFormData['nom'],
                         'prenom' => $cleanFormData['prenom'],
-                        'localisation' => $cleanFormData['localisation'] ?? '',  // Now using localisation directly
+                        'localisation' => $cleanFormData['location'] ?? '',  // Map location to localisation
                         'email' => $cleanFormData['email'] ?? '',
                         'telephone' => $cleanFormData['telephone'] ?? '',
                         'site_web' => $cleanFormData['website'] ?? null,     // Map website to site_web
@@ -79,12 +76,11 @@ class CVSectionsManager {
             }
             
             // 2. Profile
-            if (isset($cleanFormData['description'])) {
+            if (isset($cleanFormData['profil_description'])) {
                 try {
                     $profileData = [
-                        'user_id' => $userId,
                         'cv_id' => $cvId,
-                        'description' => $cleanFormData['description']  // Now using description directly
+                        'description' => $cleanFormData['profil_description']  // Map profil_description to description
                     ];
                     $results['profile'] = $this->profile->saveProfile($profileData);
                     error_log("CVSectionsManager::saveAllSections - Profile saved successfully");
@@ -181,22 +177,7 @@ class CVSectionsManager {
                 }
             }
             
-            // 9. Customization
-            if (isset($cleanFormData['primary_color']) || isset($cleanFormData['format'])) {
-                try {
-                    $customizationData = [
-                        'user_id' => $userId,
-                        'cv_id' => $cvId,
-                        'primary_color' => $cleanFormData['primary_color'] ?? '#667eea',
-                        'download_format' => $cleanFormData['format'] ?? 'pdf'
-                    ];
-                    $results['customization'] = $this->customization->saveCustomization($customizationData);
-                    error_log("CVSectionsManager::saveAllSections - Customization saved successfully");
-                } catch (Exception $e) {
-                    error_log("CVSectionsManager::saveAllSections - Customization error: " . $e->getMessage());
-                    throw new Exception("Error saving customization: " . $e->getMessage());
-                }
-            }
+            // Note: Customization functionality removed as not in current database schema
             
             return $results;
             
@@ -212,15 +193,14 @@ class CVSectionsManager {
      */
     public function getAllSections($cvId, $userId) {
         return [
-            'personal_info' => $this->personalInfo->getPersonalInfo($cvId, $userId),
-            'profile' => $this->profile->getProfile($cvId, $userId),
-            'education' => $this->education->getEducation($cvId, $userId),
-            'experience' => $this->experience->getExperience($cvId, $userId),
-            'projects' => $this->projects->getProjects($cvId, $userId),
-            'certificates' => $this->certificates->getCertificates($cvId, $userId),
-            'skills' => $this->skills->getSkills($cvId, $userId),
-            'languages' => $this->languages->getLanguages($cvId, $userId),
-            'customization' => $this->customization->getCustomization($cvId, $userId)
+            'personal_info' => $this->personalInfo->getPersonalInfo($cvId),
+            'profile' => $this->profile->getProfile($cvId),
+            'education' => $this->education->getEducation($cvId),
+            'experience' => $this->experience->getExperience($cvId),
+            'projects' => $this->projects->getProjects($cvId),
+            'certificates' => $this->certificates->getCertificates($cvId),
+            'skills' => $this->skills->getSkills($cvId),
+            'languages' => $this->languages->getLanguages($cvId)
         ];
     }
     
@@ -228,15 +208,53 @@ class CVSectionsManager {
      * Delete all CV sections data
      */
     public function deleteAllSections($cvId, $userId) {
-        $this->personalInfo->deletePersonalInfo($cvId, $userId);
-        $this->profile->deleteProfile($cvId, $userId);
-        $this->education->deleteEducation($cvId, $userId);
-        $this->experience->deleteExperience($cvId, $userId);
-        $this->projects->deleteProjects($cvId, $userId);
-        $this->certificates->deleteCertificates($cvId, $userId);
-        $this->skills->deleteSkills($cvId, $userId);
-        $this->languages->deleteLanguages($cvId, $userId);
-        $this->customization->deleteCustomization($cvId, $userId);
+        $errors = [];
+        $successCount = 0;
+        $totalSections = 8; // Total number of section types
+        
+        error_log("CVSectionsManager: Starting deletion of all sections for CV ID: $cvId");
+        
+        // Try to delete each section, continue even if some fail
+        $sections = [
+            'personalInfo' => function() use ($cvId) { return $this->personalInfo->deletePersonalInfo($cvId); },
+            'profile' => function() use ($cvId) { return $this->profile->deleteProfile($cvId); },
+            'education' => function() use ($cvId) { return $this->education->deleteEducation($cvId); },
+            'experience' => function() use ($cvId) { return $this->experience->deleteExperience($cvId); },
+            'projects' => function() use ($cvId) { return $this->projects->deleteProjects($cvId); },
+            'certificates' => function() use ($cvId) { return $this->certificates->deleteCertificates($cvId); },
+            'skills' => function() use ($cvId) { return $this->skills->deleteSkills($cvId); },
+            'languages' => function() use ($cvId) { return $this->languages->deleteLanguages($cvId); }
+        ];
+        
+        foreach ($sections as $sectionName => $deleteFunction) {
+            try {
+                $result = $deleteFunction();
+                if ($result) {
+                    $successCount++;
+                    error_log("CVSectionsManager: Successfully deleted $sectionName for CV $cvId");
+                } else {
+                    error_log("CVSectionsManager: No records found for $sectionName for CV $cvId");
+                    $successCount++; // Count as success since no records exist
+                }
+            } catch (Exception $e) {
+                $errors[] = "$sectionName: " . $e->getMessage();
+                error_log("CVSectionsManager: Error deleting $sectionName for CV $cvId: " . $e->getMessage());
+            }
+        }
+        
+        error_log("CVSectionsManager: Section deletion summary for CV $cvId - Success: $successCount/$totalSections, Errors: " . count($errors));
+        
+        // Only throw exception if all deletions failed
+        if ($successCount === 0 && !empty($errors)) {
+            throw new Exception("All section deletions failed: " . implode(", ", $errors));
+        }
+        
+        // Log warnings for partial failures but don't fail the entire operation
+        if (!empty($errors)) {
+            error_log("CVSectionsManager: Some section deletions failed for CV $cvId: " . implode(", ", $errors));
+        }
+        
+        return true;
     }
     
     /**

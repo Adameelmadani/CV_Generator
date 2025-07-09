@@ -28,7 +28,7 @@ class CVProfile extends Model {
         
         $this->execute($sql, [
             ':cv_id' => $data['cv_id'],
-            ':description' => $data['description']
+            ':description' => $data['profil_description']
         ]);
         
         return $this->db->lastInsertId();
@@ -41,7 +41,7 @@ class CVProfile extends Model {
         
         return $this->execute($sql, [
             ':cv_id' => $data['cv_id'],
-            ':description' => $data['description']
+            ':description' => $data['profil_description']
         ]);
     }
     

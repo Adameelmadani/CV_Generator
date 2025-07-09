@@ -6,10 +6,13 @@ class CV extends Model {
     protected $table = 'cvs';
     
     public function getUserCVs($userId) {
-        $sql = "SELECT id, contenu_xml, lien_pdf, est_publie, date_creation, date_modification, id_filiere 
-                FROM {$this->table} 
-                WHERE id_utilisateur = :user_id 
-                ORDER BY date_modification DESC";
+        $sql = "SELECT c.id, c.contenu_xml, c.lien_pdf, c.est_publie, c.date_creation, c.date_modification, c.id_filiere,
+                       COALESCE(CONCAT(p.prenom, ' ', p.nom), 'CV sans nom') as cv_name,
+                       c.date_creation as created_at
+                FROM {$this->table} c
+                LEFT JOIN informations_personnelles p ON c.id = p.id_cv
+                WHERE c.id_utilisateur = :user_id 
+                ORDER BY c.date_modification DESC";
         
         $stmt = $this->execute($sql, [':user_id' => $userId]);
         return $stmt->fetchAll();
@@ -30,9 +33,13 @@ class CV extends Model {
     public function createCV($userId, $xmlContent, $pdfPath = null, $templateXslt = null, $filiereId = null) {
         // Validate inputs
         if (empty($userId) || empty($xmlContent)) {
-            error_log("ERROR: Invalid input data for CV creation");
+            error_log("ERROR: Invalid input data for CV creation - userId: " . $userId . ", xmlContent length: " . strlen($xmlContent));
             throw new Exception("Invalid input data for CV creation");
         }
+        
+        // Log XML content for debugging
+        error_log("CV::createCV - XML content length: " . strlen($xmlContent));
+        error_log("CV::createCV - XML content preview: " . substr($xmlContent, 0, 200) . "...");
         
         $data = [
             ':id_utilisateur' => $userId,
