@@ -1,9 +1,28 @@
 <?php
+// Enable error logging
+ini_set('log_errors', 1);
+ini_set('error_log', __DIR__ . '/error.log');
 
-require_once __DIR__ . '/../core/bootstrap.php';
-require_once __DIR__ . '/../app/Controllers/AuthController.php';
+try {
+    require_once __DIR__ . '/../core/bootstrap.php';
+    require_once __DIR__ . '/../app/Controllers/AuthController.php';
 
-$authController = new AuthController();
-$authController->login();
-
-?>
+    $authController = new AuthController();
+    $authController->login();
+} catch (Exception $e) {
+    error_log("Login Handler Error: " . $e->getMessage() . "\n" . $e->getTraceAsString());
+    http_response_code(500);
+    header('Content-Type: application/json');
+    echo json_encode([
+        'status' => 'error',
+        'message' => 'Erreur serveur. Veuillez réessayer.'
+    ]);
+} catch (Error $e) {
+    error_log("Login Handler Fatal Error: " . $e->getMessage() . "\n" . $e->getTraceAsString());
+    http_response_code(500);
+    header('Content-Type: application/json');
+    echo json_encode([
+        'status' => 'error',
+        'message' => 'Erreur serveur. Veuillez réessayer.'
+    ]);
+}

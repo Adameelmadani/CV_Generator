@@ -324,7 +324,7 @@ let currentStep = 1;
               console.log('👤 User not logged in but in guest mode - continuing...');
               return false; // Return false but don't redirect
             } else {
-              console.warn('⚠️ User not logged in!');
+              console.warn('⚠️ User not logged in! Session result:', result);
               alert('Session expirée. Vous allez être redirigé vers la page de connexion.');
               window.location.href = '../Login_Signup/auth.html';
               return false;
@@ -2237,7 +2237,9 @@ let currentStep = 1;
           });
           
           if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            const errorText = await response.text();
+            console.error('❌ HTTP Error Response:', errorText);
+            throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
           }
           
           const result = await response.json();

@@ -1,6 +1,9 @@
 <?php
+// Enable error logging
+ini_set('log_errors', 1);
+ini_set('error_log', __DIR__ . '/error.log');
 
-session_start();
+require_once __DIR__ . '/../core/bootstrap.php';
 require_once __DIR__ . '/../app/Controllers/FiliereController.php';
 
 header('Content-Type: application/json');
@@ -27,7 +30,14 @@ try {
     }
     
 } catch (Exception $e) {
-    error_log("Error in filiere endpoint: " . $e->getMessage());
+    error_log("Error in filiere endpoint: " . $e->getMessage() . "\n" . $e->getTraceAsString());
+    http_response_code(500);
+    echo json_encode([
+        'status' => 'error',
+        'message' => 'Server error'
+    ]);
+} catch (Error $e) {
+    error_log("Fatal error in filiere endpoint: " . $e->getMessage() . "\n" . $e->getTraceAsString());
     http_response_code(500);
     echo json_encode([
         'status' => 'error',

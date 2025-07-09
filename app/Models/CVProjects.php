@@ -14,12 +14,22 @@ class CVProjects extends Model {
     }
     
     public function saveProjects($cvId, $projectsData) {
+        // Validate input parameters
+        if (!is_array($projectsData)) {
+            error_log("CVProjects::saveProjects - projectsData is not an array: " . gettype($projectsData));
+            return [];
+        }
+        
         // First, delete existing project entries for this CV
         $this->deleteProjects($cvId);
         
         // Then insert new entries
         $insertedIds = [];
         foreach ($projectsData as $index => $project) {
+            if (!is_array($project)) {
+                error_log("CVProjects::saveProjects - project entry at index $index is not an array: " . gettype($project));
+                continue;
+            }
             if (!empty($project['nom_projet'])) {
                 $insertedIds[] = $this->createProjectEntry($cvId, $project);
             }

@@ -1,186 +1,5 @@
-// Données des filières
-const filieres = [
-        {
-          id: 1,
-          nom: "Génie Mécanique",
-          description:
-            "Conception, fabrication, et maintenance de systèmes mécaniques. Travaille sur les moteurs, les structures mécaniques, la thermodynamique et la résistance des matériaux.",
-        },
-        {
-          id: 2,
-          nom: "Génie Industriel",
-          description:
-            "Optimisation des systèmes de production, logistique, qualité, organisation et performance des processus industriels.",
-        },
-        {
-          id: 3,
-          nom: "Génie Électrique",
-          description:
-            "Étude et application de l'électricité, des circuits électriques, des systèmes de puissance et de l'électronique de puissance.",
-        },
-        {
-          id: 4,
-          nom: "Génie Électromécanique",
-          description:
-            "Filière hybride combinant les systèmes mécaniques et électriques (automatisme, moteurs, maintenance intégrée), avec une forte orientation technique sur les machines.",
-        },
-        {
-          id: 5,
-          nom: "Génie Civil",
-          description:
-            "Conception, construction et gestion d'infrastructures : bâtiments, ponts, routes, barrages, structures métalliques et en béton.",
-        },
-        {
-          id: 6,
-          nom: "Architecture",
-          description:
-            "Art et science de la conception des bâtiments et de l'environnement bâti. Inclut design, urbanisme, patrimoine, avec une formation artistique poussée.",
-        },
-        {
-          id: 7,
-          nom: "Informatique & Numérique",
-          description:
-            "Programmation, systèmes d'exploitation, réseaux, cybersécurité, génie logiciel, administration des systèmes et technologies web.",
-        },
-        {
-          id: 8,
-          nom: "Intelligence Artificielle & Data Science",
-          description:
-            "Traitement des données massives, apprentissage automatique, vision par ordinateur, modélisation prédictive, traitement du langage naturel.",
-        },
-        {
-          id: 9,
-          nom: "Génie Chimique & Procédés",
-          description:
-            "Transformation de la matière et de l'énergie à l'échelle industrielle. Inclut réacteurs chimiques, cinétique, thermodynamique appliquée.",
-        },
-        {
-          id: 10,
-          nom: "Énergies & Environnement",
-          description:
-            "Production, gestion énergétique (renouvelable ou non), traitement des déchets, de l'air, de l'eau, durabilité.",
-        },
-        {
-          id: 11,
-          nom: "Télécommunications & Électronique",
-          description:
-            "Transmission de données, réseaux sans fil, antennes, fibres optiques, traitement du signal, capteurs.",
-        },
-        {
-          id: 12,
-          nom: "Mathématiques Appliquées & Modélisation",
-          description:
-            "Modélisation mathématique de systèmes complexes, simulations numériques, optimisation, finance quantitative.",
-        },
-        {
-          id: 13,
-          nom: "Économie & Gestion Appliquée",
-          description:
-            "Analyse des systèmes économiques, finance, logistique, stratégie, audit, marketing analytique.",
-        },
-        {
-          id: 14,
-          nom: "Génie Biomédical",
-          description:
-            "Application de l'ingénierie au domaine médical : appareils médicaux, imagerie, prothèses, interfaces homme-machine.",
-        },
-        {
-          id: 15,
-          nom: "Génie Maritime",
-          description:
-            "Ingénierie navale : construction navale, logistique maritime, mécanique marine, transport international.",
-        },
-        {
-          id: 16,
-          nom: "Aéronautique",
-          description:
-            "Conception et maintenance des systèmes aéronautiques : moteurs, structures, aérodynamique, contrôle de vol.",
-        },
-        {
-          id: 17,
-          nom: "Agroalimentaire",
-          description:
-            "Transformation industrielle des produits agricoles : sécurité alimentaire, nutrition, biotechnologie alimentaire.",
-        },
-        {
-          id: 18,
-          nom: "Textile & Matériaux",
-          description:
-            "Conception de textiles techniques, polymères, matériaux composites à usage industriel, biomédical ou technologique.",
-        },
-        {
-          id: 19,
-          nom: "Sciences de la Vie & de la Terre",
-          description:
-            "Biologie, géologie, écologie, biochimie, microbiologie, recherche environnementale.",
-        },
-        {
-          id: 20,
-          nom: "Sciences Cognitives & Interdisciplinaires",
-          description:
-            "Étude de l'intelligence humaine et artificielle : psychologie cognitive, neurosciences, interfaces cerveau-machine.",
-        },
-        {
-          id: 21,
-          nom: "Médecine",
-          description:
-            "Études médicales classiques : soins aux patients, diagnostic, pathologies, pharmacologie, chirurgie.",
-        },
-        {
-          id: 22,
-          nom: "Ingénierie Multimédia & Technologies Interactives",
-          description:
-            "Création de contenus numériques, jeux vidéo, réalité virtuelle/augmentée, design interactif.",
-        },
-        {
-          id: 23,
-          nom: "Génie Juridique & Droit des Technologies",
-          description:
-            "Droit numérique, cybersécurité juridique, RGPD, propriété intellectuelle.",
-        },
-        {
-          id: 24,
-          nom: "Géomatique & SIG",
-          description:
-            "Traitement de données spatiales : cartographie, GPS, images satellites, SIG.",
-        },
-        {
-          id: 25,
-          nom: "Sciences Spatiales & Aérospatiales",
-          description:
-            "Technologie des satellites, propulsion spatiale, orbites, capteurs embarqués.",
-        },
-        {
-          id: 26,
-          nom: "Sciences de l'Éducation & Ingénierie Pédagogique",
-          description:
-            "Conception de dispositifs d'apprentissage, neurosciences éducatives, e-learning.",
-        },
-        {
-          id: 27,
-          nom: "Sécurité Industrielle & Gestion des Risques",
-          description:
-            "Analyse des dangers, gestion de crise, prévention industrielle et environnementale.",
-        },
-        {
-          id: 28,
-          nom: "Pharmacie Industrielle & Biotechnologies",
-          description:
-            "Production de médicaments, bioprocédés, génie pharmaceutique, vaccins.",
-        },
-        {
-          id: 29,
-          nom: "Actuariat & Ingénierie Financière",
-          description:
-            "Mathématiques de l'assurance, modélisation des risques, statistiques financières.",
-        },
-        {
-          id: 30,
-          nom: "Diplomatie & Relations Techno-stratégiques",
-          description:
-            "Géopolitique de l'innovation, coopération technologique, cybersécurité internationale.",
-        },
-      ];
+// Données des filières (will be loaded from API)
+let filieres = [];
 
 // Initialiser la page
 document.addEventListener("DOMContentLoaded", function () {
@@ -190,15 +9,30 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 // Charger les filières dans le select
-function loadFilieres() {
-  const select = document.getElementById("signup_filiere");
-  if (select) {
-    filieres.forEach((filiere) => {
-      const option = document.createElement("option");
-      option.value = filiere.id;
-      option.textContent = filiere.nom;
-      select.appendChild(option);
-    });
+async function loadFilieres() {
+  try {
+    const response = await fetch("filieres_mvc.php?action=getAllFilieres");
+    const result = await response.json();
+    
+    if (result.status === "success") {
+      filieres = result.filieres;
+      const select = document.getElementById("signup_filiere");
+      if (select) {
+        // Clear existing options except the default one
+        select.innerHTML = '<option value="">Sélectionnez votre filière</option>';
+        
+        filieres.forEach((filiere) => {
+          const option = document.createElement("option");
+          option.value = filiere.id;
+          option.textContent = filiere.nom;
+          select.appendChild(option);
+        });
+      }
+    } else {
+      console.error("Error loading filieres:", result.message);
+    }
+  } catch (error) {
+    console.error("Error fetching filieres:", error);
   }
 }
 
@@ -343,6 +177,7 @@ function toggleForm() {
 // Gestion de la connexion
 async function handleLogin(e) {
   e.preventDefault();
+  console.log("Login form submitted");
 
   const btn = document.getElementById("loginBtn");
   const loading = document.getElementById("loginLoading");
@@ -351,6 +186,7 @@ async function handleLogin(e) {
   if (loading) loading.classList.add("show");
 
   const formData = new FormData(e.target);
+  console.log("Form data prepared for login");
 
   try {
     const response = await fetch("login_handler_mvc.php", {
@@ -358,17 +194,40 @@ async function handleLogin(e) {
       body: formData,
     });
 
+    // Check if response is ok
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
     const result = await response.json();
+    console.log("Login response:", result);
 
     if (result.status === "success") {
       showAlert("loginAlert", result.message, "success");
-      setTimeout(() => {
+      // Add debug logging
+      console.log("Login successful, redirecting to:", result.redirect);
+      
+      // Try immediate redirect first, then fallback to delayed redirect
+      try {
         window.location.href = result.redirect;
-      }, 1500);
+      } catch (redirectError) {
+        console.error("Direct redirect failed, trying delayed redirect:", redirectError);
+        setTimeout(() => {
+          console.log("Executing delayed redirect...");
+          try {
+            window.location.href = result.redirect;
+          } catch (delayedRedirectError) {
+            console.error("Delayed redirect also failed:", delayedRedirectError);
+            // Last resort: try window.location.replace
+            window.location.replace(result.redirect);
+          }
+        }, 500);
+      }
     } else {
       showAlert("loginAlert", result.message, "error");
     }
   } catch (error) {
+    console.error("Login error:", error);
     showAlert("loginAlert", "Erreur de connexion. Veuillez réessayer.", "error");
   } finally {
     if (btn) btn.style.display = "block";
@@ -412,9 +271,21 @@ async function handleSignup(e) {
 
     if (result.status === "success") {
       showAlert("signupAlert", result.message, "success");
-      setTimeout(() => {
+      // Try immediate redirect first, then fallback to delayed redirect
+      try {
         window.location.href = result.redirect;
-      }, 1500);
+      } catch (redirectError) {
+        console.error("Direct redirect failed, trying delayed redirect:", redirectError);
+        setTimeout(() => {
+          try {
+            window.location.href = result.redirect;
+          } catch (delayedRedirectError) {
+            console.error("Delayed redirect also failed:", delayedRedirectError);
+            // Last resort: try window.location.replace
+            window.location.replace(result.redirect);
+          }
+        }, 500);
+      }
     } else {
       showAlert("signupAlert", result.message, "error");
     }

@@ -14,12 +14,22 @@ class CVSkills extends Model {
     }
     
     public function saveSkills($cvId, $skillsData) {
+        // Validate input parameters
+        if (!is_array($skillsData)) {
+            error_log("CVSkills::saveSkills - skillsData is not an array: " . gettype($skillsData));
+            return [];
+        }
+        
         // First, delete existing skill entries for this CV
         $this->deleteSkills($cvId);
         
         // Then insert new entries
         $insertedIds = [];
         foreach ($skillsData as $index => $skill) {
+            if (!is_array($skill)) {
+                error_log("CVSkills::saveSkills - skill entry at index $index is not an array: " . gettype($skill));
+                continue;
+            }
             if (!empty($skill['categorie']) || !empty($skill['competences'])) {
                 $insertedIds[] = $this->createSkillEntry($cvId, $skill);
             }

@@ -17,6 +17,15 @@ class User extends Model {
     }
     
     public function createUser($nom, $prenom, $email, $hashedPassword, $phoneNumber, $filiereId = null) {
+        // Validate filiere exists if provided
+        if ($filiereId !== null) {
+            $checkSql = "SELECT id FROM filieres WHERE id = :filiere_id";
+            $checkStmt = $this->execute($checkSql, [':filiere_id' => $filiereId]);
+            if (!$checkStmt->fetch()) {
+                throw new Exception("La filière sélectionnée n'existe pas.");
+            }
+        }
+        
         $sql = "INSERT INTO {$this->table} (nom, prenom, email, mot_de_passe_hash, numero_telephone, id_filiere, date_inscription) 
                 VALUES (:nom, :prenom, :email, :password, :phone_number, :id_filiere, :date_inscription)";
         $this->execute($sql, [

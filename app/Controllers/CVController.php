@@ -211,9 +211,17 @@ class CVController extends Controller {
         // Check if this is a guest mode request
         $isGuestMode = isset($_POST['guest_mode']) && $_POST['guest_mode'] === 'true';
         
+        error_log("CV Generation - Guest Mode: " . ($isGuestMode ? 'true' : 'false'));
+        
         $userId = null;
         if (!$isGuestMode) {
-            $userId = $this->requireAuth();
+            try {
+                $userId = $this->requireAuth();
+                error_log("CV Generation - User ID: " . $userId);
+            } catch (Exception $e) {
+                error_log("CV Generation - Auth failed: " . $e->getMessage());
+                throw $e;
+            }
         }
         
         if ($_SERVER["REQUEST_METHOD"] !== "POST") {
@@ -466,7 +474,7 @@ class CVController extends Controller {
         $xmlContent .= "  <personalInfo>\n";
         $xmlContent .= "    <firstname>"   . htmlspecialchars($formData['prenom'] ?? '')    . "</firstname>\n";
         $xmlContent .= "    <lastname>"    . htmlspecialchars($formData['nom'] ?? '')       . "</lastname>\n";
-        $xmlContent .= "    <location>"    . htmlspecialchars($formData['location'] ?? '')  . "</location>\n";
+        $xmlContent .= "    <location>"    . htmlspecialchars($formData['localisation'] ?? '')  . "</location>\n";
         $xmlContent .= "    <email>"       . htmlspecialchars($formData['email'] ?? '')     . "</email>\n";
         $xmlContent .= "    <phone>"       . htmlspecialchars($formData['telephone'] ?? '') . "</phone>\n";
         if (!empty($formData['website']))  $xmlContent .= "    <website>"   . htmlspecialchars($formData['website'])   . "</website>\n";
@@ -476,9 +484,9 @@ class CVController extends Controller {
         $xmlContent .= "  </personalInfo>\n\n";
 
         // Professional Profile
-        if (!empty($formData['profil_description'])) {
+        if (!empty($formData['description'])) {
             $xmlContent .= "  <profil>\n";
-            $xmlContent .= "    <description>" . htmlspecialchars($formData['profil_description']) . "</description>\n";
+            $xmlContent .= "    <description>" . htmlspecialchars($formData['description']) . "</description>\n";
             $xmlContent .= "  </profil>\n\n";
         }
 

@@ -84,6 +84,12 @@ class AuthController extends Controller {
             $this->session['userEmail'] = $email;
             $this->session['nom'] = $nom;
             $this->session['prenom'] = $prenom;
+            $this->session['userTel'] = $telephone;
+            $this->session['filiereId'] = $filiereId;
+            $this->session['loginTime'] = time(); // Add login timestamp
+            
+            // Regenerate session ID for security
+            session_regenerate_id(true);
             
             $this->jsonResponse([
                 'status' => 'success',
@@ -140,6 +146,10 @@ class AuthController extends Controller {
             $this->session['prenom'] = $user['prenom'];
             $this->session['userTel'] = $user['numero_telephone'];
             $this->session['filiereId'] = $user['id_filiere'];
+            $this->session['loginTime'] = time(); // Add login timestamp
+            
+            // Regenerate session ID for security
+            session_regenerate_id(true);
             
             $this->jsonResponse([
                 'status' => 'success',
@@ -167,6 +177,21 @@ class AuthController extends Controller {
                 return;
             }
             
+            // Check session timeout (optional - 24 hours)
+            if (isset($this->session['loginTime'])) {
+                $sessionTimeout = 24 * 60 * 60; // 24 hours in seconds
+                if (time() - $this->session['loginTime'] > $sessionTimeout) {
+                    session_unset();
+                    session_destroy();
+                    $this->jsonResponse([
+                        'status' => 'error',
+                        'logged_in' => false,
+                        'message' => 'Session expirée'
+                    ]);
+                    return;
+                }
+            }
+            
             // Récupérer les informations utilisateur depuis la base de données
             $user = $this->userModel->getUserById($this->session['userId']);
             
@@ -182,14 +207,24 @@ class AuthController extends Controller {
                 return;
             }
             
+            // Construire le nom d'affichage
+            $displayName = trim($user['prenom'] . ' ' . $user['nom']);
+            if (empty($displayName)) {
+                $displayName = 'Utilisateur';
+            }
+            
             $this->jsonResponse([
                 'status' => 'success',
                 'logged_in' => true,
                 'user_id' => $this->session['userId'],
                 'user_email' => $user['email'],
-                'user_tel' => $user['phone_number'],
-                'username' => $user['username'] ?? 'Utilisateur',
-                'session_id' => session_id()
+                'user_tel' => $user['numero_telephone'], // Fixed field name
+                'username' => $displayName, // Use full name as username
+                'nom' => $user['nom'],
+                'prenom' => $user['prenom'],
+                'filiere_id' => $user['id_filiere'],
+                'session_id' => session_id(),
+                'login_time' => $this->session['loginTime'] ?? null
             ]);
             
         } catch (Exception $e) {
@@ -203,14 +238,32 @@ class AuthController extends Controller {
     }
     
     public function logout() {
-        session_unset();
-        session_destroy();
-        
-        $this->jsonResponse([
-            'status' => 'success',
-            'message' => 'Déconnexion réussie',
-            'redirect' => 'Login_Signup/auth.html'
-        ]);
+        try {
+            // Clear all session data
+            session_unset();
+            session_destroy();
+            
+            // Also clear the session cookie
+            if (ini_get("session.use_cookies")) {
+                $params = session_get_cookie_params();
+                setcookie(session_name(), '', time() - 42000,
+                    $params["path"], $params["domain"],
+                    $params["secure"], $params["httponly"]
+                );
+            }
+            
+            $this->jsonResponse([
+                'status' => 'success',
+                'message' => 'Déconnexion réussie',
+                'redirect' => '../Cv_generator/Login_Signup/auth.html'
+            ]);
+        } catch (Exception $e) {
+            error_log("Erreur lors de la déconnexion : " . $e->getMessage());
+            $this->jsonResponse([
+                'status' => 'error',
+                'message' => 'Erreur lors de la déconnexion'
+            ], 500);
+        }
     }
     
     public function resetPassword() {

@@ -1,6 +1,15 @@
 <?php
 
 require_once __DIR__ . '/../core/bootstrap.php';
+require_once __DIR__ . '/../app/Controllers/CVController.php';
+
+// Add comprehensive logging
+error_log("=== CV Generation Request Started ===");
+error_log("Request Method: " . $_SERVER['REQUEST_METHOD']);
+error_log("Request URI: " . $_SERVER['REQUEST_URI']);
+error_log("User Agent: " . ($_SERVER['HTTP_USER_AGENT'] ?? 'unknown'));
+error_log("Session ID: " . session_id());
+error_log("Session Status: " . session_status());
 
 // Enhanced AJAX detection
 $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && 
@@ -23,8 +32,7 @@ $isPostNotForm = $_SERVER['REQUEST_METHOD'] === 'POST' &&
 error_log("CV Generation Request - AJAX: " . ($isAjax ? 'true' : 'false') . 
           ", JSON Accept: " . ($acceptsJson ? 'true' : 'false') . 
           ", Fetch: " . ($isFetch ? 'true' : 'false') .
-          ", POST not form: " . ($isPostNotForm ? 'true' : 'false') .
-          ", User Agent: " . ($_SERVER['HTTP_USER_AGENT'] ?? 'unknown'));
+          ", POST not form: " . ($isPostNotForm ? 'true' : 'false'));
 
 // If this is NOT an AJAX/Fetch request, redirect back to the form
 // Re-enable this check now that we've fixed the frontend
@@ -34,5 +42,33 @@ if (!$isAjax && !$acceptsJson && !$isFetch) {
     exit();
 }
 
-$controller = new CVController();
-$controller->generateCV();
+try {
+    error_log("Creating CVController instance...");
+    $controller = new CVController();
+    error_log("CVController created, calling generateCV...");
+    
+    // Add debug info about POST data
+    error_log("POST data keys: " . implode(', ', array_keys($_POST)));
+    error_log("POST data sample: " . json_encode(array_slice($_POST, 0, 5, true)));
+    
+    $controller->generateCV();
+    error_log("=== CV Generation Request Completed Successfully ===");
+} catch (Exception $e) {
+    error_log("CV Generation Error: " . $e->getMessage() . "\n" . $e->getTraceAsString());
+    http_response_code(500);
+    header('Content-Type: application/json');
+    echo json_encode([
+        'status' => 'error',
+        'message' => 'Erreur lors de la génération du CV. Veuillez réessayer.',
+        'debug' => $e->getMessage() // Add debug info
+    ]);
+} catch (Error $e) {
+    error_log("CV Generation Fatal Error: " . $e->getMessage() . "\n" . $e->getTraceAsString());
+    http_response_code(500);
+    header('Content-Type: application/json');
+    echo json_encode([
+        'status' => 'error',
+        'message' => 'Erreur lors de la génération du CV. Veuillez réessayer.',
+        'debug' => $e->getMessage() // Add debug info
+    ]);
+}

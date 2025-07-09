@@ -16,18 +16,46 @@ document.addEventListener('DOMContentLoaded', function() {
 async function checkUserSession() {
     try {
         const response = await fetch('../Login_Signup/check_session_mvc.php');
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
         const result = await response.json();
+        console.log('Session check result:', result);
         
         if (result.status === 'success' && result.logged_in) {
-            // Afficher le username au lieu de l'email
-            const displayName = result.username || result.user_email;
+            // Afficher le username ou construire le nom d'affichage
+            let displayName = result.username;
+            if (!displayName || displayName === 'Utilisateur') {
+                // Fallback: utiliser prenom + nom s'ils sont disponibles
+                if (result.prenom && result.nom) {
+                    displayName = `${result.prenom} ${result.nom}`;
+                } else {
+                    displayName = result.user_email;
+                }
+            }
+            
             document.getElementById('userEmail').textContent = displayName;
+            
+            // Stocker les infos utilisateur dans des variables globales si nécessaire
+            window.currentUser = {
+                id: result.user_id,
+                email: result.user_email,
+                nom: result.nom,
+                prenom: result.prenom,
+                tel: result.user_tel,
+                filiereId: result.filiere_id
+            };
+            
         } else {
+            console.log('Session invalid, redirecting to login');
             // Rediriger vers la page de connexion si pas connecté
             window.location.href = '../Login_Signup/auth.html';
         }
     } catch (error) {
         console.error('Erreur lors de la vérification de session:', error);
+        // En cas d'erreur, rediriger vers la page de connexion
         window.location.href = '../Login_Signup/auth.html';
     }
 }

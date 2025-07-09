@@ -14,12 +14,22 @@ class CVCertificates extends Model {
     }
     
     public function saveCertificates($cvId, $certificatesData) {
+        // Validate input parameters
+        if (!is_array($certificatesData)) {
+            error_log("CVCertificates::saveCertificates - certificatesData is not an array: " . gettype($certificatesData));
+            return [];
+        }
+        
         // First, delete existing certificate entries for this CV
         $this->deleteCertificates($cvId);
         
         // Then insert new entries
         $insertedIds = [];
         foreach ($certificatesData as $index => $certificate) {
+            if (!is_array($certificate)) {
+                error_log("CVCertificates::saveCertificates - certificate entry at index $index is not an array: " . gettype($certificate));
+                continue;
+            }
             if (!empty($certificate['nom_certificat'])) {
                 $insertedIds[] = $this->createCertificateEntry($cvId, $certificate);
             }

@@ -14,12 +14,22 @@ class CVEducation extends Model {
     }
     
     public function saveEducation($cvId, $educationData) {
+        // Validate input parameters
+        if (!is_array($educationData)) {
+            error_log("CVEducation::saveEducation - educationData is not an array: " . gettype($educationData));
+            return [];
+        }
+        
         // First, delete existing education entries for this CV
         $this->deleteEducation($cvId);
         
         // Then insert new entries
         $insertedIds = [];
         foreach ($educationData as $index => $education) {
+            if (!is_array($education)) {
+                error_log("CVEducation::saveEducation - education entry at index $index is not an array: " . gettype($education));
+                continue;
+            }
             if (!empty($education['diplome']) || !empty($education['universite'])) {
                 $insertedIds[] = $this->createEducationEntry($cvId, $education);
             }

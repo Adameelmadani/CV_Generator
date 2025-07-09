@@ -42,101 +42,168 @@ class CVSectionsManager {
         // Clean all form data for database storage
         $cleanFormData = $this->cleanArrayForDatabase($formData);
         
+        // Add logging to debug form data
+        error_log("CVSectionsManager::saveAllSections - CV ID: $cvId, User ID: $userId");
+        error_log("CVSectionsManager::saveAllSections - Form data keys: " . implode(', ', array_keys($cleanFormData)));
+        
+        // Add detailed logging for array fields
+        foreach (['education_degree', 'experience_company', 'project_name', 'certificate_name', 'skill_category', 'language_name'] as $arrayField) {
+            if (isset($cleanFormData[$arrayField])) {
+                error_log("CVSectionsManager::saveAllSections - $arrayField type: " . gettype($cleanFormData[$arrayField]) . ", count: " . (is_array($cleanFormData[$arrayField]) ? count($cleanFormData[$arrayField]) : 'N/A'));
+            }
+        }
+        
         try {
             // 1. Personal Information
             if (isset($cleanFormData['nom']) && isset($cleanFormData['prenom'])) {
-                $personalData = [
-                    'user_id' => $userId,
-                    'cv_id' => $cvId,
-                    'nom' => $cleanFormData['nom'],
-                    'prenom' => $cleanFormData['prenom'],
-                    'location' => $cleanFormData['location'] ?? '',
-                    'email' => $cleanFormData['email'] ?? '',
-                    'telephone' => $cleanFormData['telephone'] ?? '',
-                    'website' => $cleanFormData['website'] ?? null,
-                    'linkedin' => $cleanFormData['linkedin'] ?? null,
-                    'github' => $cleanFormData['github'] ?? null,
-                    'photo_path' => $cleanFormData['photo_path'] ?? null
-                ];
-                $results['personal_info'] = $this->personalInfo->savePersonalInfo($personalData);
+                try {
+                    $personalData = [
+                        'user_id' => $userId,
+                        'cv_id' => $cvId,
+                        'nom' => $cleanFormData['nom'],
+                        'prenom' => $cleanFormData['prenom'],
+                        'localisation' => $cleanFormData['localisation'] ?? '',  // Now using localisation directly
+                        'email' => $cleanFormData['email'] ?? '',
+                        'telephone' => $cleanFormData['telephone'] ?? '',
+                        'site_web' => $cleanFormData['website'] ?? null,     // Map website to site_web
+                        'linkedin' => $cleanFormData['linkedin'] ?? null,
+                        'github' => $cleanFormData['github'] ?? null,
+                        'chemin_photo' => $cleanFormData['photo_path'] ?? null  // Map photo_path to chemin_photo
+                    ];
+                    $results['personal_info'] = $this->personalInfo->savePersonalInfo($personalData);
+                    error_log("CVSectionsManager::saveAllSections - Personal info saved successfully");
+                } catch (Exception $e) {
+                    error_log("CVSectionsManager::saveAllSections - Personal info error: " . $e->getMessage());
+                    throw $e;
+                }
             }
             
             // 2. Profile
-            if (isset($cleanFormData['profil_description'])) {
-                $profileData = [
-                    'user_id' => $userId,
-                    'cv_id' => $cvId,
-                    'profil_description' => $cleanFormData['profil_description']
-                ];
-                $results['profile'] = $this->profile->saveProfile($profileData);
+            if (isset($cleanFormData['description'])) {
+                try {
+                    $profileData = [
+                        'user_id' => $userId,
+                        'cv_id' => $cvId,
+                        'description' => $cleanFormData['description']  // Now using description directly
+                    ];
+                    $results['profile'] = $this->profile->saveProfile($profileData);
+                    error_log("CVSectionsManager::saveAllSections - Profile saved successfully");
+                } catch (Exception $e) {
+                    error_log("CVSectionsManager::saveAllSections - Profile error: " . $e->getMessage());
+                    throw $e;
+                }
             }
             
             // 3. Education
             if (isset($cleanFormData['education_degree']) && is_array($cleanFormData['education_degree'])) {
-                $educationData = $this->formatArrayData($cleanFormData, 'education', [
-                    'education_degree', 'education_dates', 'education_university', 
-                    'education_field', 'education_details'
-                ]);
-                $results['education'] = $this->education->saveEducation($cvId, $userId, $educationData);
+                try {
+                    $educationData = $this->formatArrayData($cleanFormData, 'education', [
+                        'education_degree', 'education_dates', 'education_university', 
+                        'education_field', 'education_details'
+                    ]);
+                    $results['education'] = $this->education->saveEducation($cvId, $educationData);
+                    error_log("CVSectionsManager::saveAllSections - Education saved successfully");
+                } catch (Exception $e) {
+                    error_log("CVSectionsManager::saveAllSections - Education error: " . $e->getMessage());
+                    throw new Exception("Error saving education: " . $e->getMessage());
+                }
             }
             
             // 4. Experience
             if (isset($cleanFormData['experience_company']) && is_array($cleanFormData['experience_company'])) {
-                $experienceData = $this->formatArrayData($cleanFormData, 'experience', [
-                    'experience_location', 'experience_dates', 'experience_company',
-                    'experience_position', 'experience_description'
-                ]);
-                $results['experience'] = $this->experience->saveExperience($cvId, $userId, $experienceData);
+                try {
+                    $experienceData = $this->formatArrayData($cleanFormData, 'experience', [
+                        'experience_location', 'experience_dates', 'experience_company',
+                        'experience_position', 'experience_description'
+                    ]);
+                    $results['experience'] = $this->experience->saveExperience($cvId, $experienceData);
+                    error_log("CVSectionsManager::saveAllSections - Experience saved successfully");
+                } catch (Exception $e) {
+                    error_log("CVSectionsManager::saveAllSections - Experience error: " . $e->getMessage());
+                    throw new Exception("Error saving experience: " . $e->getMessage());
+                }
             }
             
             // 5. Projects
             if (isset($cleanFormData['project_name']) && is_array($cleanFormData['project_name'])) {
-                $projectsData = $this->formatArrayData($cleanFormData, 'project', [
-                    'project_name', 'project_link', 'project_description'
-                ]);
-                $results['projects'] = $this->projects->saveProjects($cvId, $userId, $projectsData);
+                try {
+                    $projectsData = $this->formatArrayData($cleanFormData, 'project', [
+                        'project_name', 'project_link', 'project_description'
+                    ]);
+                    $results['projects'] = $this->projects->saveProjects($cvId, $projectsData);
+                    error_log("CVSectionsManager::saveAllSections - Projects saved successfully");
+                } catch (Exception $e) {
+                    error_log("CVSectionsManager::saveAllSections - Projects error: " . $e->getMessage());
+                    throw new Exception("Error saving projects: " . $e->getMessage());
+                }
             }
             
             // 6. Certificates
             if (isset($cleanFormData['certificate_name']) && is_array($cleanFormData['certificate_name'])) {
-                $certificatesData = $this->formatArrayData($cleanFormData, 'certificate', [
-                    'certificate_name', 'certificate_date', 'certificate_issuer',
-                    'certificate_location', 'certificate_description'
-                ]);
-                $results['certificates'] = $this->certificates->saveCertificates($cvId, $userId, $certificatesData);
+                try {
+                    $certificatesData = $this->formatArrayData($cleanFormData, 'certificate', [
+                        'certificate_name', 'certificate_date', 'certificate_issuer',
+                        'certificate_location', 'certificate_description'
+                    ]);
+                    $results['certificates'] = $this->certificates->saveCertificates($cvId, $certificatesData);
+                    error_log("CVSectionsManager::saveAllSections - Certificates saved successfully");
+                } catch (Exception $e) {
+                    error_log("CVSectionsManager::saveAllSections - Certificates error: " . $e->getMessage());
+                    throw new Exception("Error saving certificates: " . $e->getMessage());
+                }
             }
             
             // 7. Skills
             if (isset($cleanFormData['skill_category']) && is_array($cleanFormData['skill_category'])) {
-                $skillsData = $this->formatArrayData($cleanFormData, 'skill', [
-                    'skill_category', 'skill_items'
-                ]);
-                $results['skills'] = $this->skills->saveSkills($cvId, $userId, $skillsData);
+                try {
+                    $skillsData = $this->formatArrayData($cleanFormData, 'skill', [
+                        'skill_category', 'skill_items'
+                    ]);
+                    $results['skills'] = $this->skills->saveSkills($cvId, $skillsData);
+                    error_log("CVSectionsManager::saveAllSections - Skills saved successfully");
+                } catch (Exception $e) {
+                    error_log("CVSectionsManager::saveAllSections - Skills error: " . $e->getMessage());
+                    throw new Exception("Error saving skills: " . $e->getMessage());
+                }
             }
             
             // 8. Languages
             if (isset($cleanFormData['language_name']) && is_array($cleanFormData['language_name'])) {
-                $languagesData = $this->formatArrayData($cleanFormData, 'language', [
-                    'language_name', 'language_level'
-                ]);
-                $results['languages'] = $this->languages->saveLanguages($cvId, $userId, $languagesData);
+                try {
+                    $languagesData = $this->formatArrayData($cleanFormData, 'language', [
+                        'language_name', 'language_level'
+                    ]);
+                    $results['languages'] = $this->languages->saveLanguages($cvId, $languagesData);
+                    error_log("CVSectionsManager::saveAllSections - Languages saved successfully");
+                } catch (Exception $e) {
+                    error_log("CVSectionsManager::saveAllSections - Languages error: " . $e->getMessage());
+                    throw new Exception("Error saving languages: " . $e->getMessage());
+                }
             }
             
             // 9. Customization
             if (isset($cleanFormData['primary_color']) || isset($cleanFormData['format'])) {
-                $customizationData = [
-                    'user_id' => $userId,
-                    'cv_id' => $cvId,
-                    'primary_color' => $cleanFormData['primary_color'] ?? '#667eea',
-                    'download_format' => $cleanFormData['format'] ?? 'pdf'
-                ];
-                $results['customization'] = $this->customization->saveCustomization($customizationData);
+                try {
+                    $customizationData = [
+                        'user_id' => $userId,
+                        'cv_id' => $cvId,
+                        'primary_color' => $cleanFormData['primary_color'] ?? '#667eea',
+                        'download_format' => $cleanFormData['format'] ?? 'pdf'
+                    ];
+                    $results['customization'] = $this->customization->saveCustomization($customizationData);
+                    error_log("CVSectionsManager::saveAllSections - Customization saved successfully");
+                } catch (Exception $e) {
+                    error_log("CVSectionsManager::saveAllSections - Customization error: " . $e->getMessage());
+                    throw new Exception("Error saving customization: " . $e->getMessage());
+                }
             }
             
             return $results;
             
         } catch (Exception $e) {
-            throw new Exception("Error saving CV sections: " . $e->getMessage());
+            error_log("CVSectionsManager::saveAllSections - Database error: " . $e->getMessage());
+            error_log("CVSectionsManager::saveAllSections - Stack trace: " . $e->getTraceAsString());
+            throw new Exception("Error saving CV sections: Database operation failed - " . $e->getMessage());
         }
     }
     
@@ -186,16 +253,60 @@ class CVSectionsManager {
             }
         }
         
-        // Build the formatted array
+        // Build the formatted array with proper field mapping
         for ($i = 0; $i < $count; $i++) {
             $item = [];
             foreach ($fields as $field) {
-                $item[$field] = isset($formData[$field][$i]) ? $formData[$field][$i] : '';
+                $mappedKey = $this->mapFormFieldToDbField($field, $prefix);
+                $item[$mappedKey] = isset($formData[$field][$i]) ? $formData[$field][$i] : '';
             }
             $result[] = $item;
         }
         
         return $result;
+    }
+    
+    /**
+     * Map form field names to database field names
+     */
+    private function mapFormFieldToDbField($formField, $prefix) {
+        $mappings = [
+            // Education mappings
+            'education_degree' => 'diplome',
+            'education_dates' => 'dates', 
+            'education_university' => 'universite',
+            'education_field' => 'specialite',
+            'education_details' => 'description',
+            
+            // Experience mappings
+            'experience_location' => 'lieu',
+            'experience_dates' => 'dates',
+            'experience_company' => 'entreprise',
+            'experience_position' => 'poste',
+            'experience_description' => 'description',
+            
+            // Project mappings
+            'project_name' => 'nom_projet',
+            'project_link' => 'lien_projet',
+            'project_description' => 'description',
+            
+            // Certificate mappings
+            'certificate_name' => 'nom_certificat',
+            'certificate_date' => 'date_certificat',
+            'certificate_issuer' => 'organisme',
+            'certificate_location' => 'lieu',
+            'certificate_description' => 'description',
+            
+            // Skills mappings
+            'skill_category' => 'categorie',
+            'skill_items' => 'competences',
+            
+            // Languages mappings
+            'language_name' => 'nom_langue',
+            'language_level' => 'niveau'
+        ];
+        
+        return $mappings[$formField] ?? $formField;
     }
     
     /**
