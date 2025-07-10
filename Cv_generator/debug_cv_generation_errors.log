@@ -246,3 +246,53 @@
 [10-Jul-2025 14:44:00 Europe/Paris] Reused session CV ID: 27 with name: test
 [10-Jul-2025 14:44:03 Europe/Paris] PDF saved permanently: C:\xampp\htdocs\CV_Generator\app\Controllers/../../Cv_generator/saved_pdfs/CV_Jean_Dupont_27_10001.pdf
 [10-Jul-2025 14:44:03 Europe/Paris] === CV Generation Request Completed Successfully ===
+[10-Jul-2025 15:07:54 Europe/Paris] === CV Generation Request Started ===
+[10-Jul-2025 15:07:54 Europe/Paris] Request Method: POST
+[10-Jul-2025 15:07:54 Europe/Paris] Request URI: /CV_Generator/Cv_generator/generate_cv_mvc.php
+[10-Jul-2025 15:07:54 Europe/Paris] User Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36 Edg/138.0.0.0
+[10-Jul-2025 15:07:54 Europe/Paris] Session ID: 
+[10-Jul-2025 15:07:54 Europe/Paris] Session Status: 1
+[10-Jul-2025 15:07:54 Europe/Paris] CV Generation Request - AJAX: true, JSON Accept: true, Fetch: true, POST not form: true
+[10-Jul-2025 15:07:54 Europe/Paris] Creating CVController instance...
+[10-Jul-2025 15:07:55 Europe/Paris] CVController created, calling generateCV...
+[10-Jul-2025 15:07:55 Europe/Paris] POST data keys: editing_cv_id, existing_photo_path, primary_color, nom, prenom, location, email, telephone, website, linkedin, github, profil_description, education_degree, education_dates, education_university, education_field, education_details, experience_location, experience_dates, experience_company, experience_position, experience_description, project_name, project_link, project_description, certificate_name, certificate_date, certificate_issuer, certificate_location, certificate_description, skill_category, skill_items, language_name, language_level, format, custom_cv_name
+[10-Jul-2025 15:07:55 Europe/Paris] POST data sample: {"editing_cv_id":"","existing_photo_path":"","primary_color":"#667eea","nom":"Dupont","prenom":"Jean"}
+[10-Jul-2025 15:07:55 Europe/Paris] CV Generation - Guest Mode: false
+[10-Jul-2025 15:07:55 Europe/Paris] CV Generation - User ID: 10004
+[10-Jul-2025 15:07:55 Europe/Paris] generateXMLContent - Starting XML generation
+[10-Jul-2025 15:07:55 Europe/Paris] generateXMLContent - Form data keys: editing_cv_id, existing_photo_path, primary_color, nom, prenom, location, email, telephone, website, linkedin, github, profil_description, education_degree, education_dates, education_university, education_field, education_details, experience_location, experience_dates, experience_company, experience_position, experience_description, project_name, project_link, project_description, certificate_name, certificate_date, certificate_issuer, certificate_location, certificate_description, skill_category, skill_items, language_name, language_level, format, custom_cv_name
+[10-Jul-2025 15:07:55 Europe/Paris] generateXMLContent - XML generation completed, length: 2856
+[10-Jul-2025 15:07:55 Europe/Paris] generateXMLContent - XML preview: <?xml version="1.0" encoding="UTF-8"?>
+<cv>
+  <personalization>
+    <primaryColor>#667eea</primaryColor>
+  </personalization>
+
+  <personalInfo>
+    <firstname>Jean</firstname>
+    <lastname>Dupont</la...
+[10-Jul-2025 15:07:55 Europe/Paris] Using custom CV name from form data: zgdsg
+[10-Jul-2025 15:07:55 Europe/Paris] Generated form data hash: 35c635a4a33197c1ff3351fa84cef1e3 with custom_cv_name: zgdsg
+[10-Jul-2025 15:07:55 Europe/Paris] CV::createCV - XML content length: 2856
+[10-Jul-2025 15:07:55 Europe/Paris] CV::createCV - CV name: zgdsg
+[10-Jul-2025 15:07:55 Europe/Paris] CV::createCV - User filiere ID: 1
+[10-Jul-2025 15:07:55 Europe/Paris] CVSectionsManager::saveAllSections - CV ID: 34, User ID: 10004
+[10-Jul-2025 15:07:55 Europe/Paris] CVSectionsManager::saveAllSections - Form data keys: editing_cv_id, existing_photo_path, primary_color, nom, prenom, location, email, telephone, website, linkedin, github, profil_description, education_degree, education_dates, education_university, education_field, education_details, experience_location, experience_dates, experience_company, experience_position, experience_description, project_name, project_link, project_description, certificate_name, certificate_date, certificate_issuer, certificate_location, certificate_description, skill_category, skill_items, language_name, language_level, format, custom_cv_name
+[10-Jul-2025 15:07:55 Europe/Paris] CVSectionsManager::saveAllSections - education_degree type: array, count: 1
+[10-Jul-2025 15:07:55 Europe/Paris] CVSectionsManager::saveAllSections - experience_company type: array, count: 1
+[10-Jul-2025 15:07:55 Europe/Paris] CVSectionsManager::saveAllSections - project_name type: array, count: 1
+[10-Jul-2025 15:07:55 Europe/Paris] CVSectionsManager::saveAllSections - certificate_name type: array, count: 1
+[10-Jul-2025 15:07:55 Europe/Paris] CVSectionsManager::saveAllSections - skill_category type: array, count: 1
+[10-Jul-2025 15:07:55 Europe/Paris] CVSectionsManager::saveAllSections - language_name type: array, count: 1
+[10-Jul-2025 15:07:55 Europe/Paris] CVSectionsManager::saveAllSections - Personal info saved successfully
+[10-Jul-2025 15:07:55 Europe/Paris] PHP Warning:  Undefined array key "profil_description" in C:\xampp\htdocs\CV_Generator\app\Models\CVProfile.php on line 31
+[10-Jul-2025 15:07:55 Europe/Paris] CVSectionsManager::saveAllSections - Profile saved successfully
+[10-Jul-2025 15:07:55 Europe/Paris] CVSectionsManager::saveAllSections - Education saved successfully
+[10-Jul-2025 15:07:55 Europe/Paris] CVSectionsManager::saveAllSections - Experience saved successfully
+[10-Jul-2025 15:07:55 Europe/Paris] CVSectionsManager::saveAllSections - Projects saved successfully
+[10-Jul-2025 15:07:55 Europe/Paris] CVSectionsManager::saveAllSections - Certificates saved successfully
+[10-Jul-2025 15:07:55 Europe/Paris] CVSectionsManager::saveAllSections - Skills saved successfully
+[10-Jul-2025 15:07:55 Europe/Paris] CVSectionsManager::saveAllSections - Languages saved successfully
+[10-Jul-2025 15:07:55 Europe/Paris] Generated core data hash: 81290c4d22739f1b58b999069598d6bd with custom_cv_name: zgdsg
+[10-Jul-2025 15:07:58 Europe/Paris] PDF saved permanently: C:\xampp\htdocs\CV_Generator\app\Controllers/../../Cv_generator/saved_pdfs/CV_Jean_Dupont_34_10004.pdf
+[10-Jul-2025 15:07:58 Europe/Paris] === CV Generation Request Completed Successfully ===

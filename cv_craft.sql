@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 10, 2025 at 02:46 PM
+-- Generation Time: Jul 10, 2025 at 03:01 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -37,13 +37,6 @@ CREATE TABLE `certificats` (
   `description` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `certificats`
---
-
-INSERT INTO `certificats` (`id`, `id_cv`, `nom_certificat`, `date_certificat`, `organisme`, `lieu`, `description`) VALUES
-(32, 27, 'AWS Certified Developer', 'Mars 2023', 'Amazon Web Services', 'En ligne', 'Certification professionnelle en développement d\'applications sur AWS');
-
 -- --------------------------------------------------------
 
 --
@@ -56,13 +49,6 @@ CREATE TABLE `competences` (
   `categorie` varchar(255) DEFAULT NULL,
   `competences` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `competences`
---
-
-INSERT INTO `competences` (`id`, `id_cv`, `categorie`, `competences`) VALUES
-(32, 27, 'Langages de programmation', 'JavaScript, TypeScript, Python, Java, PHP, SQL');
 
 -- --------------------------------------------------------
 
@@ -83,13 +69,6 @@ CREATE TABLE `cvs` (
   `id_filiere` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `cvs`
---
-
-INSERT INTO `cvs` (`id`, `id_utilisateur`, `contenu_xml`, `lien_pdf`, `cv_name`, `template_xslt`, `est_publie`, `date_creation`, `date_modification`, `id_filiere`) VALUES
-(27, 10001, '<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<cv>\n  <personalization>\n    <primaryColor>#667eea</primaryColor>\n  </personalization>\n\n  <personalInfo>\n    <firstname>Jean</firstname>\n    <lastname>Dupont</lastname>\n    <location>Paris, France</location>\n    <email>jean.dupont@email.com</email>\n    <phone>+33 1 23 45 67 89</phone>\n    <website>https://jeandupont.dev</website>\n    <linkedin>https://linkedin.com/in/jeandupont</linkedin>\n    <github>https://github.com/jeandupont</github>\n  </personalInfo>\n\n  <profil>\n    <description>Développeur Full-Stack passionné avec 5 ans d&amp;#039;expérience dans la création d&amp;#039;applications web modernes. Expertise en JavaScript, React, Node.js et bases de données. Recherche de nouveaux défis techniques dans une équipe dynamique.</description>\n  </profil>\n\n  <education>\n    <degree>\n      <title>Master en Informatique</title>\n      <period>2020</period>\n      <institution>Université Pierre et Marie Curie</institution>\n      <field>Génie Logiciel</field>\n      <description>Mention Bien - Spécialisation en développement web et architecture logicielle</description>\n    </degree>\n  </education>\n\n  <certificates>\n    <certificate>\n      <name>AWS Certified Developer</name>\n      <date>Mars 2023</date>\n      <issuer>Amazon Web Services</issuer>\n      <location>En ligne</location>\n      <description>Certification professionnelle en développement d&#039;applications sur AWS</description>\n    </certificate>\n  </certificates>\n\n  <experiences>\n    <experience>\n      <location>Paris, France</location>\n      <period>Jan 2021 – Présent</period>\n      <company>TechCorp Solutions</company>\n      <position>Développeur Full-Stack Senior</position>\n      <description>Développement d&amp;#039;applications web modernes avec React et Node.js\r\nGestion et encadrement d&amp;#039;une équipe de 3 développeurs juniors\r\nOptimisation des performances applicatives et renforcement de la sécurité\r\nMise en place de pipelines CI/CD avec Docker et Kubernetes\r\nConception d&amp;#039;architectures scalables et maintenables\r\nParticipation aux décisions techniques et choix technologiques</description>\n    </experience>\n  </experiences>\n\n  <projects>\n    <project>\n      <name>E-Commerce Platform</name>\n      <link>https://github.com/jeandupont/ecommerce-platform</link>\n      <description>Plateforme e-commerce complète développée avec React, Node.js, MongoDB et Stripe. Fonctionnalités: gestion des produits, panier, paiements sécurisés, dashboard admin.</description>\n    </project>\n  </projects>\n\n  <skills>\n    <skill>\n      <category>Langages de programmation</category>\n      <items>JavaScript, TypeScript, Python, Java, PHP, SQL</items>\n    </skill>\n  </skills>\n\n  <languages>\n    <language>\n      <name>Français</name>\n      <level>Native</level>\n    </language>\n  </languages>\n\n</cv>', 'saved_pdfs/CV_Jean_Dupont_27_10001.pdf', 'test', NULL, 1, '2025-07-10', '2025-07-10', 8);
-
 -- --------------------------------------------------------
 
 --
@@ -105,13 +84,6 @@ CREATE TABLE `experiences` (
   `poste` varchar(255) DEFAULT NULL,
   `description` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `experiences`
---
-
-INSERT INTO `experiences` (`id`, `id_cv`, `lieu`, `dates`, `entreprise`, `poste`, `description`) VALUES
-(32, 27, 'Paris, France', 'Jan 2021 – Présent', 'TechCorp Solutions', 'Développeur Full-Stack Senior', 'Développement d\'applications web modernes avec React et Node.js\r\nGestion et encadrement d\'une équipe de 3 développeurs juniors\r\nOptimisation des performances applicatives et renforcement de la sécurité\r\nMise en place de pipelines CI/CD avec Docker et Kubernetes\r\nConception d\'architectures scalables et maintenables\r\nParticipation aux décisions techniques et choix technologiques');
 
 -- --------------------------------------------------------
 
@@ -177,13 +149,6 @@ CREATE TABLE `formations` (
   `description` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `formations`
---
-
-INSERT INTO `formations` (`id`, `id_cv`, `diplome`, `dates`, `universite`, `specialite`, `description`) VALUES
-(32, 27, 'Master en Informatique', '2020', 'Université Pierre et Marie Curie', 'Génie Logiciel', 'Mention Bien - Spécialisation en développement web et architecture logicielle');
-
 -- --------------------------------------------------------
 
 --
@@ -204,13 +169,6 @@ CREATE TABLE `informations_personnelles` (
   `chemin_photo` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `informations_personnelles`
---
-
-INSERT INTO `informations_personnelles` (`id`, `id_cv`, `nom`, `prenom`, `localisation`, `email`, `telephone`, `site_web`, `linkedin`, `github`, `chemin_photo`) VALUES
-(24, 27, 'Dupont', 'Jean', 'Paris, France', 'jean.dupont@email.com', '+33 1 23 45 67 89', 'https://jeandupont.dev', 'https://linkedin.com/in/jeandupont', 'https://github.com/jeandupont', NULL);
-
 -- --------------------------------------------------------
 
 --
@@ -224,13 +182,6 @@ CREATE TABLE `langues` (
   `niveau` varchar(100) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `langues`
---
-
-INSERT INTO `langues` (`id`, `id_cv`, `nom_langue`, `niveau`) VALUES
-(32, 27, 'Français', 'Native');
-
 -- --------------------------------------------------------
 
 --
@@ -242,13 +193,6 @@ CREATE TABLE `profils` (
   `id_cv` int(11) NOT NULL,
   `description` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `profils`
---
-
-INSERT INTO `profils` (`id`, `id_cv`, `description`) VALUES
-(18, 27, NULL);
 
 -- --------------------------------------------------------
 
@@ -263,13 +207,6 @@ CREATE TABLE `projets` (
   `lien_projet` varchar(255) DEFAULT NULL,
   `description` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `projets`
---
-
-INSERT INTO `projets` (`id`, `id_cv`, `nom_projet`, `lien_projet`, `description`) VALUES
-(32, 27, 'E-Commerce Platform', 'https://github.com/jeandupont/ecommerce-platform', 'Plateforme e-commerce complète développée avec React, Node.js, MongoDB et Stripe. Fonctionnalités: gestion des produits, panier, paiements sécurisés, dashboard admin.');
 
 -- --------------------------------------------------------
 
@@ -287,13 +224,6 @@ CREATE TABLE `utilisateurs` (
   `numero_telephone` varchar(20) DEFAULT NULL,
   `date_inscription` date NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `utilisateurs`
---
-
-INSERT INTO `utilisateurs` (`id`, `nom`, `prenom`, `id_filiere`, `email`, `mot_de_passe_hash`, `numero_telephone`, `date_inscription`) VALUES
-(10001, 'Zbida', 'Amine', 8, 'itzzbida@gmail.com', '$2y$10$Dg4cSAzgzxtrqgYOASUqQOvWVcZCyFhtR2QrpcCxxA9X8eQeW2hnO', '0767671765', '2025-07-10');
 
 --
 -- Indexes for dumped tables
@@ -462,7 +392,7 @@ ALTER TABLE `competences`
 -- Constraints for table `cvs`
 --
 ALTER TABLE `cvs`
-  ADD CONSTRAINT `cvs_ibfk_1` FOREIGN KEY (`id_utilisateur`) REFERENCES `utilisateurs` (`id`),
+  ADD CONSTRAINT `cvs_ibfk_1` FOREIGN KEY (`id_utilisateur`) REFERENCES `utilisateurs` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `cvs_ibfk_2` FOREIGN KEY (`id_filiere`) REFERENCES `filieres` (`id`);
 
 --
