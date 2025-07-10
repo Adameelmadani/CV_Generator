@@ -1649,7 +1649,7 @@ class CVController extends Controller {
                 $finalCvName = $_SESSION['custom_cv_name'] ?? $cvName;
                 
                 // Update the existing CV with the current data
-                $this->cvModel->updateCV($sessionCVId, $userId, $finalCvName, $xmlContent);
+                $this->cvModel->updateCV($sessionCVId, $userId, $xmlContent);
                 $this->sectionsManager->saveAllSections($sessionCVId, $userId, $formData);
                 
                 error_log("Reused session CV ID: " . $sessionCVId . " with name: " . $finalCvName);
@@ -1673,7 +1673,7 @@ class CVController extends Controller {
                     $finalCvName = $_SESSION['custom_cv_name'] ?? $cvName;
                     
                     // Update the existing CV
-                    $this->cvModel->updateCV($sessionCVId, $userId, $finalCvName, $xmlContent);
+                    $this->cvModel->updateCV($sessionCVId, $userId, $xmlContent);
                     $this->sectionsManager->saveAllSections($sessionCVId, $userId, $formData);
                     
                     // Update session hash for this generation
