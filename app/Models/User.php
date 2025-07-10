@@ -11,6 +11,12 @@ class User extends Model {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
     
+    public function findById($userId) {
+        $sql = "SELECT * FROM {$this->table} WHERE id = :user_id";
+        $stmt = $this->execute($sql, [':user_id' => $userId]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
     public function findByEmailOrUsername($email, $username) {
         // Since the new schema doesn't have username, just search by email
         return $this->findByEmail($email);

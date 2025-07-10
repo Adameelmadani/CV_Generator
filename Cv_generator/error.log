@@ -1,0 +1,22 @@
+[10-Jul-2025 13:52:37 Europe/Paris] Database error: SQLSTATE[HY093]: Invalid parameter number
+[10-Jul-2025 13:52:37 Europe/Paris] Error in getUserFilieres: Database operation failed
+[10-Jul-2025 13:52:39 Europe/Paris] Database error: SQLSTATE[HY093]: Invalid parameter number
+[10-Jul-2025 13:52:39 Europe/Paris] Error in getUserFilieres: Database operation failed
+[10-Jul-2025 13:52:55 Europe/Paris] Database error: SQLSTATE[HY093]: Invalid parameter number
+[10-Jul-2025 13:52:55 Europe/Paris] Error in getUserFilieres: Database operation failed
+[10-Jul-2025 13:53:27 Europe/Paris] Database error: SQLSTATE[HY093]: Invalid parameter number
+[10-Jul-2025 13:53:27 Europe/Paris] Error in getUserFilieres: Database operation failed
+[10-Jul-2025 13:53:28 Europe/Paris] Database error: SQLSTATE[HY093]: Invalid parameter number
+[10-Jul-2025 13:53:28 Europe/Paris] Error in getUserFilieres: Database operation failed
+[10-Jul-2025 13:55:19 Europe/Paris] Database error: SQLSTATE[HY093]: Invalid parameter number
+[10-Jul-2025 13:55:19 Europe/Paris] Error in getUserFilieres: Database operation failed
+[10-Jul-2025 13:55:24 Europe/Paris] Database error: SQLSTATE[HY093]: Invalid parameter number
+[10-Jul-2025 13:55:24 Europe/Paris] Error in getUserFilieres: Database operation failed
+[10-Jul-2025 13:56:25 Europe/Paris] Authentication failed - no user ID in session. Session data: Array
+(
+)
+
+[10-Jul-2025 13:58:28 Europe/Paris] getUserFilieres - Authentication successful, User ID: 10000
+[10-Jul-2025 13:58:28 Europe/Paris] getUserFilieres - User data: {"id":10000,"nom":"Zbida","prenom":"Amine","email":"itzzbida@gmail.com","numero_telephone":"0767671765","date_inscription":"2025-07-10","id_filiere":8}
+[10-Jul-2025 13:58:28 Europe/Paris] getUserFilieres - User ID: 10000, User Filiere ID: 8
+[10-Jul-2025 13:58:28 Europe/Paris] getUserFilieres - Found filieres: [{"id":3,"nom":"G\u00e9nie \u00c9lectrique","description":"\u00c9tude et application de l\u2019\u00e9lectricit\u00e9, des circuits \u00e9lectriques, des syst\u00e8mes de puissance et de l\u2019\u00e9lectronique de puissance."},{"id":2,"nom":"G\u00e9nie Industriel","description":"Optimisation des syst\u00e8mes de production, logistique, qualit\u00e9, organisation et performance des processus industriels."},{"id":7,"nom":"Informatique & Num\u00e9rique","description":"Programmation, syst\u00e8mes d\u2019exploitation, r\u00e9seaux, cybers\u00e9curit\u00e9, g\u00e9nie logiciel, administration des syst\u00e8mes et technologies web."},{"id":8,"nom":"Intelligence Artificielle & Data Science","description":"Traitement des donn\u00e9es massives, apprentissage automatique, vision par ordinateur, mod\u00e9lisation pr\u00e9dictive, traitement du langage naturel."},{"id":12,"nom":"Math\u00e9matiques Appliqu\u00e9es & Mod\u00e9lisation","description":"Mod\u00e9lisation math\u00e9matique de syst\u00e8mes complexes, simulations num\u00e9riques, optimisation, finance quantitative."}]

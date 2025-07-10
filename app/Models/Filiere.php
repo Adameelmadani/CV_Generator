@@ -39,28 +39,4 @@ class Filiere extends Model {
         $sql = "DELETE FROM {$this->table} WHERE id = :id";
         return $this->execute($sql, [':id' => $id]);
     }
-    
-    public function getFiliereAssociees($filiereId) {
-        $sql = "SELECT f.* FROM {$this->table} f 
-                INNER JOIN filiere_associee fa ON f.id = fa.filiere_associee_id 
-                WHERE fa.filiere_id = :filiere_id";
-        $stmt = $this->execute($sql, [':filiere_id' => $filiereId]);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-    
-    public function addFiliereAssociation($filiereId, $filiereAssocieeId) {
-        $sql = "INSERT INTO filiere_associee (filiere_id, filiere_associee_id) VALUES (:filiere_id, :filiere_associee_id)";
-        return $this->execute($sql, [
-            ':filiere_id' => $filiereId,
-            ':filiere_associee_id' => $filiereAssocieeId
-        ]);
-    }
-    
-    public function removeFiliereAssociation($filiereId, $filiereAssocieeId) {
-        $sql = "DELETE FROM filiere_associee WHERE filiere_id = :filiere_id AND filiere_associee_id = :filiere_associee_id";
-        return $this->execute($sql, [
-            ':filiere_id' => $filiereId,
-            ':filiere_associee_id' => $filiereAssocieeId
-        ]);
-    }
 }

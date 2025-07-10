@@ -461,7 +461,7 @@ class CVController extends Controller {
             $cvName = $this->extractCVNameFromXML($xml) ?: pathinfo($file['name'], PATHINFO_FILENAME);
             
             // Save to database
-            $cvId = $this->cvModel->createCV($userId, $xmlContent);
+            $cvId = $this->cvModel->createCV($userId, $xmlContent, $cvName);
             
             $this->jsonResponse([
                 'status' => 'success',
@@ -1182,8 +1182,12 @@ class CVController extends Controller {
                 $regeneratedXML = $this->regenerateXMLFromSections($cvId, $userId);
                 
                 if ($regeneratedXML) {
+                    // Get current CV to preserve the name
+                    $currentCV = $this->cvModel->getUserCV($cvId, $userId);
+                    $cvName = $currentCV['cv_name'] ?? 'CV_' . date('Y-m-d_H-i-s');
+                    
                     // Update the CV with regenerated XML
-                    $this->cvModel->updateCV($cvId, $userId, $regeneratedXML);
+                    $this->cvModel->updateCV($cvId, $userId, $cvName, $regeneratedXML);
                     $xmlContent = $regeneratedXML;
                     error_log("Download CV - Successfully regenerated XML for CV ID: $cvId");
                 } else {
@@ -1577,7 +1581,7 @@ class CVController extends Controller {
         
         if ($editingCVId) {
             // If editing an existing CV, always use that ID
-            $this->cvModel->updateCV($editingCVId, $userId, $xmlContent);
+            $this->cvModel->updateCV($editingCVId, $userId, $cvName, $xmlContent);
             $this->sectionsManager->saveAllSections($editingCVId, $userId, $formData);
             
             // Clear force_new_cv flag when editing existing CV
@@ -1618,7 +1622,7 @@ class CVController extends Controller {
             unset($_SESSION['custom_cv_name']);
             
             // Create a new CV
-            $cvId = $this->cvModel->createCV($userId, $xmlContent);
+            $cvId = $this->cvModel->createCV($userId, $xmlContent, $cvName);
             if (!$cvId) {
                 error_log("ERROR: Failed to create CV in database");
                 throw new Exception("Failed to create CV in database");
@@ -1649,7 +1653,7 @@ class CVController extends Controller {
                 $finalCvName = $_SESSION['custom_cv_name'] ?? $cvName;
                 
                 // Update the existing CV with the current data
-                $this->cvModel->updateCV($sessionCVId, $userId, $xmlContent);
+                $this->cvModel->updateCV($sessionCVId, $userId, $finalCvName, $xmlContent);
                 $this->sectionsManager->saveAllSections($sessionCVId, $userId, $formData);
                 
                 error_log("Reused session CV ID: " . $sessionCVId . " with name: " . $finalCvName);
@@ -1673,7 +1677,7 @@ class CVController extends Controller {
                     $finalCvName = $_SESSION['custom_cv_name'] ?? $cvName;
                     
                     // Update the existing CV
-                    $this->cvModel->updateCV($sessionCVId, $userId, $xmlContent);
+                    $this->cvModel->updateCV($sessionCVId, $userId, $finalCvName, $xmlContent);
                     $this->sectionsManager->saveAllSections($sessionCVId, $userId, $formData);
                     
                     // Update session hash for this generation
@@ -1685,7 +1689,7 @@ class CVController extends Controller {
         }
         
         // Create a new CV
-        $cvId = $this->cvModel->createCV($userId, $xmlContent);
+        $cvId = $this->cvModel->createCV($userId, $xmlContent, $cvName);
         $this->sectionsManager->saveAllSections($cvId, $userId, $formData);
         
         // Store in session for future generations
@@ -2176,6 +2180,96 @@ class CVController extends Controller {
         } catch (Exception $e) {
             error_log("regenerateXMLFromSections - Error: " . $e->getMessage());
             return null;
+        }
+    }
+
+    public function getUserFilieres() {
+        // Since we're removing filière associations, this method is deprecated
+        // but we'll keep it for backward compatibility and return an empty response
+        $this->jsonResponse([
+            'status' => 'success',
+            'filieres' => [],
+            'message' => 'Filière associations have been removed. Publishing is now direct.'
+        ]);
+    }
+
+    public function getFilieres() {
+        try {
+            require_once __DIR__ . '/../Models/Filiere.php';
+            $filiereModel = new Filiere();
+            $filieres = $filiereModel->getAllFilieres();
+            
+            $this->jsonResponse([
+                'status' => 'success',
+                'filieres' => $filieres
+            ]);
+            
+        } catch (Exception $e) {
+            error_log("Error in getFilieres: " . $e->getMessage());
+            $this->jsonResponse([
+                'status' => 'error',
+                'message' => 'Error retrieving filieres: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function publishCV() {
+        $userId = $this->requireAuth();
+        
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->jsonResponse([
+                'status' => 'error',
+                'message' => 'Method not allowed'
+            ], 405);
+            return;
+        }
+
+        $input = $this->getJsonInput();
+        
+        if (!isset($input['cv_id'])) {
+            $this->jsonResponse([
+                'status' => 'error',
+                'message' => 'CV ID is required'
+            ], 400);
+            return;
+        }
+
+        $cvId = intval($input['cv_id']);
+        $isPublished = isset($input['is_published']) ? (bool)$input['is_published'] : true;
+
+        try {
+            // Verify the CV belongs to the user
+            $cv = $this->cvModel->getUserCV($cvId, $userId);
+            if (!$cv) {
+                $this->jsonResponse([
+                    'status' => 'error',
+                    'message' => 'CV not found'
+                ], 404);
+                return;
+            }
+
+            // Update the publication status
+            $result = $this->cvModel->publishCV($cvId, $userId, $isPublished);
+            
+            if ($result) {
+                $this->jsonResponse([
+                    'status' => 'success',
+                    'message' => $isPublished ? 'CV published successfully' : 'CV unpublished successfully',
+                    'is_published' => $isPublished
+                ]);
+            } else {
+                $this->jsonResponse([
+                    'status' => 'error',
+                    'message' => 'Failed to update CV publication status'
+                ], 500);
+            }
+
+        } catch (Exception $e) {
+            error_log("Error in publishCV: " . $e->getMessage());
+            $this->jsonResponse([
+                'status' => 'error',
+                'message' => 'Error updating CV publication status: ' . $e->getMessage()
+            ], 500);
         }
     }
 }

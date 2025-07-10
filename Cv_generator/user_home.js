@@ -5,10 +5,15 @@ let currentCVForPreview = null;
 let currentCVForDelete = null;
 let currentCVForDownload = null; // Nouvelle variable pour le CV à télécharger
 
+// Variables pour stocker les filieres
+let filieres = [];
+let userFilieres = []; // Filieres associated with the user
+
 // Initialisation de la page
 document.addEventListener('DOMContentLoaded', function() {
     checkUserSession();
     loadUserCVs();
+    loadFilieres();
     setupEventListeners();
 });
 
@@ -171,17 +176,21 @@ function displayCVs() {
         <div class="cv-card" onclick="previewCV(${cv.id})">
             <div class="cv-card-header">
                 <div class="cv-card-info-left">
-                    <div class="cv-card-title">${cv.cv_name}</div>
+                    <div class="cv-card-title">${cv.display_name}</div>
                     <div class="cv-card-date">Créé le ${formatDate(cv.created_at)}</div>
+                    ${cv.est_publie ? `<div class="cv-card-status published">Publié</div>` : ''}
                 </div>
                 <div class="cv-card-actions">
                     <button class="action-btn" onclick="event.stopPropagation(); editCV(${cv.id})" title="Modifier">
                         <i class="fas fa-edit"></i>
                     </button>
+                    <button class="action-btn ${cv.est_publie ? 'published' : ''}" onclick="event.stopPropagation(); ${cv.est_publie ? 'unpublishCV(' + cv.id + ')' : 'publishCV(' + cv.id + ')'}" title="${cv.est_publie ? 'Dépublier' : 'Publier'}">
+                        <i class="fas ${cv.est_publie ? 'fa-eye-slash' : 'fa-share-alt'}"></i>
+                    </button>
                     <button class="action-btn" onclick="event.stopPropagation(); downloadCV(${cv.id})" title="Télécharger">
                         <i class="fas fa-download"></i>
                     </button>
-                    <button class="action-btn delete" onclick="event.stopPropagation(); deleteCV(${cv.id}, '${cv.cv_name}', '${cv.created_at}')" title="Supprimer">
+                    <button class="action-btn delete" onclick="event.stopPropagation(); deleteCV(${cv.id}, '${cv.display_name}', '${cv.created_at}')" title="Supprimer">
                         <i class="fas fa-trash"></i>
                     </button>
                 </div>
@@ -195,7 +204,17 @@ function displayCVs() {
 
 // Formater la date
 function formatDate(dateString) {
+    if (!dateString || dateString === null || dateString === 'null') {
+        return 'Date non disponible';
+    }
+    
     const date = new Date(dateString);
+    
+    // Vérifier si la date est valide
+    if (isNaN(date.getTime())) {
+        return 'Date non disponible';
+    }
+    
     return date.toLocaleDateString('fr-FR', {
         year: 'numeric',
         month: 'long',
@@ -919,4 +938,136 @@ async function clearCVSession() {
         console.error('❌ Error clearing CV session:', error);
         return false;
     }
+}
+
+// Load filieres (simplified - no longer needed for publishing)
+async function loadFilieres() {
+    // We no longer need to load user-specific filieres for publishing
+    // This function is kept for backward compatibility but doesn't do much
+    userFilieres = [];
+    filieres = [];
+    
+    console.log('✅ Filière loading skipped - direct publishing enabled');
+}
+
+// Get published status text for display
+function getPublishedFilieresText(cv) {
+    // Since we removed filière associations, just return empty string
+    // The "Publié" text will be shown by the calling code
+    return '';
+}
+
+// Publier un CV
+async function publishCV(cvId) {
+    console.log('📤 Publishing CV ID:', cvId);
+    
+    if (!confirm('Êtes-vous sûr de vouloir publier ce CV ?')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch('publish_cv_mvc.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                cv_id: cvId,
+                is_published: true
+            })
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const result = await response.json();
+        
+        if (result.status === 'success') {
+            showMessage('CV publié avec succès !', 'success');
+            loadUserCVs(); // Refresh the CV list
+        } else {
+            showMessage(result.message || 'Erreur lors de la publication', 'error');
+        }
+    } catch (error) {
+        console.error('❌ Error publishing CV:', error);
+        showMessage('Erreur lors de la publication du CV', 'error');
+    }
+}
+
+// Dépublier un CV
+async function unpublishCV(cvId) {
+    if (!confirm('Êtes-vous sûr de vouloir dépublier ce CV ?')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch('publish_cv_mvc.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                cv_id: cvId,
+                is_published: false
+            })
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const result = await response.json();
+        
+        if (result.status === 'success') {
+            showMessage('CV dépublié avec succès !', 'success');
+            loadUserCVs(); // Refresh the CV list
+        } else {
+            showMessage(result.message || 'Erreur lors de la dépublication', 'error');
+        }
+    } catch (error) {
+        console.error('❌ Error unpublishing CV:', error);
+        showMessage('Erreur lors de la dépublication du CV', 'error');
+    }
+}
+
+// Afficher un message
+function showMessage(message, type = 'info') {
+    // Create message element
+    const messageElement = document.createElement('div');
+    messageElement.className = `message ${type}`;
+    messageElement.textContent = message;
+    
+    // Style the message
+    messageElement.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 12px 24px;
+        border-radius: 4px;
+        color: white;
+        font-weight: 500;
+        z-index: 10000;
+        animation: slideIn 0.3s ease-out;
+    `;
+    
+    // Set background color based on type
+    switch (type) {
+        case 'success':
+            messageElement.style.backgroundColor = '#28a745';
+            break;
+        case 'error':
+            messageElement.style.backgroundColor = '#dc3545';
+            break;
+        default:
+            messageElement.style.backgroundColor = '#007bff';
+    }
+    
+    // Add to DOM
+    document.body.appendChild(messageElement);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+        messageElement.remove();
+    }, 3000);
 }

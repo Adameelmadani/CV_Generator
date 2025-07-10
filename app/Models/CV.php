@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/../../core/bootstrap.php';
+require_once __DIR__ . '/User.php';
 
 class CV extends Model {
     protected $table = 'cvs';
@@ -8,7 +9,9 @@ class CV extends Model {
     public function getUserCVs($userId) {
         $sql = "SELECT c.id, c.contenu_xml, c.lien_pdf, c.est_publie, c.date_creation, c.date_modification, c.id_filiere,
                        COALESCE(CONCAT(p.prenom, ' ', p.nom), 'CV sans nom') as cv_name,
-                       c.date_creation as created_at
+                       COALESCE(CONCAT(p.prenom, ' ', p.nom), 'CV sans nom') as display_name,
+                       c.date_creation as created_at,
+                       c.date_modification as updated_at
                 FROM {$this->table} c
                 LEFT JOIN informations_personnelles p ON c.id = p.id_cv
                 WHERE c.id_utilisateur = :user_id 
@@ -30,30 +33,39 @@ class CV extends Model {
         return $stmt->fetch();
     }
     
-    public function createCV($userId, $xmlContent, $pdfPath = null, $templateXslt = null, $filiereId = null) {
+    public function createCV($userId, $xmlContent, $cvName = null, $pdfPath = null, $templateXslt = null, $userFiliereId = null) {
         // Validate inputs
         if (empty($userId) || empty($xmlContent)) {
             error_log("ERROR: Invalid input data for CV creation - userId: " . $userId . ", xmlContent length: " . strlen($xmlContent));
             throw new Exception("Invalid input data for CV creation");
         }
         
-        // Log XML content for debugging
+        // If userFiliereId is not provided, get it from the user data
+        if ($userFiliereId === null) {
+            $userModel = new User();
+            $userData = $userModel->findById($userId);
+            $userFiliereId = $userData['id_filiere'] ?? null;
+        }
+        
+        // Log creation details for debugging
         error_log("CV::createCV - XML content length: " . strlen($xmlContent));
-        error_log("CV::createCV - XML content preview: " . substr($xmlContent, 0, 200) . "...");
+        error_log("CV::createCV - CV name: " . ($cvName ?: 'auto-generated'));
+        error_log("CV::createCV - User filiere ID: " . ($userFiliereId ?: 'none'));
         
         $data = [
             ':id_utilisateur' => $userId,
             ':contenu_xml' => $xmlContent,
+            ':cv_name' => $cvName,
             ':lien_pdf' => $pdfPath,
             ':template_xslt' => $templateXslt,
             ':est_publie' => false,
             ':date_creation' => date('Y-m-d'),
             ':date_modification' => date('Y-m-d'),
-            ':id_filiere' => $filiereId
+            ':id_filiere' => $userFiliereId
         ];
         
-        $sql = "INSERT INTO {$this->table} (id_utilisateur, contenu_xml, lien_pdf, template_xslt, est_publie, date_creation, date_modification, id_filiere) 
-                VALUES (:id_utilisateur, :contenu_xml, :lien_pdf, :template_xslt, :est_publie, :date_creation, :date_modification, :id_filiere)";
+        $sql = "INSERT INTO {$this->table} (id_utilisateur, contenu_xml, cv_name, lien_pdf, template_xslt, est_publie, date_creation, date_modification, id_filiere) 
+                VALUES (:id_utilisateur, :contenu_xml, :cv_name, :lien_pdf, :template_xslt, :est_publie, :date_creation, :date_modification, :id_filiere)";
         
         try {
             $stmt = $this->execute($sql, $data);
@@ -81,16 +93,17 @@ class CV extends Model {
         }
     }
     
-    public function updateCV($cvId, $userId, $xmlContent, $pdfPath = null, $templateXslt = null, $isPublished = null) {
+    public function updateCV($cvId, $userId, $cvName, $xmlContent, $pdfPath = null, $templateXslt = null, $isPublished = null) {
         $data = [
             ':cv_id' => $cvId,
             ':user_id' => $userId,
+            ':cv_name' => $cvName,
             ':contenu_xml' => $xmlContent,
             ':date_modification' => date('Y-m-d')
         ];
         
         $sql = "UPDATE {$this->table} 
-                SET contenu_xml = :contenu_xml, date_modification = :date_modification";
+                SET cv_name = :cv_name, contenu_xml = :contenu_xml, date_modification = :date_modification";
         
         if ($pdfPath !== null) {
             $data[':lien_pdf'] = $pdfPath;
