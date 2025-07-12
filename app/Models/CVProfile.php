@@ -28,7 +28,7 @@ class CVProfile extends Model {
         
         $this->execute($sql, [
             ':cv_id' => $data['cv_id'],
-            ':description' => $data['profil_description']
+            ':description' => $data['description']
         ]);
         
         return $this->db->lastInsertId();
@@ -41,12 +41,22 @@ class CVProfile extends Model {
         
         return $this->execute($sql, [
             ':cv_id' => $data['cv_id'],
-            ':description' => $data['profil_description']
+            ':description' => $data['description']
         ]);
     }
     
     public function deleteProfile($cvId) {
         $sql = "DELETE FROM {$this->table} WHERE id_cv = :cv_id";
         return $this->execute($sql, [':cv_id' => $cvId]);
+    }
+
+    public function getProfileSuggestions($term, $limit = 10) {
+        $sql = "SELECT DISTINCT description FROM {$this->table} WHERE description LIKE :term AND description IS NOT NULL AND description != '' LIMIT :limit";
+        $stmt = $this->db->prepare($sql);
+        $likeTerm = "%$term%";
+        $stmt->bindParam(':term', $likeTerm, PDO::PARAM_STR);
+        $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_COLUMN);
     }
 }

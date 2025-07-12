@@ -39,6 +39,10 @@ try {
             $rhController->getStats();
             break;
             
+        case 'autocomplete_suggestions':
+            $rhController->autocompleteSuggestions();
+            break;
+            
         default:
             http_response_code(404);
             echo json_encode(['success' => false, 'message' => 'Action non trouvée']);

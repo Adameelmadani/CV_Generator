@@ -813,12 +813,12 @@ function setupEventListeners() {
     
     fileInput.addEventListener('change', function(e) {
         const file = e.target.files[0];
-        if (file && file.type === 'text/xml') {
+        if (file && (file.type === 'text/xml' || file.type === 'application/pdf' || file.name.endsWith('.xml') || file.name.endsWith('.pdf'))) {
             importBtn.disabled = false;
             importZone.querySelector('h4').textContent = file.name;
         } else {
             importBtn.disabled = true;
-            alert('Veuillez sélectionner un fichier XML valide.');
+            alert('Veuillez sélectionner un fichier PDF ou XML valide.');
         }
     });
     
@@ -838,11 +838,11 @@ function setupEventListeners() {
         importZone.classList.remove('dragover');
         
         const files = e.dataTransfer.files;
-        if (files.length > 0 && files[0].type === 'text/xml') {
+        if (files.length > 0 && (files[0].type === 'text/xml' || files[0].type === 'application/pdf' || files[0].name.endsWith('.xml') || files[0].name.endsWith('.pdf'))) {
             fileInput.files = files;
             fileInput.dispatchEvent(new Event('change'));
         } else {
-            alert('Veuillez déposer un fichier XML valide.');
+            alert('Veuillez déposer un fichier PDF ou XML valide.');
         }
     });
     
@@ -854,6 +854,7 @@ function setupEventListeners() {
         if (!file) return;
         
         const formData = new FormData();
+        // On garde le même champ pour compatibilité backend
         formData.append('xml_file', file);
         
         const progressElement = document.getElementById('importProgress');
@@ -875,17 +876,9 @@ function setupEventListeners() {
                 progressFill.style.width = '100%';
                 progressText.textContent = 'Import terminé !';
                 
-                setTimeout(() => {
-                    closeModal('importModal');
-                    loadUserCVs();
-                    
-                    // Réinitialiser le formulaire
-                    fileInput.value = '';
-                    importBtn.disabled = true;
-                    progressElement.style.display = 'none';
-                    progressFill.style.width = '0%';
-                    importZone.querySelector('h4').textContent = 'Glissez votre fichier XML ici';
-                }, 1000);
+                // Rediriger vers la page d’édition du CV importé
+                window.location.href = 'home.html?edit=' + result.cv_id;
+                return; // Arrêter ici pour ne pas recharger la liste
             } else {
                 alert('Erreur lors de l\'import: ' + result.message);
             }

@@ -66,4 +66,14 @@ class CVExperience extends Model {
         $sql = "DELETE FROM {$this->table} WHERE id = :id AND id_cv = :cv_id";
         return $this->execute($sql, [':id' => $id, ':cv_id' => $cvId]);
     }
+
+    public function getExperienceSuggestions($term, $limit = 10) {
+        $sql = "SELECT DISTINCT description FROM {$this->table} WHERE description LIKE :term AND description IS NOT NULL AND description != '' LIMIT :limit";
+        $stmt = $this->db->prepare($sql);
+        $likeTerm = "%$term%";
+        $stmt->bindParam(':term', $likeTerm, PDO::PARAM_STR);
+        $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_COLUMN);
+    }
 }

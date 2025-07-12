@@ -636,21 +636,122 @@ document.getElementById('cvModal').addEventListener('click', function(e) {
     }
 });
 
-// Recherche avec la touche Entrée
-document.getElementById('descriptionSearch').addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') {
-        advancedSearch();
-    }
-});
+// === AUTOCOMPLETE LOGIC ===
 
-document.getElementById('tasksSearch').addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') {
-        advancedSearch();
-    }
-});
+function setupAutocomplete(inputId, field) {
+    const input = document.getElementById(inputId);
+    let dropdown = null;
+    let debounceTimeout = null;
+    let selectedIndex = -1;
+    let suggestions = [];
 
-document.getElementById('skillsSearch').addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') {
+    input.addEventListener('input', function () {
+        const term = input.value.trim();
+        if (debounceTimeout) clearTimeout(debounceTimeout);
+        if (!term) {
+            closeDropdown();
+            return;
+        }
+        debounceTimeout = setTimeout(() => {
+            fetchSuggestions(term);
+        }, 200);
+    });
+
+    input.addEventListener('keydown', function (e) {
+        if (!dropdown) return;
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            selectedIndex = (selectedIndex + 1) % suggestions.length;
+            updateDropdownSelection();
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            selectedIndex = (selectedIndex - 1 + suggestions.length) % suggestions.length;
+            updateDropdownSelection();
+        } else if (e.key === 'Enter') {
+            if (selectedIndex >= 0 && suggestions[selectedIndex]) {
+                selectSuggestion(suggestions[selectedIndex]);
+                e.preventDefault();
+            }
+        } else if (e.key === 'Escape') {
+            closeDropdown();
+        }
+    });
+
+    document.addEventListener('click', function (e) {
+        if (dropdown && !dropdown.contains(e.target) && e.target !== input) {
+            closeDropdown();
+        }
+    });
+
+    function fetchSuggestions(term) {
+        fetch(`${API_BASE_URL}?action=autocomplete_suggestions&field=${field}&term=${encodeURIComponent(term)}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && Array.isArray(data.suggestions) && data.suggestions.length > 0) {
+                    suggestions = data.suggestions;
+                    showDropdown(suggestions);
+                } else {
+                    closeDropdown();
+                }
+            })
+            .catch(() => closeDropdown());
+    }
+
+    function showDropdown(items) {
+        closeDropdown();
+        dropdown = document.createElement('div');
+        dropdown.className = 'autocomplete-dropdown';
+        dropdown.style.position = 'absolute';
+        dropdown.style.zIndex = 1000;
+        dropdown.style.background = '#fff';
+        dropdown.style.border = '1px solid #ccc';
+        dropdown.style.width = input.offsetWidth + 'px';
+        dropdown.style.maxHeight = '200px';
+        dropdown.style.overflowY = 'auto';
+        dropdown.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
+        dropdown.style.left = input.getBoundingClientRect().left + window.scrollX + 'px';
+        dropdown.style.top = (input.getBoundingClientRect().bottom + window.scrollY) + 'px';
+        selectedIndex = -1;
+        items.forEach((item, idx) => {
+            const option = document.createElement('div');
+            option.className = 'autocomplete-option';
+            option.textContent = item;
+            option.style.padding = '8px 12px';
+            option.style.cursor = 'pointer';
+            option.addEventListener('mousedown', function (e) {
+                e.preventDefault();
+                selectSuggestion(item);
+            });
+            dropdown.appendChild(option);
+        });
+        document.body.appendChild(dropdown);
+        updateDropdownSelection();
+    }
+
+    function updateDropdownSelection() {
+        if (!dropdown) return;
+        Array.from(dropdown.children).forEach((child, idx) => {
+            child.style.background = (idx === selectedIndex) ? '#e6f0fa' : '#fff';
+        });
+    }
+
+    function selectSuggestion(suggestion) {
+        input.value = suggestion;
+        closeDropdown();
         advancedSearch();
     }
-});
+
+    function closeDropdown() {
+        if (dropdown) {
+            dropdown.remove();
+            dropdown = null;
+            selectedIndex = -1;
+            suggestions = [];
+        }
+    }
+}
+
+// Setup autocomplete for all three fields
+setupAutocomplete('descriptionSearch', 'description');
+setupAutocomplete('tasksSearch', 'tasks');
+setupAutocomplete('skillsSearch', 'skills');

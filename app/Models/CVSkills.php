@@ -63,4 +63,25 @@ class CVSkills extends Model {
         $sql = "DELETE FROM {$this->table} WHERE id = :id AND id_cv = :cv_id";
         return $this->execute($sql, [':id' => $id, ':cv_id' => $cvId]);
     }
+
+    public function getSkillSuggestions($term, $limit = 10) {
+        $sql = "SELECT DISTINCT competences FROM {$this->table} WHERE competences LIKE :term AND competences IS NOT NULL AND competences != '' LIMIT :limit";
+        $stmt = $this->db->prepare($sql);
+        $likeTerm = "%$term%";
+        $stmt->bindParam(':term', $likeTerm, PDO::PARAM_STR);
+        $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
+        $stmt->execute();
+        $results = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        // Flatten comma-separated skills into individual suggestions
+        $suggestions = [];
+        foreach ($results as $row) {
+            foreach (explode(',', $row) as $skill) {
+                $skill = trim($skill);
+                if ($skill && stripos($skill, $term) !== false) {
+                    $suggestions[] = $skill;
+                }
+            }
+        }
+        return array_values(array_unique($suggestions));
+    }
 }

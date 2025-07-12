@@ -1549,3 +1549,33 @@ body::before {
     border-width: 1px;
   }
 }
+
+.autocomplete-dropdown {
+  position: absolute;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 0 0 8px 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  max-height: 200px;
+  overflow-y: auto;
+  width: 100%;
+  min-width: 180px;
+  font-size: 1rem;
+  z-index: 1000;
+}
+
+.autocomplete-option {
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.autocomplete-option:hover,
+.autocomplete-option.active {
+  background: #e6f0fa;
+}
+
+/* Ensure dropdown appears above other UI */
+.autocomplete-dropdown {
+  z-index: 2000;
+}

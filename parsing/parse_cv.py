@@ -8,6 +8,15 @@ import sys
 print("PYTHON USED:", sys.executable)
 
 
+def restore_spaces(text):
+    text = re.sub(r'([a-zéèàùâêîôûç])([A-ZÉÈÀÙÂÊÎÔÛÇ])', r'\1 \2', text)
+    text = re.sub(r'([a-zéèàùâêîôûç])\\.([A-ZÉÈÀÙÂÊÎÔÛÇ])', r'\1. \2', text)
+    text = re.sub(r"-\n", "", text)  # Correction des mots coupés
+    text = re.sub(r'd039;', "'", text)  # Apostrophe mal encodée
+    text = re.sub(r'[\x00-\x1F]+', ' ', text)  # Nettoyage caractères invisibles
+    return text
+
+
 def extract_text_from_pdf(pdf_path):
     text = ""
     print(f"--- Extraction du fichier : {pdf_path} ---")
@@ -98,7 +107,9 @@ def extract_info(text):
         profil_lines = [l.strip() for l in sections['profil'].split('\n') if l.strip()]
         if profil_lines and profil_lines[0].lower().startswith(('professionnel', 'profil professionnel')):
             profil_lines = profil_lines[1:]
+        # Correction ici :
         description = " ".join(profil_lines)
+        description = restore_spaces(description)
         info['profil'] = {'description': description}
 
     # Expériences

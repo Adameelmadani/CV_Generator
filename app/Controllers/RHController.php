@@ -363,5 +363,39 @@ class RHController extends Controller {
         
         echo json_encode(['success' => true, 'data' => $stats]);
     }
+
+    /**
+     * Endpoint: autocomplete suggestions for search fields
+     */
+    public function autocompleteSuggestions() {
+        $field = $_GET['field'] ?? '';
+        $term = $_GET['term'] ?? '';
+        $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 10;
+        $suggestions = [];
+
+        require_once __DIR__ . '/../Models/CVProfile.php';
+        require_once __DIR__ . '/../Models/CVSkills.php';
+        require_once __DIR__ . '/../Models/CVExperience.php';
+
+        switch ($field) {
+            case 'description':
+                $profileModel = new CVProfile();
+                $suggestions = $profileModel->getProfileSuggestions($term, $limit);
+                break;
+            case 'skills':
+                $skillsModel = new CVSkills();
+                $suggestions = $skillsModel->getSkillSuggestions($term, $limit);
+                break;
+            case 'tasks':
+                $expModel = new CVExperience();
+                $suggestions = $expModel->getExperienceSuggestions($term, $limit);
+                break;
+            default:
+                http_response_code(400);
+                echo json_encode(['success' => false, 'message' => 'Invalid field for autocomplete']);
+                return;
+        }
+        echo json_encode(['success' => true, 'suggestions' => $suggestions]);
+    }
 }
 ?> 
