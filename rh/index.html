@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CVCRAFT - Espace RH</title>
+    <link rel="stylesheet" href="styles.css?v=2.0">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>
+        // Force reload CSS to clear cache
+        const link = document.querySelector('link[href*="styles.css"]');
+        if (link) {
+            link.href = link.href.split('?')[0] + '?v=' + Date.now();
+        }
+    </script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-users-cog"></i>
+                <h1>CVCRAFT RH</h1>
+            </div>
+            <div class="user-info" id="userInfo">
+                <span id="userEmail"></span>
+                <button class="logout-btn" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> Déconnexion
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Dashboard Section -->
+    <div class="dashboard-section" id="dashboardSection">
+        <div class="dashboard-container">
+            <!-- Stats Cards -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 id="totalCVs">0</h3>
+                        <p>CV publiés</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 id="totalFilieres">0</h3>
+                        <p>Filières</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-calendar-plus"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 id="recentCVs">0</h3>
+                        <p>CV récents (7j)</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Advanced Search Section -->
+            <div class="search-section">
+                <div class="search-header">
+                    <h2><i class="fas fa-search"></i> Recherche Avancée de CV</h2>
+                    <p>Recherchez des candidats avec des critères spécialisés</p>
+                </div>
+                
+                <!-- Search Fields -->
+                <div class="search-fields">
+                    <div class="search-field-group">
+                        <div class="field-header">
+                            <i class="fas fa-user-tie"></i>
+                            <h3>Profil & Description</h3>
+                            <span class="field-description">Recherche dans les profils professionnels et descriptions</span>
+                        </div>
+                        <div class="field-content">
+                            <input type="text" id="descriptionSearch" placeholder="Ex: Développeur Full-Stack, Chef de projet, Analyste...">
+                            <div class="field-weight">
+                                <label>Pondération:</label>
+                                <input type="range" id="descriptionWeight" min="0" max="100" value="30">
+                                <span id="descriptionWeightValue">30%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="search-field-group">
+                        <div class="field-header">
+                            <i class="fas fa-briefcase"></i>
+                            <h3>Expériences & Formations</h3>
+                            <span class="field-description">Recherche dans les expériences, formations et tâches</span>
+                        </div>
+                        <div class="field-content">
+                            <input type="text" id="tasksSearch" placeholder="Ex: Gestion d'équipe, Migration cloud, E-commerce...">
+                            <div class="field-weight">
+                                <label>Pondération:</label>
+                                <input type="range" id="tasksWeight" min="0" max="100" value="40">
+                                <span id="tasksWeightValue">40%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="search-field-group">
+                        <div class="field-header">
+                            <i class="fas fa-cogs"></i>
+                            <h3>Compétences & Langues</h3>
+                            <span class="field-description">Recherche dans les compétences techniques et langues</span>
+                        </div>
+                        <div class="field-content">
+                            <input type="text" id="skillsSearch" placeholder="Ex: Java, React, Docker, Photoshop, SAP...">
+                            <div class="field-weight">
+                                <label>Pondération:</label>
+                                <input type="range" id="skillsWeight" min="0" max="100" value="30">
+                                <span id="skillsWeightValue">30%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Advanced Filters -->
+                <div class="advanced-filters">
+                    <div class="filters-header">
+                        <h3><i class="fas fa-filter"></i> Filtres Avancés</h3>
+                        <button class="toggle-filters-btn" onclick="toggleAdvancedFilters()">
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                    </div>
+                    <div class="filters-content" id="advancedFiltersContent">
+                        <div class="filters-grid">
+                            <div class="filter-group">
+                                <label for="filiereFilter">Filière</label>
+                                <select id="filiereFilter">
+                                    <option value="">Toutes les filières</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label for="experienceLevel">Niveau d'expérience</label>
+                                <select id="experienceLevel">
+                                    <option value="">Tous niveaux</option>
+                                    <option value="junior">Junior (0-2 ans)</option>
+                                    <option value="intermediate">Intermédiaire (3-5 ans)</option>
+                                    <option value="senior">Senior (5+ ans)</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label for="dateRange">CV récents</label>
+                                <select id="dateRange">
+                                    <option value="">Toutes dates</option>
+                                    <option value="7">7 derniers jours</option>
+                                    <option value="30">30 derniers jours</option>
+                                    <option value="90">3 derniers mois</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Search Actions -->
+                <div class="search-actions">
+                    <button class="search-btn" onclick="advancedSearch()">
+                        <i class="fas fa-search"></i> Recherche Avancée
+                    </button>
+                    <button class="clear-btn" onclick="clearAdvancedFilters()">
+                        <i class="fas fa-times"></i> Effacer
+                    </button>
+                    <button class="save-search-btn" onclick="saveSearch()">
+                        <i class="fas fa-save"></i> Sauvegarder
+                    </button>
+                </div>
+            </div>
+
+            <!-- Results Section -->
+            <div class="results-section">
+                <div class="results-header">
+                    <h3><i class="fas fa-list"></i> Résultats de recherche</h3>
+                    <div class="results-info">
+                        <span id="resultsCount">0 CV trouvé(s)</span>
+                        <div class="results-actions">
+                            <button class="export-btn" onclick="exportResults()">
+                                <i class="fas fa-download"></i> Exporter
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="results-container" id="resultsContainer">
+                    <div class="no-results">
+                        <i class="fas fa-search"></i>
+                        <p>Aucun CV trouvé. Utilisez les filtres pour affiner votre recherche.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CV Details Modal -->
+    <div class="modal" id="cvModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Détails du CV</h2>
+                <button class="close-btn" onclick="closeModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- CV details will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Chargement...</p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
