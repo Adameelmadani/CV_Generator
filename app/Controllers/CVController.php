@@ -405,7 +405,6 @@ class CVController extends Controller {
     
     public function importCV() {
         $userId = $this->requireAuth();
-        
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->jsonResponse([
                 'status' => 'error',
@@ -413,7 +412,6 @@ class CVController extends Controller {
             ], 405);
             return;
         }
-        
         // Check if file was uploaded
         if (!isset($_FILES['xml_file']) || $_FILES['xml_file']['error'] !== UPLOAD_ERR_OK) {
             $this->jsonResponse([
@@ -422,18 +420,18 @@ class CVController extends Controller {
             ], 400);
             return;
         }
-        
         $file = $_FILES['xml_file'];
-        
+        $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+        $isPDF = ($file['type'] === 'application/pdf' || $ext === 'pdf');
+        $isXML = ($file['type'] === 'text/xml' || $ext === 'xml');
         // Validate file type
-        if ($file['type'] !== 'text/xml' && pathinfo($file['name'], PATHINFO_EXTENSION) !== 'xml') {
+        if (!$isPDF && !$isXML) {
             $this->jsonResponse([
                 'status' => 'error',
-                'message' => 'File must be XML format'
+                'message' => 'File must be PDF or XML format'
             ], 400);
             return;
         }
-        
         // Validate file size (max 5MB)
         if ($file['size'] > 5 * 1024 * 1024) {
             $this->jsonResponse([
@@ -442,11 +440,46 @@ class CVController extends Controller {
             ], 400);
             return;
         }
-        
         try {
-            // Read XML content
-            $xmlContent = file_get_contents($file['tmp_name']);
-            
+            if ($isXML) {
+                // Read XML content
+                $xmlContent = file_get_contents($file['tmp_name']);
+            } else if ($isPDF) {
+                // Save PDF temporarily
+                $tmpPdf = sys_get_temp_dir() . '/cv_import_' . uniqid() . '.pdf';
+                $tmpXml = sys_get_temp_dir() . '/cv_import_' . uniqid() . '.xml';
+                move_uploaded_file($file['tmp_name'], $tmpPdf);
+                // Call parse_cv.py (chemin corrigé)
+                $python = 'python';
+                $script = 'C:/xampp/htdocs/CV_Generator-3/parsing/parse_cv.py';
+                $cmd = escapeshellcmd("$python $script $tmpPdf $tmpXml") . " 2>&1";
+                exec($cmd, $output, $ret);
+                error_log("CMD: $cmd");
+                error_log("RET: $ret");
+                error_log("OUTPUT: " . implode("\n", $output));
+                error_log("SCRIPT: $script");
+                error_log("TMPPDF: $tmpPdf");
+                error_log("TMPXML: $tmpXml");
+                if ($ret !== 0 || !file_exists($tmpXml)) {
+                    $this->jsonResponse([
+                        'status' => 'error',
+                        'message' => 'Erreur lors du parsing du PDF. Veuillez vérifier le format du CV.'
+                    ], 500);
+                    if (file_exists($tmpPdf)) unlink($tmpPdf);
+                    if (file_exists($tmpXml)) unlink($tmpXml);
+                    return;
+                }
+                $xmlContent = file_get_contents($tmpXml);
+                // Nettoyage fichiers temporaires
+                if (file_exists($tmpPdf)) unlink($tmpPdf);
+                if (file_exists($tmpXml)) unlink($tmpXml);
+            } else {
+                $this->jsonResponse([
+                    'status' => 'error',
+                    'message' => 'Format de fichier non supporté.'
+                ], 400);
+                return;
+            }
             // Validate XML
             $xml = simplexml_load_string($xmlContent);
             if (!$xml) {
@@ -456,20 +489,16 @@ class CVController extends Controller {
                 ], 400);
                 return;
             }
-            
             // Extract CV name from XML or use filename
             $cvName = $this->extractCVNameFromXML($xml) ?: pathinfo($file['name'], PATHINFO_FILENAME);
-            
             // Save to database
             $cvId = $this->cvModel->createCV($userId, $xmlContent, $cvName);
-            
             $this->jsonResponse([
                 'status' => 'success',
                 'message' => 'CV imported successfully',
                 'cv_id' => $cvId,
                 'cv_name' => $cvName
             ]);
-            
         } catch (Exception $e) {
             error_log("Error in importCV: " . $e->getMessage());
             $this->jsonResponse([
@@ -1911,7 +1940,7 @@ class CVController extends Controller {
             }
             
             // If no saved PDF, generate it on the fly
-            $xmlContent = $cv['xml_content'];
+            $xmlContent = $cv['contenu_xml'];
             $files = $this->generatePDF($xmlContent, $cvId);
             
             // Save this PDF for future use

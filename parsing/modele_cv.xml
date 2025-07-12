@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cv>
+  <personalization>
+    <primaryColor>#667eea</primaryColor>
+  </personalization>
+
+  <personalInfo>
+    <firstname></firstname>
+    <lastname></lastname>
+    <location></location>
+    <email></email>
+    <phone></phone>
+    <website></website>
+    <linkedin></linkedin>
+    <github></github>
+    <photo></photo>
+  </personalInfo>
+
+  <profil>
+    <description></description>
+  </profil>
+
+  <education>
+    <!-- Chaque diplôme sera ajouté ici -->
+  </education>
+
+  <certificates>
+    <!-- Chaque certificat sera ajouté ici -->
+  </certificates>
+
+  <experiences>
+    <!-- Chaque expérience sera ajoutée ici -->
+  </experiences>
+
+  <projects>
+    <!-- Chaque projet sera ajouté ici -->
+  </projects>
+
+  <skills>
+    <!-- Chaque catégorie de compétence sera ajoutée ici -->
+  </skills>
+
+  <languages>
+    <!-- Chaque langue sera ajoutée ici -->
+  </languages>
+</cv>

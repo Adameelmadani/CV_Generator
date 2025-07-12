@@ -114,7 +114,13 @@ let currentStep = 1;
         // Check for custom CV name from user_home.html
         const customCVName = sessionStorage.getItem('newCVName');
         if (customCVName) {
-          showCustomCVNameNotification(customCVName);
+          // Update header title with just the CV name
+          const headerTitle = document.querySelector('.header h2');
+          if (headerTitle) {
+            headerTitle.textContent = customCVName;
+          }
+          // Update page title
+          document.title = 'CV Generator - ' + customCVName;
         }
         
         // Check if user is in guest mode (came from main page without authentication)
@@ -384,38 +390,14 @@ let currentStep = 1;
         // Add a note for guest users
         const headerActions = document.querySelector('.header-actions');
         if (headerActions) {
-          const guestNote = document.createElement('span');
+          const guestNote = document.createElement('div');
           guestNote.className = 'guest-note';
           guestNote.innerHTML = '<i class="fas fa-info-circle"></i> Mode invité - Téléchargement PDF uniquement. <a href="../Login_Signup/auth.html">Créez un compte</a> pour accéder à tous les formats';
-          guestNote.style.cssText = 'color: #666; font-size: 14px; margin-right: 15px;';
           headerActions.insertBefore(guestNote, headerActions.firstChild);
         }
       }
 
-      // Function to show a notification about the custom CV name
-      function showCustomCVNameNotification(cvName) {
-        // Update page title
-        document.title = 'CV Generator - Création: ' + cvName;
-        
-        // Update header title
-        const headerTitle = document.querySelector('.header h2');
-        if (headerTitle) {
-          headerTitle.textContent = 'Nouveau CV: ' + cvName;
-        }
-        
-        // Show notification
-        const header = document.querySelector('.header');
-        if (header) {
-          const notification = document.createElement('div');
-          notification.style.cssText = 'background: #d4edda; color: #155724; border: 1px solid #c3e6cb; border-radius: 8px; padding: 12px 16px; margin: 10px 0; display: flex; align-items: center; gap: 10px; font-size: 14px;';
-          notification.innerHTML = '<i class="fas fa-info-circle"></i><span>Création du CV: <strong>' + cvName + '</strong></span>';
-          header.appendChild(notification);
-          setTimeout(function() { 
-            if (notification.parentElement) notification.remove(); 
-          }, 5000);
-          console.log('📋 Showing CV name notification:', cvName);
-        }
-      }
+
 
       function showStep(step) {
         // Hide all step contents

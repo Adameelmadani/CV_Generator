@@ -3,29 +3,30 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Europass CV Generator</title>
-    <link rel="stylesheet" href="home.css">
+    <title>CVCraft</title>
+    <link rel="stylesheet" href="home.css?v=2.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   </head>
   <body>      <div class="container">
       <div class="header">
         <div class="header-actions">
           <a href="user_home.html" class="btn-link" id="myCvsLink">
-            Mes CV
+            <i class="fas fa-folder"></i> Mes CV
           </a>
           <a href="user_home.html" class="btn-link" id="userHomeBtn">
-            Mes CV sauvegardés
+            <i class="fas fa-save"></i> Mes CV sauvegardés
           </a>
           <button class="btn-link" id="fillTestBtn" onclick="fillTestData()">
-            Fill Test Data
+            <i class="fas fa-magic"></i> Fill Test Data
           </button>
           <button class="btn-link" id="previewToggleBtn" onclick="togglePreview()">
             <i class="fas fa-eye"></i> Aperçu
           </button>
           <button class="logout-btn" onclick="logout()" id="logoutBtn">
-            Déconnexion
+            <i class="fas fa-sign-out-alt"></i> Déconnexion
           </button>
         </div>
-        <h2>Générateur de CV</h2>
+        <h2>CVCraft</h2>
         <p>Créez votre CV professionnel en quelques étapes</p>
       </div>
 
@@ -343,6 +344,6 @@
   </div>
 </div>
 
-    <script src="home.js"></script>
+    <script src="home.js?v=2.0"></script>
   </body>
 </html>

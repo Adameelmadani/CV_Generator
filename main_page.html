@@ -3,61 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CV Generator - Accueil</title>
+    <title>CVCraft - Accueil</title>
     <link rel="stylesheet" href="main_page.css">
 </head>
 <body>
-    <div class="container">
-        <div class="logo">📄</div>
-        <h1 class="title">CV Generator Europass</h1>
-        <p class="subtitle">
-            Créez votre CV professionnel au format Europass en quelques minutes. 
-            Simple, rapide et efficace.
-        </p>
+    <!-- Professional Header with RH Button -->
+    <header class="header">
+        <div class="header-content">
+            <a href="#" class="header-logo">
+                <span class="header-logo-icon">📄</span>
+                <span class="header-logo-text">CVCraft</span>
+            </a>
+            <a href="Login_Signup/auth.html#rhLoginForm" class="btn-rh-header">
+                Espace RH
+            </a>
+        </div>
+    </header>
 
+    <div class="container">
+        <!-- Hero Section -->
+        <div class="hero-section">
+            <div class="logo">📄</div>
+            <h1 class="title">CVCraft</h1>
+            <p class="subtitle">
+                Créez votre CV professionnel au format Europass en quelques minutes. 
+                Simple, rapide et efficace.
+            </p>
+        </div>
+
+        
+
+        <!-- Features Section -->
         <div class="info-section">
-            <h3 class="info-title">Pourquoi choisir notre générateur ?</h3>
+            <h3 class="info-title">Fonctionnalités principales</h3>
             <div class="features">
                 <div class="feature">
                     <svg class="feature-icon" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
-                    <span class="feature-text">Format Europass officiel respecté</span>
+                    <span class="feature-text">Format Europass officiel respecté et certifié</span>
                 </div>
                 <div class="feature">
                     <svg class="feature-icon" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"/>
                     </svg>
-                    <span class="feature-text">Interface intuitive et conviviale</span>
+                    <span class="feature-text">Interface intuitive et expérience utilisateur optimisée</span>
                 </div>
                 <div class="feature">
                     <svg class="feature-icon" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M12 2l3.09 6.26L22 9l-5 4.87L18.18 22 12 18.27 5.82 22 7 13.87 2 9l6.91-.74L12 2z"/>
                     </svg>
-                    <span class="feature-text">Génération PDF de haute qualité</span>
+                    <span class="feature-text">Export PDF haute qualité et impression professionnelle</span>
                 </div>
                 <div class="feature">
                     <svg class="feature-icon" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/>
                     </svg>
-                    <span class="feature-text">Sauvegarde de vos informations (avec compte)</span>
+                    <span class="feature-text">Sauvegarde sécurisée et synchronisation cloud</span>
                 </div>
             </div>
         </div>
 
+        <!-- Information Section -->
         <div class="info-section">
             <p class="info-text">
-                <strong>Avec un compte :</strong> Sauvegardez vos informations, modifiez vos CV et accédez à des fonctionnalités avancées.
+                <strong>Avec un compte :</strong> Bénéficiez de la sauvegarde automatique, de la modification illimitée de vos CV, et accédez à des fonctionnalités avancées comme les modèles premium et l'analyse de compatibilité.
                 <br><br>
-                <strong>Sans compte :</strong> Créez votre CV directement sans inscription, idéal pour une utilisation ponctuelle.
+                <strong>Sans compte :</strong> Créez votre CV directement sans inscription préalable, solution idéale pour une utilisation ponctuelle avec toutes les fonctionnalités essentielles.
             </p>
         </div>
 
+        <!-- Action Buttons -->
         <div class="buttons">
-            <a href="Login_Signup/auth.html" class="btn btn-primary">
+            <a href="Login_Signup/auth.html" class="btn">
                 Se connecter
             </a>
-            <a href="Cv_generator/home.html?mode=guest" class="btn btn-secondary">
+            <a href="Cv_generator/home.html?mode=guest" class="btn">
                 Continuer sans authentification
             </a>
         </div>

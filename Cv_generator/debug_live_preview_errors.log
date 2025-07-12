@@ -236,3 +236,164 @@
 [10-Jul-2025 14:43:56 Europe/Paris] Has projects: YES
 [10-Jul-2025 14:43:56 Europe/Paris] Has skills: YES
 [10-Jul-2025 14:43:56 Europe/Paris] Has languages: YES
+[10-Jul-2025 15:22:46 Europe/Paris] generateXMLContent - Starting XML generation
+[10-Jul-2025 15:22:46 Europe/Paris] generateXMLContent - Form data keys: education_degree, education_dates, education_university, education_field, education_details, experience_location, experience_dates, experience_company, experience_position, experience_description, project_name, project_link, project_description, skill_category, skill_items, language_name, language_level, certificate_name, certificate_date, certificate_issuer, certificate_location, certificate_description, editing_cv_id, existing_photo_path, primary_color, photo, nom, prenom, location, email, telephone, website, linkedin, github, profil_description, format
+[10-Jul-2025 15:22:46 Europe/Paris] generateXMLContent - XML generation completed, length: 2851
+[10-Jul-2025 15:22:46 Europe/Paris] generateXMLContent - XML preview: <?xml version="1.0" encoding="UTF-8"?>
+<cv>
+  <personalization>
+    <primaryColor>#667eea</primaryColor>
+  </personalization>
+
+  <personalInfo>
+    <firstname>Jean</firstname>
+    <lastname>Dupont</la...
+[10-Jul-2025 15:22:46 Europe/Paris] Live Preview XML structure check:
+[10-Jul-2025 15:22:46 Europe/Paris] Has certificates: YES
+[10-Jul-2025 15:22:46 Europe/Paris] Has projects: YES
+[10-Jul-2025 15:22:46 Europe/Paris] Has skills: YES
+[10-Jul-2025 15:22:46 Europe/Paris] Has languages: YES
+[10-Jul-2025 15:22:51 Europe/Paris] generateXMLContent - Starting XML generation
+[10-Jul-2025 15:22:51 Europe/Paris] generateXMLContent - Form data keys: education_degree, education_dates, education_university, education_field, education_details, experience_location, experience_dates, experience_company, experience_position, experience_description, project_name, project_link, project_description, skill_category, skill_items, language_name, language_level, certificate_name, certificate_date, certificate_issuer, certificate_location, certificate_description, editing_cv_id, existing_photo_path, primary_color, photo, nom, prenom, location, email, telephone, website, linkedin, github, profil_description, format
+[10-Jul-2025 15:22:51 Europe/Paris] generateXMLContent - XML generation completed, length: 2851
+[10-Jul-2025 15:22:51 Europe/Paris] generateXMLContent - XML preview: <?xml version="1.0" encoding="UTF-8"?>
+<cv>
+  <personalization>
+    <primaryColor>#667eea</primaryColor>
+  </personalization>
+
+  <personalInfo>
+    <firstname>Jean</firstname>
+    <lastname>Dupont</la...
+[10-Jul-2025 15:22:51 Europe/Paris] Live Preview XML structure check:
+[10-Jul-2025 15:22:51 Europe/Paris] Has certificates: YES
+[10-Jul-2025 15:22:51 Europe/Paris] Has projects: YES
+[10-Jul-2025 15:22:51 Europe/Paris] Has skills: YES
+[10-Jul-2025 15:22:51 Europe/Paris] Has languages: YES
+[10-Jul-2025 15:22:55 Europe/Paris] generateXMLContent - Starting XML generation
+[10-Jul-2025 15:22:55 Europe/Paris] generateXMLContent - Form data keys: education_degree, education_dates, education_university, education_field, education_details, experience_location, experience_dates, experience_company, experience_position, experience_description, project_name, project_link, project_description, skill_category, skill_items, language_name, language_level, certificate_name, certificate_date, certificate_issuer, certificate_location, certificate_description, editing_cv_id, existing_photo_path, primary_color, photo, nom, prenom, location, email, telephone, website, linkedin, github, profil_description, format
+[10-Jul-2025 15:22:55 Europe/Paris] generateXMLContent - XML generation completed, length: 2851
+[10-Jul-2025 15:22:55 Europe/Paris] generateXMLContent - XML preview: <?xml version="1.0" encoding="UTF-8"?>
+<cv>
+  <personalization>
+    <primaryColor>#667eea</primaryColor>
+  </personalization>
+
+  <personalInfo>
+    <firstname>Jean</firstname>
+    <lastname>Dupont</la...
+[10-Jul-2025 15:22:55 Europe/Paris] Live Preview XML structure check:
+[10-Jul-2025 15:22:55 Europe/Paris] Has certificates: YES
+[10-Jul-2025 15:22:55 Europe/Paris] Has projects: YES
+[10-Jul-2025 15:22:55 Europe/Paris] Has skills: YES
+[10-Jul-2025 15:22:55 Europe/Paris] Has languages: YES
+[10-Jul-2025 15:23:19 Europe/Paris] generateXMLContent - Starting XML generation
+[10-Jul-2025 15:23:19 Europe/Paris] generateXMLContent - Form data keys: education_degree, education_dates, education_university, education_field, education_details, experience_location, experience_dates, experience_company, experience_position, experience_description, project_name, project_link, project_description, skill_category, skill_items, language_name, language_level, certificate_name, certificate_date, certificate_issuer, certificate_location, certificate_description, editing_cv_id, existing_photo_path, primary_color, photo, nom, prenom, location, email, telephone, website, linkedin, github, profil_description, format
+[10-Jul-2025 15:23:19 Europe/Paris] generateXMLContent - XML generation completed, length: 2851
+[10-Jul-2025 15:23:19 Europe/Paris] generateXMLContent - XML preview: <?xml version="1.0" encoding="UTF-8"?>
+<cv>
+  <personalization>
+    <primaryColor>#667eea</primaryColor>
+  </personalization>
+
+  <personalInfo>
+    <firstname>Jean</firstname>
+    <lastname>Dupont</la...
+[10-Jul-2025 15:23:19 Europe/Paris] Live Preview XML structure check:
+[10-Jul-2025 15:23:19 Europe/Paris] Has certificates: YES
+[10-Jul-2025 15:23:19 Europe/Paris] Has projects: YES
+[10-Jul-2025 15:23:19 Europe/Paris] Has skills: YES
+[10-Jul-2025 15:23:19 Europe/Paris] Has languages: YES
+[10-Jul-2025 15:23:34 Europe/Paris] generateXMLContent - Starting XML generation
+[10-Jul-2025 15:23:34 Europe/Paris] generateXMLContent - Form data keys: education_degree, education_dates, education_university, education_field, education_details, experience_location, experience_dates, experience_company, experience_position, experience_description, project_name, project_link, project_description, skill_category, skill_items, language_name, language_level, certificate_name, certificate_date, certificate_issuer, certificate_location, certificate_description, editing_cv_id, existing_photo_path, primary_color, photo, nom, prenom, location, email, telephone, website, linkedin, github, profil_description, format
+[10-Jul-2025 15:23:34 Europe/Paris] generateXMLContent - XML generation completed, length: 2851
+[10-Jul-2025 15:23:34 Europe/Paris] generateXMLContent - XML preview: <?xml version="1.0" encoding="UTF-8"?>
+<cv>
+  <personalization>
+    <primaryColor>#667eea</primaryColor>
+  </personalization>
+
+  <personalInfo>
+    <firstname>Jean</firstname>
+    <lastname>Dupont</la...
+[10-Jul-2025 15:23:34 Europe/Paris] Live Preview XML structure check:
+[10-Jul-2025 15:23:34 Europe/Paris] Has certificates: YES
+[10-Jul-2025 15:23:34 Europe/Paris] Has projects: YES
+[10-Jul-2025 15:23:34 Europe/Paris] Has skills: YES
+[10-Jul-2025 15:23:34 Europe/Paris] Has languages: YES
+[10-Jul-2025 15:23:40 Europe/Paris] generateXMLContent - Starting XML generation
+[10-Jul-2025 15:23:40 Europe/Paris] generateXMLContent - Form data keys: education_degree, education_dates, education_university, education_field, education_details, experience_location, experience_dates, experience_company, experience_position, experience_description, project_name, project_link, project_description, skill_category, skill_items, language_name, language_level, certificate_name, certificate_date, certificate_issuer, certificate_location, certificate_description, editing_cv_id, existing_photo_path, primary_color, photo, nom, prenom, location, email, telephone, website, linkedin, github, profil_description, format
+[10-Jul-2025 15:23:40 Europe/Paris] generateXMLContent - XML generation completed, length: 2851
+[10-Jul-2025 15:23:40 Europe/Paris] generateXMLContent - XML preview: <?xml version="1.0" encoding="UTF-8"?>
+<cv>
+  <personalization>
+    <primaryColor>#dc3545</primaryColor>
+  </personalization>
+
+  <personalInfo>
+    <firstname>Jean</firstname>
+    <lastname>Dupont</la...
+[10-Jul-2025 15:23:40 Europe/Paris] Live Preview XML structure check:
+[10-Jul-2025 15:23:40 Europe/Paris] Has certificates: YES
+[10-Jul-2025 15:23:40 Europe/Paris] Has projects: YES
+[10-Jul-2025 15:23:40 Europe/Paris] Has skills: YES
+[10-Jul-2025 15:23:40 Europe/Paris] Has languages: YES
+[10-Jul-2025 15:23:48 Europe/Paris] generateXMLContent - Starting XML generation
+[10-Jul-2025 15:23:48 Europe/Paris] generateXMLContent - Form data keys: education_degree, education_dates, education_university, education_field, education_details, experience_location, experience_dates, experience_company, experience_position, experience_description, project_name, project_link, project_description, skill_category, skill_items, language_name, language_level, certificate_name, certificate_date, certificate_issuer, certificate_location, certificate_description, editing_cv_id, existing_photo_path, primary_color, photo, nom, prenom, location, email, telephone, website, linkedin, github, profil_description, format
+[10-Jul-2025 15:23:48 Europe/Paris] generateXMLContent - XML generation completed, length: 2851
+[10-Jul-2025 15:23:48 Europe/Paris] generateXMLContent - XML preview: <?xml version="1.0" encoding="UTF-8"?>
+<cv>
+  <personalization>
+    <primaryColor>#dc3545</primaryColor>
+  </personalization>
+
+  <personalInfo>
+    <firstname>Jean</firstname>
+    <lastname>Dupont</la...
+[10-Jul-2025 15:23:48 Europe/Paris] Live Preview XML structure check:
+[10-Jul-2025 15:23:48 Europe/Paris] Has certificates: YES
+[10-Jul-2025 15:23:48 Europe/Paris] Has projects: YES
+[10-Jul-2025 15:23:48 Europe/Paris] Has skills: YES
+[10-Jul-2025 15:23:48 Europe/Paris] Has languages: YES
+[10-Jul-2025 15:23:56 Europe/Paris] generateXMLContent - Starting XML generation
+[10-Jul-2025 15:23:56 Europe/Paris] generateXMLContent - Form data keys: education_degree, education_dates, education_university, education_field, education_details, experience_location, experience_dates, experience_company, experience_position, experience_description, project_name, project_link, project_description, skill_category, skill_items, language_name, language_level, certificate_name, certificate_date, certificate_issuer, certificate_location, certificate_description, editing_cv_id, existing_photo_path, primary_color, photo, nom, prenom, location, email, telephone, website, linkedin, github, profil_description, format
+[10-Jul-2025 15:23:56 Europe/Paris] generateXMLContent - XML generation completed, length: 2851
+[10-Jul-2025 15:23:56 Europe/Paris] generateXMLContent - XML preview: <?xml version="1.0" encoding="UTF-8"?>
+<cv>
+  <personalization>
+    <primaryColor>#dc3545</primaryColor>
+  </personalization>
+
+  <personalInfo>
+    <firstname>Jean</firstname>
+    <lastname>Dupont</la...
+[10-Jul-2025 15:23:56 Europe/Paris] Live Preview XML structure check:
+[10-Jul-2025 15:23:56 Europe/Paris] Has certificates: YES
+[10-Jul-2025 15:23:56 Europe/Paris] Has projects: YES
+[10-Jul-2025 15:23:56 Europe/Paris] Has skills: YES
+[10-Jul-2025 15:23:56 Europe/Paris] Has languages: YES
+[10-Jul-2025 15:24:10 Europe/Paris] generateXMLContent - Starting XML generation
+[10-Jul-2025 15:24:10 Europe/Paris] generateXMLContent - Form data keys: education_degree, education_dates, education_university, education_field, education_details, experience_location, experience_dates, experience_company, experience_position, experience_description, project_name, project_link, project_description, skill_category, skill_items, language_name, language_level, certificate_name, certificate_date, certificate_issuer, certificate_location, certificate_description, editing_cv_id, existing_photo_path, primary_color, photo, nom, prenom, location, email, telephone, website, linkedin, github, profil_description, format
+[10-Jul-2025 15:24:10 Europe/Paris] generateXMLContent - XML generation completed, length: 2851
+[10-Jul-2025 15:24:10 Europe/Paris] generateXMLContent - XML preview: <?xml version="1.0" encoding="UTF-8"?>
+<cv>
+  <personalization>
+    <primaryColor>#dc3545</primaryColor>
+  </personalization>
+
+  <personalInfo>
+    <firstname>Jean</firstname>
+    <lastname>Dupont</la...
+[10-Jul-2025 15:24:10 Europe/Paris] Live Preview XML structure check:
+[10-Jul-2025 15:24:10 Europe/Paris] Has certificates: YES
+[10-Jul-2025 15:24:10 Europe/Paris] Has projects: YES
+[10-Jul-2025 15:24:10 Europe/Paris] Has skills: YES
+[10-Jul-2025 15:24:10 Europe/Paris] Has languages: YES
+[11-Jul-2025 19:40:17 Europe/Paris] Authentication failed - no user ID in session. Session data: Array
+(
+)
+
+[11-Jul-2025 19:40:17 Europe/Paris] Authentication failed - no user ID in session. Session data: Array
+(
+)
+

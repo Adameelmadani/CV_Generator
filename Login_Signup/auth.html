@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Authentification - CV Generator</title>
     <link rel="stylesheet" href="auth_style.css" />
+   
   </head>
   <body>
     <div class="container">
@@ -144,8 +145,47 @@
             </div>
           </div>
         </div>
+        <!-- Section RH Sign In -->
+        <div class="form-section rh-section">
+          <h2>Connexion RH</h2>
+          <p style="text-align: center; color: #666; margin-bottom: 20px; font-size: 14px;">
+            Accès réservé aux ressources humaines
+          </p>
+          <div class="alert" id="rhAlert"></div>
+          <form id="rhLoginForm">
+            <div class="form-group">
+              <label for="rh_email">Email RH</label>
+              <input type="email" id="rh_email" name="rh_email" required />
+            </div>
+            <div class="form-group">
+              <label for="rh_password">Mot de passe</label>
+              <input type="password" id="rh_password" name="rh_password" required />
+            </div>
+            <button type="submit" class="btn" id="rhLoginBtn">Se connecter RH</button>
+            <div class="loading" id="rhLoginLoading" style="display:none;">
+              <div class="spinner"></div>
+              <p>Connexion RH en cours...</p>
+            </div>
+          </form>
+          <div class="toggle-container">
+            <p>
+              <a href="#" class="toggle-link" onclick="toggleForm()">
+                ← Retour à la connexion utilisateur
+              </a>
+            </p>
+          </div>
+        </div>
       </div>
-    </div>
+      
+      <!-- Bouton d'accès RH depuis les sections normales -->
+      <div style="text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid #e1e5e9;">
+        <p style="color: #666; font-size: 14px; margin-bottom: 10px;">
+          Vous êtes RH ?
+        </p>
+        <a href="#rhLoginForm" class="toggle-link" onclick="toggleToRH()">
+          Accéder à l'espace RH
+        </a>
+      </div>
 
    <script src="auth.js"></script>
   </body>

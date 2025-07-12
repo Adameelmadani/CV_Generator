@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", function () {
   loadFilieres();
   setupEventListeners();
   setupNameValidation();
+  setupRHDisplay();
 });
 
 // Charger les filières dans le select
@@ -295,6 +296,120 @@ async function handleSignup(e) {
     if (btn) btn.style.display = "block";
     if (loading) loading.classList.remove("show");
   }
+}
+
+// RH Login
+const rhLoginForm = document.getElementById('rhLoginForm');
+const rhLoginBtn = document.getElementById('rhLoginBtn');
+const rhLoginLoading = document.getElementById('rhLoginLoading');
+const rhAlert = document.getElementById('rhAlert');
+
+if (rhLoginForm) {
+  rhLoginForm.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    console.log("RH Login form submitted");
+
+    rhAlert.textContent = '';
+    rhLoginBtn.disabled = true;
+    rhLoginLoading.style.display = 'block';
+
+    const formData = new FormData(rhLoginForm);
+    
+    try {
+      const response = await fetch('rh_login_handler_mvc.php', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("RH Login response:", data);
+
+      if (data.success) {
+        showAlert("rhAlert", data.message, "success");
+        console.log("RH Login successful, redirecting to:", data.redirect);
+        
+        // Redirection avec fallback
+        try {
+          window.location.href = data.redirect;
+        } catch (redirectError) {
+          console.error("Direct redirect failed, trying delayed redirect:", redirectError);
+          setTimeout(() => {
+            try {
+              window.location.href = data.redirect;
+            } catch (delayedRedirectError) {
+              console.error("Delayed redirect also failed:", delayedRedirectError);
+              window.location.replace(data.redirect);
+            }
+          }, 500);
+        }
+      } else {
+        showAlert("rhAlert", data.message, "error");
+      }
+    } catch (error) {
+      console.error("RH Login error:", error);
+      showAlert("rhAlert", "Erreur de connexion RH. Veuillez réessayer.", "error");
+    } finally {
+      rhLoginBtn.disabled = false;
+      rhLoginLoading.style.display = 'none';
+    }
+  });
+}
+
+// Configuration de l'affichage RH
+function setupRHDisplay() {
+  // Vérifier si on arrive avec le hash RH
+  if (window.location.hash === "#rhLoginForm") {
+    showRHSection();
+  }
+  
+  // Écouter les changements de hash
+  window.addEventListener('hashchange', function() {
+    if (window.location.hash === "#rhLoginForm") {
+      showRHSection();
+    } else {
+      hideRHSection();
+    }
+  });
+}
+
+// Afficher la section RH
+function showRHSection() {
+  const rhSection = document.querySelector('.form-section.rh-section');
+  const loginSection = document.querySelector('.login-section');
+  const signupSection = document.querySelector('.signup-section');
+  
+  if (rhSection) {
+    // Masquer les autres sections
+    if (loginSection) loginSection.classList.remove('active');
+    if (signupSection) signupSection.classList.remove('active');
+    
+    // Afficher la section RH
+    rhSection.classList.add('show-rh');
+    rhSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    
+    // Réinitialiser les alertes
+    hideAlert("loginAlert");
+    hideAlert("signupAlert");
+    hideAlert("rhAlert");
+  }
+}
+
+// Masquer la section RH
+function hideRHSection() {
+  const rhSection = document.querySelector('.form-section.rh-section');
+  if (rhSection) {
+    rhSection.classList.remove('show-rh');
+  }
+}
+
+// Basculer vers la section RH
+function toggleToRH() {
+  window.location.hash = "#rhLoginForm";
+  showRHSection();
 }
 
 // Afficher une alerte

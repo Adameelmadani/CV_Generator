@@ -1,0 +1,4 @@
+pdfplumber
+pytesseract
+Pillow
+lxml 
