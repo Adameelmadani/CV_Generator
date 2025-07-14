@@ -1579,3 +1579,109 @@ ou externe, un programme ex‚cutable ou un fichier de commandes.
 [12-Jul-2025 19:41:17 Europe/Paris] Has projects: YES
 [12-Jul-2025 19:41:17 Europe/Paris] Has skills: YES
 [12-Jul-2025 19:41:17 Europe/Paris] Has languages: YES
+[13-Jul-2025 14:21:59 Europe/Paris] Authentication failed - no user ID in session. Session data: Array
+(
+)
+
+[13-Jul-2025 14:21:59 Europe/Paris] Authentication failed - no user ID in session. Session data: Array
+(
+)
+
+[13-Jul-2025 14:22:28 Europe/Paris] Authentication failed - no user ID in session. Session data: Array
+(
+)
+
+[13-Jul-2025 14:22:32 Europe/Paris] Authentication failed - no user ID in session. Session data: Array
+(
+)
+
+[13-Jul-2025 15:13:06 Europe/Paris] generateXMLContent - Starting XML generation
+[13-Jul-2025 15:13:06 Europe/Paris] generateXMLContent - Form data keys: education_degree, education_dates, education_university, education_field, education_details, experience_location, experience_dates, experience_company, experience_position, experience_description, project_name, project_link, project_description, skill_category, skill_items, language_name, language_level, certificate_name, certificate_date, certificate_issuer, certificate_location, certificate_description, editing_cv_id, existing_photo_path, primary_color, photo, nom, prenom, location, email, telephone, website, linkedin, github, profil_description, format, photo_preview_src
+[13-Jul-2025 15:13:06 Europe/Paris] generateXMLContent - XML generation completed, length: 2379
+[13-Jul-2025 15:13:06 Europe/Paris] generateXMLContent - XML preview: <?xml version="1.0" encoding="UTF-8"?>
+<cv>
+  <personalization>
+    <primaryColor>#667eea</primaryColor>
+  </personalization>
+
+  <personalInfo>
+    <firstname>Abderrazak</firstname>
+    <lastname>KHAL...
+[13-Jul-2025 15:13:06 Europe/Paris] Live Preview XML structure check:
+[13-Jul-2025 15:13:06 Europe/Paris] Has certificates: YES
+[13-Jul-2025 15:13:06 Europe/Paris] Has projects: YES
+[13-Jul-2025 15:13:06 Europe/Paris] Has skills: YES
+[13-Jul-2025 15:13:06 Europe/Paris] Has languages: YES
+[13-Jul-2025 15:13:06 Europe/Paris] Photo copied successfully: uploads/photos/temp_preview_photo_6873b0e26504d.png -> cv_photo.png
+[13-Jul-2025 15:13:18 Europe/Paris] generateXMLContent - Starting XML generation
+[13-Jul-2025 15:13:18 Europe/Paris] generateXMLContent - Form data keys: education_degree, education_dates, education_university, education_field, education_details, experience_location, experience_dates, experience_company, experience_position, experience_description, project_name, project_link, project_description, skill_category, skill_items, language_name, language_level, certificate_name, certificate_date, certificate_issuer, certificate_location, certificate_description, editing_cv_id, existing_photo_path, primary_color, photo, nom, prenom, location, email, telephone, website, linkedin, github, profil_description, format, photo_preview_src
+[13-Jul-2025 15:13:18 Europe/Paris] generateXMLContent - XML generation completed, length: 2379
+[13-Jul-2025 15:13:18 Europe/Paris] generateXMLContent - XML preview: <?xml version="1.0" encoding="UTF-8"?>
+<cv>
+  <personalization>
+    <primaryColor>#667eea</primaryColor>
+  </personalization>
+
+  <personalInfo>
+    <firstname>Abderrazak</firstname>
+    <lastname>KHAL...
+[13-Jul-2025 15:13:18 Europe/Paris] Live Preview XML structure check:
+[13-Jul-2025 15:13:18 Europe/Paris] Has certificates: YES
+[13-Jul-2025 15:13:18 Europe/Paris] Has projects: YES
+[13-Jul-2025 15:13:18 Europe/Paris] Has skills: YES
+[13-Jul-2025 15:13:18 Europe/Paris] Has languages: YES
+[13-Jul-2025 15:13:18 Europe/Paris] Photo copied successfully: uploads/photos/temp_preview_photo_6873b0ee39cd9.png -> cv_photo.png
+[13-Jul-2025 15:13:37 Europe/Paris] generateXMLContent - Starting XML generation
+[13-Jul-2025 15:13:37 Europe/Paris] generateXMLContent - Form data keys: education_degree, education_dates, education_university, education_field, education_details, experience_location, experience_dates, experience_company, experience_position, experience_description, project_name, project_link, project_description, skill_category, skill_items, language_name, language_level, certificate_name, certificate_date, certificate_issuer, certificate_location, certificate_description, editing_cv_id, existing_photo_path, primary_color, photo, nom, prenom, location, email, telephone, website, linkedin, github, profil_description, format, photo_preview_src
+[13-Jul-2025 15:13:37 Europe/Paris] generateXMLContent - XML generation completed, length: 2379
+[13-Jul-2025 15:13:37 Europe/Paris] generateXMLContent - XML preview: <?xml version="1.0" encoding="UTF-8"?>
+<cv>
+  <personalization>
+    <primaryColor>#dc3545</primaryColor>
+  </personalization>
+
+  <personalInfo>
+    <firstname>Abderrazak</firstname>
+    <lastname>KHAL...
+[13-Jul-2025 15:13:37 Europe/Paris] Live Preview XML structure check:
+[13-Jul-2025 15:13:37 Europe/Paris] Has certificates: YES
+[13-Jul-2025 15:13:37 Europe/Paris] Has projects: YES
+[13-Jul-2025 15:13:37 Europe/Paris] Has skills: YES
+[13-Jul-2025 15:13:37 Europe/Paris] Has languages: YES
+[13-Jul-2025 15:13:37 Europe/Paris] Photo copied successfully: uploads/photos/temp_preview_photo_6873b101dc35d.png -> cv_photo.png
+[13-Jul-2025 15:14:00 Europe/Paris] generateXMLContent - Starting XML generation
+[13-Jul-2025 15:14:00 Europe/Paris] generateXMLContent - Form data keys: education_degree, education_dates, education_university, education_field, education_details, experience_location, experience_dates, experience_company, experience_position, experience_description, project_name, project_link, project_description, skill_category, skill_items, language_name, language_level, certificate_name, certificate_date, certificate_issuer, certificate_location, certificate_description, editing_cv_id, existing_photo_path, primary_color, photo, nom, prenom, location, email, telephone, website, linkedin, github, profil_description, format, photo_preview_src
+[13-Jul-2025 15:14:00 Europe/Paris] generateXMLContent - XML generation completed, length: 2379
+[13-Jul-2025 15:14:00 Europe/Paris] generateXMLContent - XML preview: <?xml version="1.0" encoding="UTF-8"?>
+<cv>
+  <personalization>
+    <primaryColor>#dc3545</primaryColor>
+  </personalization>
+
+  <personalInfo>
+    <firstname>Abderrazak</firstname>
+    <lastname>KHAL...
+[13-Jul-2025 15:14:00 Europe/Paris] Live Preview XML structure check:
+[13-Jul-2025 15:14:00 Europe/Paris] Has certificates: YES
+[13-Jul-2025 15:14:00 Europe/Paris] Has projects: YES
+[13-Jul-2025 15:14:00 Europe/Paris] Has skills: YES
+[13-Jul-2025 15:14:00 Europe/Paris] Has languages: YES
+[13-Jul-2025 15:14:00 Europe/Paris] Photo copied successfully: uploads/photos/temp_preview_photo_6873b118411d1.png -> cv_photo.png
+[13-Jul-2025 15:14:13 Europe/Paris] generateXMLContent - Starting XML generation
+[13-Jul-2025 15:14:13 Europe/Paris] generateXMLContent - Form data keys: education_degree, education_dates, education_university, education_field, education_details, experience_location, experience_dates, experience_company, experience_position, experience_description, project_name, project_link, project_description, skill_category, skill_items, language_name, language_level, certificate_name, certificate_date, certificate_issuer, certificate_location, certificate_description, editing_cv_id, existing_photo_path, primary_color, photo, nom, prenom, location, email, telephone, website, linkedin, github, profil_description, format, photo_preview_src
+[13-Jul-2025 15:14:13 Europe/Paris] generateXMLContent - XML generation completed, length: 2379
+[13-Jul-2025 15:14:13 Europe/Paris] generateXMLContent - XML preview: <?xml version="1.0" encoding="UTF-8"?>
+<cv>
+  <personalization>
+    <primaryColor>#dc3545</primaryColor>
+  </personalization>
+
+  <personalInfo>
+    <firstname>Abderrazak</firstname>
+    <lastname>KHAL...
+[13-Jul-2025 15:14:13 Europe/Paris] Live Preview XML structure check:
+[13-Jul-2025 15:14:13 Europe/Paris] Has certificates: YES
+[13-Jul-2025 15:14:13 Europe/Paris] Has projects: YES
+[13-Jul-2025 15:14:13 Europe/Paris] Has skills: YES
+[13-Jul-2025 15:14:13 Europe/Paris] Has languages: YES
+[13-Jul-2025 15:14:13 Europe/Paris] Photo copied successfully: uploads/photos/temp_preview_photo_6873b12599322.png -> cv_photo.png

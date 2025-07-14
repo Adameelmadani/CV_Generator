@@ -931,3 +931,129 @@ ou externe, un programme ex‚cutable ou un fichier de commandes.
 [12-Jul-2025 19:29:10 Europe/Paris] Updated existing CV ID: 64
 [12-Jul-2025 19:29:14 Europe/Paris] PDF saved permanently: C:\xampp\htdocs\CV_Generator\app\Controllers/../../Cv_generator/saved_pdfs/CV_Jean_Dupont_64_10002.pdf
 [12-Jul-2025 19:29:14 Europe/Paris] === CV Generation Request Completed Successfully ===
+[13-Jul-2025 14:22:19 Europe/Paris] === CV Generation Request Started ===
+[13-Jul-2025 14:22:19 Europe/Paris] Request Method: POST
+[13-Jul-2025 14:22:19 Europe/Paris] Request URI: /V0CV/CV_Generator/Cv_generator/generate_cv_mvc.php
+[13-Jul-2025 14:22:19 Europe/Paris] User Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36 Edg/138.0.0.0
+[13-Jul-2025 14:22:19 Europe/Paris] Session ID: 
+[13-Jul-2025 14:22:19 Europe/Paris] Session Status: 1
+[13-Jul-2025 14:22:19 Europe/Paris] CV Generation Request - AJAX: true, JSON Accept: true, Fetch: true, POST not form: true
+[13-Jul-2025 14:22:19 Europe/Paris] Creating CVController instance...
+[13-Jul-2025 14:22:19 Europe/Paris] CVController created, calling generateCV...
+[13-Jul-2025 14:22:19 Europe/Paris] POST data keys: editing_cv_id, existing_photo_path, primary_color, nom, prenom, location, email, telephone, website, linkedin, github, profil_description, education_degree, education_dates, education_university, education_field, education_details, experience_location, experience_dates, experience_company, experience_position, experience_description, project_name, project_link, project_description, certificate_name, certificate_date, certificate_issuer, certificate_location, certificate_description, skill_category, skill_items, language_name, language_level, format, guest_mode
+[13-Jul-2025 14:22:19 Europe/Paris] POST data sample: {"editing_cv_id":"","existing_photo_path":"","primary_color":"#667eea","nom":"Dupont","prenom":"Jean"}
+[13-Jul-2025 14:22:19 Europe/Paris] CV Generation - Guest Mode: true
+[13-Jul-2025 14:22:19 Europe/Paris] generateXMLContent - Starting XML generation
+[13-Jul-2025 14:22:19 Europe/Paris] generateXMLContent - Form data keys: editing_cv_id, existing_photo_path, primary_color, nom, prenom, location, email, telephone, website, linkedin, github, profil_description, education_degree, education_dates, education_university, education_field, education_details, experience_location, experience_dates, experience_company, experience_position, experience_description, project_name, project_link, project_description, certificate_name, certificate_date, certificate_issuer, certificate_location, certificate_description, skill_category, skill_items, language_name, language_level, format, guest_mode
+[13-Jul-2025 14:22:19 Europe/Paris] generateXMLContent - XML generation completed, length: 2856
+[13-Jul-2025 14:22:19 Europe/Paris] generateXMLContent - XML preview: <?xml version="1.0" encoding="UTF-8"?>
+<cv>
+  <personalization>
+    <primaryColor>#667eea</primaryColor>
+  </personalization>
+
+  <personalInfo>
+    <firstname>Jean</firstname>
+    <lastname>Dupont</la...
+[13-Jul-2025 14:22:19 Europe/Paris] Using default CV name: CV_Jean_Dupont_2025-07-13 14:22:19
+[13-Jul-2025 14:22:19 Europe/Paris] Guest mode - generated temporary CV ID: guest_1752409339_5800
+[13-Jul-2025 14:22:28 Europe/Paris] Saved XML file for guest: D:\xampp\htdocs\V0CV\CV_Generator\app\Controllers/../../Cv_generator/cv_guest_1752409339_5800.xml
+[13-Jul-2025 14:22:28 Europe/Paris] Guest mode - forcing PDF format
+[13-Jul-2025 14:22:28 Europe/Paris] === CV Generation Request Completed Successfully ===
+[13-Jul-2025 15:13:54 Europe/Paris] === CV Generation Request Started ===
+[13-Jul-2025 15:13:54 Europe/Paris] Request Method: POST
+[13-Jul-2025 15:13:54 Europe/Paris] Request URI: /V0CV/CV_Generator/Cv_generator/generate_cv_mvc.php
+[13-Jul-2025 15:13:54 Europe/Paris] User Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36 Edg/138.0.0.0
+[13-Jul-2025 15:13:54 Europe/Paris] Session ID: 
+[13-Jul-2025 15:13:54 Europe/Paris] Session Status: 1
+[13-Jul-2025 15:13:54 Europe/Paris] CV Generation Request - AJAX: true, JSON Accept: true, Fetch: true, POST not form: true
+[13-Jul-2025 15:13:54 Europe/Paris] Creating CVController instance...
+[13-Jul-2025 15:13:54 Europe/Paris] CVController created, calling generateCV...
+[13-Jul-2025 15:13:54 Europe/Paris] POST data keys: editing_cv_id, existing_photo_path, primary_color, nom, prenom, location, email, telephone, website, linkedin, github, profil_description, education_degree, education_dates, education_university, education_field, education_details, experience_location, experience_dates, experience_company, experience_position, experience_description, project_name, project_link, project_description, certificate_name, certificate_date, certificate_issuer, certificate_location, certificate_description, skill_category, skill_items, language_name, language_level, format, custom_cv_name
+[13-Jul-2025 15:13:54 Europe/Paris] POST data sample: {"editing_cv_id":"","existing_photo_path":"","primary_color":"#dc3545","nom":"KHALIL","prenom":"Abderrazak"}
+[13-Jul-2025 15:13:54 Europe/Paris] CV Generation - Guest Mode: false
+[13-Jul-2025 15:13:54 Europe/Paris] CV Generation - User ID: 10003
+[13-Jul-2025 15:13:54 Europe/Paris] generateXMLContent - Starting XML generation
+[13-Jul-2025 15:13:54 Europe/Paris] generateXMLContent - Form data keys: editing_cv_id, existing_photo_path, primary_color, nom, prenom, location, email, telephone, website, linkedin, github, profil_description, education_degree, education_dates, education_university, education_field, education_details, experience_location, experience_dates, experience_company, experience_position, experience_description, project_name, project_link, project_description, certificate_name, certificate_date, certificate_issuer, certificate_location, certificate_description, skill_category, skill_items, language_name, language_level, format, custom_cv_name
+[13-Jul-2025 15:13:54 Europe/Paris] generateXMLContent - XML generation completed, length: 2380
+[13-Jul-2025 15:13:54 Europe/Paris] generateXMLContent - XML preview: <?xml version="1.0" encoding="UTF-8"?>
+<cv>
+  <personalization>
+    <primaryColor>#dc3545</primaryColor>
+  </personalization>
+
+  <personalInfo>
+    <firstname>Abderrazak</firstname>
+    <lastname>KHAL...
+[13-Jul-2025 15:13:54 Europe/Paris] Using custom CV name from form data: my_cv
+[13-Jul-2025 15:13:54 Europe/Paris] Generated form data hash: a65a166046a8e17eca10e015415cdaa0 with custom_cv_name: my_cv
+[13-Jul-2025 15:13:54 Europe/Paris] CV::createCV - XML content length: 2380
+[13-Jul-2025 15:13:54 Europe/Paris] CV::createCV - CV name: my_cv
+[13-Jul-2025 15:13:54 Europe/Paris] CV::createCV - User filiere ID: 8
+[13-Jul-2025 15:13:54 Europe/Paris] CVSectionsManager::saveAllSections - CV ID: 28, User ID: 10003
+[13-Jul-2025 15:13:54 Europe/Paris] CVSectionsManager::saveAllSections - Form data keys: editing_cv_id, existing_photo_path, primary_color, nom, prenom, location, email, telephone, website, linkedin, github, profil_description, education_degree, education_dates, education_university, education_field, education_details, experience_location, experience_dates, experience_company, experience_position, experience_description, project_name, project_link, project_description, certificate_name, certificate_date, certificate_issuer, certificate_location, certificate_description, skill_category, skill_items, language_name, language_level, format, custom_cv_name
+[13-Jul-2025 15:13:54 Europe/Paris] CVSectionsManager::saveAllSections - education_degree type: array, count: 1
+[13-Jul-2025 15:13:54 Europe/Paris] CVSectionsManager::saveAllSections - experience_company type: array, count: 1
+[13-Jul-2025 15:13:54 Europe/Paris] CVSectionsManager::saveAllSections - project_name type: array, count: 1
+[13-Jul-2025 15:13:54 Europe/Paris] CVSectionsManager::saveAllSections - certificate_name type: array, count: 1
+[13-Jul-2025 15:13:54 Europe/Paris] CVSectionsManager::saveAllSections - skill_category type: array, count: 2
+[13-Jul-2025 15:13:54 Europe/Paris] CVSectionsManager::saveAllSections - language_name type: array, count: 2
+[13-Jul-2025 15:13:54 Europe/Paris] CVSectionsManager::saveAllSections - Personal info saved successfully
+[13-Jul-2025 15:13:54 Europe/Paris] CVSectionsManager::saveAllSections - Profile saved successfully
+[13-Jul-2025 15:13:54 Europe/Paris] CVSectionsManager::saveAllSections - Education saved successfully
+[13-Jul-2025 15:13:54 Europe/Paris] CVSectionsManager::saveAllSections - Experience saved successfully
+[13-Jul-2025 15:13:54 Europe/Paris] CVSectionsManager::saveAllSections - Projects saved successfully
+[13-Jul-2025 15:13:54 Europe/Paris] CVSectionsManager::saveAllSections - Certificates saved successfully
+[13-Jul-2025 15:13:54 Europe/Paris] CVSectionsManager::saveAllSections - Skills saved successfully
+[13-Jul-2025 15:13:54 Europe/Paris] CVSectionsManager::saveAllSections - Languages saved successfully
+[13-Jul-2025 15:13:54 Europe/Paris] Generated core data hash: 621120fac71d8a1e7bc964949af77624 with custom_cv_name: my_cv
+[13-Jul-2025 15:13:54 Europe/Paris] Photo copied successfully: uploads/photos/Abderrazak_KHALIL_1752412434.png -> cv_photo.png
+[13-Jul-2025 15:14:00 Europe/Paris] PDF saved permanently: D:\xampp\htdocs\V0CV\CV_Generator\app\Controllers/../../Cv_generator/saved_pdfs/CV_Abderrazak_KHALIL_28_10003.pdf
+[13-Jul-2025 15:14:00 Europe/Paris] === CV Generation Request Completed Successfully ===
+[13-Jul-2025 18:58:35 Europe/Paris] === CV Generation Request Started ===
+[13-Jul-2025 18:58:35 Europe/Paris] Request Method: POST
+[13-Jul-2025 18:58:35 Europe/Paris] Request URI: /V0CV/CV_Generator/Cv_generator/generate_cv_mvc.php
+[13-Jul-2025 18:58:35 Europe/Paris] User Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36 Edg/138.0.0.0
+[13-Jul-2025 18:58:35 Europe/Paris] Session ID: 
+[13-Jul-2025 18:58:35 Europe/Paris] Session Status: 1
+[13-Jul-2025 18:58:35 Europe/Paris] CV Generation Request - AJAX: true, JSON Accept: true, Fetch: true, POST not form: true
+[13-Jul-2025 18:58:35 Europe/Paris] Creating CVController instance...
+[13-Jul-2025 18:58:35 Europe/Paris] CVController created, calling generateCV...
+[13-Jul-2025 18:58:35 Europe/Paris] POST data keys: editing_cv_id, existing_photo_path, primary_color, nom, prenom, location, email, telephone, website, linkedin, github, profil_description, education_degree, education_dates, education_university, education_field, education_details, experience_location, experience_dates, experience_company, experience_position, experience_description, project_name, project_link, project_description, certificate_name, certificate_date, certificate_issuer, certificate_location, certificate_description, skill_category, skill_items, language_name, language_level, format
+[13-Jul-2025 18:58:35 Europe/Paris] POST data sample: {"editing_cv_id":"29","existing_photo_path":"","primary_color":"#667eea","nom":"KHALIL","prenom":"Abderrazak"}
+[13-Jul-2025 18:58:35 Europe/Paris] CV Generation - Guest Mode: false
+[13-Jul-2025 18:58:35 Europe/Paris] CV Generation - User ID: 10003
+[13-Jul-2025 18:58:35 Europe/Paris] generateXMLContent - Starting XML generation
+[13-Jul-2025 18:58:35 Europe/Paris] generateXMLContent - Form data keys: editing_cv_id, existing_photo_path, primary_color, nom, prenom, location, email, telephone, website, linkedin, github, profil_description, education_degree, education_dates, education_university, education_field, education_details, experience_location, experience_dates, experience_company, experience_position, experience_description, project_name, project_link, project_description, certificate_name, certificate_date, certificate_issuer, certificate_location, certificate_description, skill_category, skill_items, language_name, language_level, format
+[13-Jul-2025 18:58:35 Europe/Paris] generateXMLContent - XML generation completed, length: 2336
+[13-Jul-2025 18:58:35 Europe/Paris] generateXMLContent - XML preview: <?xml version="1.0" encoding="UTF-8"?>
+<cv>
+  <personalization>
+    <primaryColor>#667eea</primaryColor>
+  </personalization>
+
+  <personalInfo>
+    <firstname>Abderrazak</firstname>
+    <lastname>KHAL...
+[13-Jul-2025 18:58:35 Europe/Paris] Using stored custom CV name from session: my_cv
+[13-Jul-2025 18:58:35 Europe/Paris] CVSectionsManager::saveAllSections - CV ID: 29, User ID: 10003
+[13-Jul-2025 18:58:35 Europe/Paris] CVSectionsManager::saveAllSections - Form data keys: editing_cv_id, existing_photo_path, primary_color, nom, prenom, location, email, telephone, website, linkedin, github, profil_description, education_degree, education_dates, education_university, education_field, education_details, experience_location, experience_dates, experience_company, experience_position, experience_description, project_name, project_link, project_description, certificate_name, certificate_date, certificate_issuer, certificate_location, certificate_description, skill_category, skill_items, language_name, language_level, format
+[13-Jul-2025 18:58:35 Europe/Paris] CVSectionsManager::saveAllSections - education_degree type: array, count: 1
+[13-Jul-2025 18:58:35 Europe/Paris] CVSectionsManager::saveAllSections - experience_company type: array, count: 1
+[13-Jul-2025 18:58:35 Europe/Paris] CVSectionsManager::saveAllSections - project_name type: array, count: 1
+[13-Jul-2025 18:58:35 Europe/Paris] CVSectionsManager::saveAllSections - certificate_name type: array, count: 1
+[13-Jul-2025 18:58:35 Europe/Paris] CVSectionsManager::saveAllSections - skill_category type: array, count: 2
+[13-Jul-2025 18:58:35 Europe/Paris] CVSectionsManager::saveAllSections - language_name type: array, count: 2
+[13-Jul-2025 18:58:35 Europe/Paris] CVSectionsManager::saveAllSections - Personal info saved successfully
+[13-Jul-2025 18:58:35 Europe/Paris] CVSectionsManager::saveAllSections - Profile saved successfully
+[13-Jul-2025 18:58:35 Europe/Paris] CVSectionsManager::saveAllSections - Education saved successfully
+[13-Jul-2025 18:58:35 Europe/Paris] CVSectionsManager::saveAllSections - Experience saved successfully
+[13-Jul-2025 18:58:35 Europe/Paris] CVSectionsManager::saveAllSections - Projects saved successfully
+[13-Jul-2025 18:58:35 Europe/Paris] CVSectionsManager::saveAllSections - Certificates saved successfully
+[13-Jul-2025 18:58:35 Europe/Paris] CVSectionsManager::saveAllSections - Skills saved successfully
+[13-Jul-2025 18:58:35 Europe/Paris] CVSectionsManager::saveAllSections - Languages saved successfully
+[13-Jul-2025 18:58:35 Europe/Paris] Generated form data hash: 31eee0d96748017c19fd268ffe2677c8 with custom_cv_name: my_cv
+[13-Jul-2025 18:58:35 Europe/Paris] Generated core data hash: 531aaf16de875dc07e62b6eb5b274516 with custom_cv_name: my_cv
+[13-Jul-2025 18:58:35 Europe/Paris] Updated existing CV ID: 29
+[13-Jul-2025 18:58:41 Europe/Paris] PDF saved permanently: D:\xampp\htdocs\V0CV\CV_Generator\app\Controllers/../../Cv_generator/saved_pdfs/CV_Abderrazak_KHALIL_29_10003.pdf
+[13-Jul-2025 18:58:41 Europe/Paris] === CV Generation Request Completed Successfully ===

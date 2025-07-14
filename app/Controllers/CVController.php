@@ -451,7 +451,7 @@ class CVController extends Controller {
                 move_uploaded_file($file['tmp_name'], $tmpPdf);
                 // Call parse_cv.py (chemin corrigé)
                 $python = 'python';
-                $script = 'C:/xampp/htdocs/CV_Generator-3/parsing/parse_cv.py';
+                $script = __DIR__ . '/../../parsing/parse_cv.py';
                 $cmd = escapeshellcmd("$python $script $tmpPdf $tmpXml") . " 2>&1";
                 exec($cmd, $output, $ret);
                 error_log("CMD: $cmd");
@@ -460,13 +460,56 @@ class CVController extends Controller {
                 error_log("SCRIPT: $script");
                 error_log("TMPPDF: $tmpPdf");
                 error_log("TMPXML: $tmpXml");
-                if ($ret !== 0 || !file_exists($tmpXml)) {
+                
+                // Vérifications détaillées
+                if ($ret !== 0) {
+                    $error_message = "Erreur lors du parsing du PDF (code: $ret). ";
+                    $output_text = implode("\n", $output);
+                    
+                    if (strpos($output_text, "Module lxml non trouvé") !== false) {
+                        $error_message .= "Problème de dépendance Python: module lxml manquant.";
+                    } elseif (strpos($output_text, "Tesseract non trouvé") !== false) {
+                        $error_message .= "Tesseract OCR n'est pas installé. Installez-le pour traiter les PDF contenant des images.";
+                    } elseif (strpos($output_text, "Le PDF semble vide") !== false) {
+                        $error_message .= "Le PDF ne contient pas de texte lisible.";
+                    } elseif (strpos($output_text, "ERREUR: Le fichier PDF") !== false) {
+                        $error_message .= "Le fichier PDF est corrompu ou inaccessible.";
+                    } elseif (strpos($output_text, "Aucun texte n'a pu être extrait") !== false) {
+                        $error_message .= "Le PDF contient uniquement des images et l'OCR n'a pas pu extraire de texte. Vérifiez la qualité des images.";
+                    } elseif (strpos($output_text, "OCR a échoué") !== false) {
+                        $error_message .= "L'OCR n'a pas pu lire le texte des images. Vérifiez la qualité et la résolution du PDF.";
+                    } else {
+                        $error_message .= "Veuillez vérifier le format du CV.";
+                    }
+                    
                     $this->jsonResponse([
                         'status' => 'error',
-                        'message' => 'Erreur lors du parsing du PDF. Veuillez vérifier le format du CV.'
+                        'message' => $error_message,
+                        'debug' => [
+                            'return_code' => $ret,
+                            'output' => $output,
+                            'script_exists' => file_exists($script),
+                            'pdf_exists' => file_exists($tmpPdf),
+                            'pdf_size' => file_exists($tmpPdf) ? filesize($tmpPdf) : 0
+                        ]
                     ], 500);
                     if (file_exists($tmpPdf)) unlink($tmpPdf);
                     if (file_exists($tmpXml)) unlink($tmpXml);
+                    return;
+                }
+                
+                if (!file_exists($tmpXml)) {
+                    $this->jsonResponse([
+                        'status' => 'error',
+                        'message' => 'Le fichier XML de sortie n\'a pas été généré. Vérifiez les permissions et l\'espace disque.',
+                        'debug' => [
+                            'output' => $output,
+                            'script_exists' => file_exists($script),
+                            'pdf_exists' => file_exists($tmpPdf),
+                            'xml_exists' => file_exists($tmpXml)
+                        ]
+                    ], 500);
+                    if (file_exists($tmpPdf)) unlink($tmpPdf);
                     return;
                 }
                 $xmlContent = file_get_contents($tmpXml);

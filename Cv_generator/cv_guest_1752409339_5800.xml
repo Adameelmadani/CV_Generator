@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cv>
+  <personalization>
+    <primaryColor>#667eea</primaryColor>
+  </personalization>
+
+  <personalInfo>
+    <firstname>Jean</firstname>
+    <lastname>Dupont</lastname>
+    <location>Paris, France</location>
+    <email>jean.dupont@email.com</email>
+    <phone>+33 1 23 45 67 89</phone>
+    <website>https://jeandupont.dev</website>
+    <linkedin>https://linkedin.com/in/jeandupont</linkedin>
+    <github>https://github.com/jeandupont</github>
+  </personalInfo>
+
+  <profil>
+    <description>Développeur Full-Stack passionné avec 5 ans d&amp;#039;expérience dans la création d&amp;#039;applications web modernes. Expertise en JavaScript, React, Node.js et bases de données. Recherche de nouveaux défis techniques dans une équipe dynamique.</description>
+  </profil>
+
+  <education>
+    <degree>
+      <title>Master en Informatique</title>
+      <period>2020</period>
+      <institution>Université Pierre et Marie Curie</institution>
+      <field>Génie Logiciel</field>
+      <description>Mention Bien - Spécialisation en développement web et architecture logicielle</description>
+    </degree>
+  </education>
+
+  <certificates>
+    <certificate>
+      <name>AWS Certified Developer</name>
+      <date>Mars 2023</date>
+      <issuer>Amazon Web Services</issuer>
+      <location>En ligne</location>
+      <description>Certification professionnelle en développement d&#039;applications sur AWS</description>
+    </certificate>
+  </certificates>
+
+  <experiences>
+    <experience>
+      <location>Paris, France</location>
+      <period>Jan 2021 – Présent</period>
+      <company>TechCorp Solutions</company>
+      <position>Développeur Full-Stack Senior</position>
+      <description>Développement d&amp;#039;applications web modernes avec React et Node.js
+Gestion et encadrement d&amp;#039;une équipe de 3 développeurs juniors
+Optimisation des performances applicatives et renforcement de la sécurité
+Mise en place de pipelines CI/CD avec Docker et Kubernetes
+Conception d&amp;#039;architectures scalables et maintenables
+Participation aux décisions techniques et choix technologiques</description>
+    </experience>
+  </experiences>
+
+  <projects>
+    <project>
+      <name>E-Commerce Platform</name>
+      <link>https://github.com/jeandupont/ecommerce-platform</link>
+      <description>Plateforme e-commerce complète développée avec React, Node.js, MongoDB et Stripe. Fonctionnalités: gestion des produits, panier, paiements sécurisés, dashboard admin.</description>
+    </project>
+  </projects>
+
+  <skills>
+    <skill>
+      <category>Langages de programmation</category>
+      <items>JavaScript, TypeScript, Python, Java, PHP, SQL</items>
+    </skill>
+  </skills>
+
+  <languages>
+    <language>
+      <name>Français</name>
+      <level>Native</level>
+    </language>
+  </languages>
+
+</cv>

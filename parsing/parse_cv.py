@@ -3,8 +3,11 @@ import re
 import os
 import pdfplumber
 import pytesseract
-from lxml import etree
-import sys
+try:
+    from lxml import etree
+except ImportError:
+    print("ERREUR: Module lxml non trouvé. Installation requise: pip install lxml")
+    sys.exit(1)
 print("PYTHON USED:", sys.executable)
 
 
@@ -20,50 +23,200 @@ def restore_spaces(text):
 def extract_text_from_pdf(pdf_path):
     text = ""
     print(f"--- Extraction du fichier : {pdf_path} ---")
+    
+    # Vérifier si Tesseract est installé
+    try:
+        pytesseract.get_tesseract_version()
+        print("[OK] Tesseract détecté")
+    except Exception as e:
+        print(f"[ERREUR] Tesseract non trouvé ou non configuré: {e}")
+        print("Installez Tesseract: https://github.com/tesseract-ocr/tesseract")
+        return ""
+    
     try:
         extract_options = {"x_tolerance": 3, "layout": True}
         with pdfplumber.open(pdf_path) as pdf:
+            if len(pdf.pages) == 0:
+                print("ERREUR: Le PDF ne contient aucune page")
+                return ""
+            
+            total_pages = len(pdf.pages)
+            print(f"Nombre de pages détectées: {total_pages}")
+            
+            # Détecter si le PDF contient principalement des images
+            has_native_text = False
             for i, page in enumerate(pdf.pages):
                 page_text = page.extract_text(**extract_options)
                 if page_text and page_text.strip():
-                    print(f"Page {i+1}: PDF natif détecté (texte propre).")
+                    has_native_text = True
+                    break
+            
+            if not has_native_text:
+                print("[ATTENTION] PDF contient principalement des images - OCR requis")
+            
+            for i, page in enumerate(pdf.pages):
+                print(f"\n--- Traitement page {i+1}/{total_pages} ---")
+                
+                # Essayer d'abord l'extraction de texte natif
+                page_text = page.extract_text(**extract_options)
+                if page_text and page_text.strip():
+                    print(f"Page {i+1}: Texte natif détecté ({len(page_text)} caractères)")
                     text += page_text + "\n"
                 else:
-                    print(f"Page {i+1}: Pas de texte natif, tentative d'OCR...")
-                    img = page.to_image(resolution=200).original
-                    ocr_text = pytesseract.image_to_string(img, lang="fra")
-                    text += ocr_text + "\n"
+                    print(f"Page {i+1}: Pas de texte natif, utilisation de l'OCR...")
+                    
+                    # Amélioration de l'OCR avec plusieurs tentatives
+                    ocr_success = False
+                    
+                    # Tentative 1: Résolution standard
+                    try:
+                        img = page.to_image(resolution=200).original
+                        ocr_text = pytesseract.image_to_string(img, lang="fra", config='--psm 6')
+                        if ocr_text and ocr_text.strip():
+                            print(f"Page {i+1}: OCR réussi (résolution 200)")
+                            text += ocr_text + "\n"
+                            ocr_success = True
+                    except Exception as e:
+                        print(f"Page {i+1}: Erreur OCR (résolution 200): {e}")
+                    
+                    # Tentative 2: Résolution plus élevée si la première échoue
+                    if not ocr_success:
+                        try:
+                            img = page.to_image(resolution=300).original
+                            ocr_text = pytesseract.image_to_string(img, lang="fra", config='--psm 6')
+                            if ocr_text and ocr_text.strip():
+                                print(f"Page {i+1}: OCR réussi (résolution 300)")
+                                text += ocr_text + "\n"
+                                ocr_success = True
+                        except Exception as e:
+                            print(f"Page {i+1}: Erreur OCR (résolution 300): {e}")
+                    
+                    # Tentative 3: Mode de segmentation différent
+                    if not ocr_success:
+                        try:
+                            img = page.to_image(resolution=200).original
+                            ocr_text = pytesseract.image_to_string(img, lang="fra", config='--psm 3')
+                            if ocr_text and ocr_text.strip():
+                                print(f"Page {i+1}: OCR réussi (mode auto)")
+                                text += ocr_text + "\n"
+                                ocr_success = True
+                        except Exception as e:
+                            print(f"Page {i+1}: Erreur OCR (mode auto): {e}")
+                    
+                    if not ocr_success:
+                        print(f"Page {i+1}: [ATTENTION] OCR a échoué sur cette page")
+                        # Ajouter un message d'erreur dans le texte pour indiquer le problème
+                        text += f"\n[ERREUR OCR: Impossible de lire le texte de la page {i+1}]\n"
+            
+            if not text.strip():
+                print("ERREUR: Aucun texte n'a pu être extrait du PDF")
+                print("Causes possibles:")
+                print("- Le PDF ne contient que des images de mauvaise qualité")
+                print("- Tesseract n'est pas correctement installé")
+                print("- Les langues françaises ne sont pas installées pour Tesseract")
+                return ""
+                
         print("--- Extraction terminée ---")
+        print(f"Longueur du texte extrait: {len(text)} caractères")
+        
+        # Nettoyer le texte extrait
+        text = re.sub(r"d039;", "'", text)
+        text = re.sub(r'\n\s*\n', '\n', text)  # Supprimer les lignes vides multiples
+        text = text.strip()
+        
+        return text
+        
     except Exception as e:
         print(f"ERREUR Critique lors de l'ouverture ou de la lecture du PDF: {e}")
-    return re.sub(r"d039;", "'", text)
+        return ""
 
 def parse_cv_into_sections(text):
     sections = {}
     known_section_titles = [
-        "Profil", "Profil Professionnel", "À propos", "Présentation", "Résumé",
-        "Expériences", "Expérience", "Expériences Professionnelles", "Parcours professionnel",
-        "Formation", "Éducation", "Diplômes", "Compétences", "Projets",
-        "Certificats", "Certifications", "Langues", "Centres d'intérêt"
+        "Profil", "Profil Professionnel", "À propos", "Présentation", "Résumé", "Summary",
+        "Expériences", "Expérience", "Expériences Professionnelles", "Parcours professionnel", "Experience", "Work Experience",
+        "Formation", "Éducation", "Diplômes", "Education", "Academic Background",
+        "Compétences", "Skills", "Technical Skills", "Hard Skills", "Soft Skills",
+        "Projets", "Projects", "Portfolio",
+        "Certificats", "Certifications", "Certificates",
+        "Langues", "Languages", "Language Skills",
+        "Centres d'intérêt", "Interests", "Hobbies", "Activities"
     ]
+    
+    # Pattern plus flexible pour détecter les sections
     pattern = re.compile(r"^\s*(" + "|".join(known_section_titles) + r")\b", re.IGNORECASE | re.MULTILINE)
     matches = list(pattern.finditer(text))
+    
     title_map = {
-        
-        'experiences': ['expériences', 'expérience', 'expériences professionnelles', 'parcours professionnel'],
-        'education': ['formation', 'éducation', 'diplômes'],
-        'profil': ['profil', 'profil professionnel', 'à propos', 'présentation', 'résumé'],
-        'skills': ['compétences'], 'projects': ['projets'], 'certificates': ['certificats', 'certifications'],
-        'languages': ['langues'], 'interests': ['centres d\'intérêt']
+        'experiences': ['expériences', 'expérience', 'expériences professionnelles', 'parcours professionnel', 'experience', 'work experience'],
+        'education': ['formation', 'éducation', 'diplômes', 'education', 'academic background'],
+        'profil': ['profil', 'profil professionnel', 'à propos', 'présentation', 'résumé', 'summary'],
+        'skills': ['compétences', 'skills', 'technical skills', 'hard skills', 'soft skills'],
+        'projects': ['projets', 'projects', 'portfolio'],
+        'certificates': ['certificats', 'certifications', 'certificates'],
+        'languages': ['langues', 'languages', 'language skills'],
+        'interests': ['centres d\'intérêt', 'interests', 'hobbies', 'activities']
     }
-    for i, match in enumerate(matches):
-        found_title = match.group(1).lower()
-        section_key = next((key for key, titles in title_map.items() if found_title in titles), None)
-        if not section_key:
-            continue
-        start_pos = match.end()
-        end_pos = matches[i+1].start() if i + 1 < len(matches) else len(text)
-        sections[section_key] = text[start_pos:end_pos].strip()
+    
+    # Si aucune section n'est trouvée, essayer une approche alternative
+    if not matches:
+        print("Aucune section standard détectée, tentative d'analyse alternative...")
+        # Essayer de détecter des sections par des mots-clés dans le texte
+        lines = text.split('\n')
+        current_section = None
+        current_content = []
+        
+        for line in lines:
+            line_lower = line.lower().strip()
+            # Détecter les sections par des mots-clés
+            if any(keyword in line_lower for keyword in ['expérience', 'experience', 'travail', 'work']):
+                if current_section and current_content:
+                    sections[current_section] = '\n'.join(current_content).strip()
+                current_section = 'experiences'
+                current_content = []
+            elif any(keyword in line_lower for keyword in ['formation', 'éducation', 'education', 'diplôme', 'degree']):
+                if current_section and current_content:
+                    sections[current_section] = '\n'.join(current_content).strip()
+                current_section = 'education'
+                current_content = []
+            elif any(keyword in line_lower for keyword in ['compétence', 'skill', 'technologie', 'technology']):
+                if current_section and current_content:
+                    sections[current_section] = '\n'.join(current_content).strip()
+                current_section = 'skills'
+                current_content = []
+            elif any(keyword in line_lower for keyword in ['projet', 'project']):
+                if current_section and current_content:
+                    sections[current_section] = '\n'.join(current_content).strip()
+                current_section = 'projects'
+                current_content = []
+            elif any(keyword in line_lower for keyword in ['certificat', 'certificate', 'certification']):
+                if current_section and current_content:
+                    sections[current_section] = '\n'.join(current_content).strip()
+                current_section = 'certificates'
+                current_content = []
+            elif any(keyword in line_lower for keyword in ['langue', 'language']):
+                if current_section and current_content:
+                    sections[current_section] = '\n'.join(current_content).strip()
+                current_section = 'languages'
+                current_content = []
+            else:
+                if current_section:
+                    current_content.append(line)
+        
+        # Ajouter la dernière section
+        if current_section and current_content:
+            sections[current_section] = '\n'.join(current_content).strip()
+    else:
+        # Approche standard avec les sections détectées
+        for i, match in enumerate(matches):
+            found_title = match.group(1).lower()
+            section_key = next((key for key, titles in title_map.items() if found_title in titles), None)
+            if not section_key:
+                continue
+            start_pos = match.end()
+            end_pos = matches[i+1].start() if i + 1 < len(matches) else len(text)
+            sections[section_key] = text[start_pos:end_pos].strip()
+    
     print(f"Sections détectées : {list(sections.keys())}")
     return sections
 
@@ -75,32 +228,107 @@ def extract_info(text):
     # Informations personnelles
     info['personalInfo'] = {}
     lines = text.splitlines()
-    for line in lines[:10]:
-        possible_name = re.match(r"^\s*([A-ZÀ-ÿ][a-zà-ÿA-ZÀ-ÿ'\-]+)\s+([A-ZÀ-ÿ][a-zà-ÿA-ZÀ-ÿ'\-]+)", line)
-        if possible_name:
+    
+    # Extraction du nom - recherche plus robuste
+    name_found = False
+    for line in lines[:15]:  # Chercher dans les 15 premières lignes
+        line_clean = line.strip()
+        if len(line_clean) < 3:
+            continue
+            
+        # Pattern pour nom complet (prénom + nom)
+        possible_name = re.match(r"^\s*([A-ZÀ-ÿ][a-zà-ÿA-ZÀ-ÿ'\-]+)\s+([A-ZÀ-ÿ][a-zà-ÿA-ZÀ-ÿ'\-]+)", line_clean)
+        if possible_name and not name_found:
             info['personalInfo']['firstname'] = possible_name.group(1).strip()
             info['personalInfo']['lastname'] = possible_name.group(2).strip()
+            name_found = True
+            print(f"Nom détecté: {info['personalInfo']['firstname']} {info['personalInfo']['lastname']}")
             break
-    info['personalInfo']['email'] = next((m.group(0) for m in [re.search(r"[\w\.\-]+@[\w\.\-]+", text)] if m), None)
-    phone_regex = re.compile(r"(\+?\d{1,3}[\s\-\.]?\d{1,2}[\s\-\.]?\d{2}[\s\-\.]?\d{2}[\s\-\.]?\d{2})|" r"(\b0[1-9](?:[\s\.\-]?\d{2}){4}\b)")
-    phone_match = phone_regex.search(text)
-    info['personalInfo']['phone'] = phone_match.group(0) if phone_match else None
-    location = None
+    
+    # Si aucun nom trouvé, essayer de détecter un nom seul
+    if not name_found:
+        for line in lines[:10]:
+            line_clean = line.strip()
+            if len(line_clean) > 2 and len(line_clean) < 50:
+                # Chercher un nom qui commence par une majuscule et contient des lettres
+                name_match = re.match(r"^[A-ZÀ-ÿ][a-zà-ÿA-ZÀ-ÿ'\-]+$", line_clean)
+                if name_match:
+                    info['personalInfo']['firstname'] = line_clean
+                    info['personalInfo']['lastname'] = ""
+                    print(f"Prénom détecté: {line_clean}")
+                    break
+    
+    # Extraction de l'email
+    email_match = re.search(r"[\w\.\-]+@[\w\.\-]+\.\w+", text)
+    info['personalInfo']['email'] = email_match.group(0) if email_match else None
+    if info['personalInfo']['email']:
+        print(f"Email détecté: {info['personalInfo']['email']}")
+    
+    # Extraction du téléphone - patterns plus flexibles
+    phone_patterns = [
+        r"(\+?\d{1,3}[\s\-\.]?\d{1,2}[\s\-\.]?\d{2}[\s\-\.]?\d{2}[\s\-\.]?\d{2})",
+        r"(\b0[1-9](?:[\s\.\-]?\d{2}){4}\b)",
+        r"(\+33\s?\d{1}\s?\d{2}\s?\d{2}\s?\d{2}\s?\d{2})",  # Format français
+        r"(\d{2}\s?\d{2}\s?\d{2}\s?\d{2}\s?\d{2})"  # Format 10 chiffres
+    ]
+    
+    phone_found = False
+    for pattern in phone_patterns:
+        phone_match = re.search(pattern, text)
+        if phone_match:
+            info['personalInfo']['phone'] = phone_match.group(0)
+            print(f"Téléphone détecté: {info['personalInfo']['phone']}")
+            phone_found = True
+            break
+    
+    if not phone_found:
+        info['personalInfo']['phone'] = None
+    
+    # Extraction de la localisation - patterns plus flexibles
     location_patterns = [
         r"\d{5}\s*,?\s*[A-Z][a-zA-ZÀ-ÿ\-]+",           # 50070, Meknès ou 75001 Paris
         r"Marjane\s*\d*\s*,?\s*\d{5,}\s*,?\s*[A-Z][a-zA-ZÀ-ÿ\-]+", # Marjane 1 , 50070, Meknès
         r"[A-Z][a-zA-ZÀ-ÿ\s\-]+,\s*[A-Z][a-zA-ZÀ-ÿ\s\-]+", # Paris, France
         r"\d{1,3}\s+\w+.*",                               # 12 rue de Paris, etc.
         r"[A-Z][a-zA-ZÀ-ÿ\s\-]+",                         # Meknès ou Paris
+        r"[A-Z][a-zA-ZÀ-ÿ\s\-]+\s*,?\s*[A-Z][a-zA-ZÀ-ÿ\s\-]+", # Ville, Pays
     ]
+    
+    location_found = False
     for pat in location_patterns:
         m = re.search(pat, text)
         if m:
             location = m.group(0).strip(" ,.-")
+            info['personalInfo']['location'] = location
+            print(f"Localisation détectée: {location}")
+            location_found = True
             break
-    info['personalInfo']['location'] = location
-    info['personalInfo']['linkedin'] = next((m.group(0) for m in [re.search(r"https?://(?:www\.)?linkedin\.com/in/[\w\-]+/?", text)] if m), None)
-    info['personalInfo']['github'] = next((m.group(0) for m in [re.search(r"https://github\.com/[\w\-]+/?", text)] if m), None)
+    
+    if not location_found:
+        info['personalInfo']['location'] = None
+    
+    # Extraction des liens sociaux
+    linkedin_match = re.search(r"https?://(?:www\.)?linkedin\.com/in/[\w\-]+/?", text)
+    info['personalInfo']['linkedin'] = linkedin_match.group(0) if linkedin_match else None
+    
+    github_match = re.search(r"https://github\.com/[\w\-]+/?", text)
+    info['personalInfo']['github'] = github_match.group(0) if github_match else None
+    
+    # Initialiser les champs manquants
+    if 'firstname' not in info['personalInfo']:
+        info['personalInfo']['firstname'] = ""
+    if 'lastname' not in info['personalInfo']:
+        info['personalInfo']['lastname'] = ""
+    if 'email' not in info['personalInfo']:
+        info['personalInfo']['email'] = ""
+    if 'phone' not in info['personalInfo']:
+        info['personalInfo']['phone'] = ""
+    if 'location' not in info['personalInfo']:
+        info['personalInfo']['location'] = ""
+    if 'linkedin' not in info['personalInfo']:
+        info['personalInfo']['linkedin'] = ""
+    if 'github' not in info['personalInfo']:
+        info['personalInfo']['github'] = ""
 
     # Profil
     if 'profil' in sections:
@@ -346,20 +574,58 @@ def main():
     script_dir = os.path.dirname(os.path.abspath(__file__))
     xml_model_path = os.path.join(script_dir, 'modele_cv.xml')
 
+    print(f"=== Début du parsing ===")
+    print(f"PDF: {pdf_path}")
+    print(f"Output: {output_path}")
+    print(f"Script dir: {script_dir}")
+    print(f"XML model: {xml_model_path}")
+
+    # Vérifications préliminaires
     if not os.path.exists(pdf_path):
-        print(f"Erreur: Le fichier PDF '{pdf_path}' n'existe pas.")
+        print(f"ERREUR: Le fichier PDF '{pdf_path}' n'existe pas.")
         sys.exit(1)
+    
     if not os.path.exists(xml_model_path):
-        print(f"Erreur: Le fichier modèle XML '{xml_model_path}' n'existe pas.")
+        print(f"ERREUR: Le fichier modèle XML '{xml_model_path}' n'existe pas.")
+        sys.exit(1)
+    
+    # Vérifier la taille du PDF
+    pdf_size = os.path.getsize(pdf_path)
+    print(f"Taille du PDF: {pdf_size} bytes")
+    if pdf_size == 0:
+        print("ERREUR: Le fichier PDF est vide.")
         sys.exit(1)
 
+    # Extraction du texte
     text = extract_text_from_pdf(pdf_path)
-    if not text.strip():
-        print("Le PDF semble vide ou n'a pas pu être lu. Arrêt du script.")
+    if not text or not text.strip():
+        print("ERREUR: Le PDF semble vide ou n'a pas pu être lu.")
+        print("Causes possibles:")
+        print("- Le PDF est corrompu")
+        print("- Le PDF ne contient que des images sans texte")
+        print("- Le PDF est protégé par mot de passe")
+        print("- Problème avec les bibliothèques PDF/OCR")
         sys.exit(1)
 
-    info = extract_info(text)
-    fill_xml(info, xml_model_path, output_path)
+    print(f"Texte extrait avec succès ({len(text)} caractères)")
+
+    # Extraction des informations
+    try:
+        info = extract_info(text)
+        print("Informations extraites avec succès")
+    except Exception as e:
+        print(f"ERREUR lors de l'extraction des informations: {e}")
+        sys.exit(1)
+
+    # Génération du XML
+    try:
+        fill_xml(info, xml_model_path, output_path)
+        print(f"XML généré avec succès: {output_path}")
+    except Exception as e:
+        print(f"ERREUR lors de la génération du XML: {e}")
+        sys.exit(1)
+
+    print("=== Parsing terminé avec succès ===")
 
 if __name__ == "__main__":
     main()

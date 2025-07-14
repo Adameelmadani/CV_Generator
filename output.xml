@@ -1,0 +1,57 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<cv>
+  <personalization>
+    <primaryColor>#667eea</primaryColor>
+  </personalization>
+  <personalInfo>
+    <firstname>Khalil</firstname>
+    <lastname>Abderrazak</lastname>
+    <location>Ouled Frej, El Jadida</location>
+    <email>khalilabderrazak1@gmail.com</email>
+    <phone>+212 6 19 38 47</phone>
+    <website/>
+    <linkedin/>
+    <github/>
+    <photo/>
+  </personalInfo>
+  <profil>
+    <description>E´l`eve-ing´enieur passionn´e par l’Intelligence Artificielle et les Techniques de Donn´ees `a l’E´cole Nationale Sup´erieure d’Arts et M´etiers (ENSAM). Je recherche activement un stage pour appliquer mes comp´etences en d´eveloppement de solutions d’IA innovantes. Mon objectif est de mettre en pratique mes connaissances th´eoriques dans un environnement professionnel et de contribuer au d´eveloppement de mod`eles d’IA performants et´evolutifs.</description>
+  </profil>
+  <education>
+    <!-- Chaque diplôme sera ajouté ici -->
+    <degree>
+      <title>E´cole Nationale Sup´erieure d’Arts et M´etiers (ENSAM)      Mekn`es, Maroc</title>
+      <institution>Diplˆome d’Ing´enieur en Intelligence Artificielle et Techniques de Donn´ees 2022 – Pr´esent</institution>
+      <description>Lyc´ee Technique Errazi                                      El Jadida, Maroc Baccalaur´eat en Sciences Math´ematiques B, Option Fran¸caise  2021 – 2022</description>
+    </degree>
+  </education>
+  <certificates>
+    <!-- Chaque certificat sera ajouté ici -->
+  </certificates>
+  <experiences>
+    <!-- Chaque expérience sera ajoutée ici -->
+  </experiences>
+  <projects>
+    <!-- Chaque projet sera ajouté ici -->
+    <project>
+      <name>et Exp´eriences Professionnelles</name>
+    </project>
+    <project>
+      <name>(cid:1) Projets Acad´emiques           — Projets Personnels</name>
+      <description>..................................   ...................................... Syst`eme intelligent de pr´ediction des d´efauts de soudure Solution point de vente avec analyse IA des ventes Maintenance Pr´edictive                Syst`eme POS (Point of Sale) Application web de gestion des ´evaluations Syst`eme automatis´e permettant de g´erer/g´en´erer de CV Syst`eme de Gestion des Notes          Syst`eme g´en´eratif de CV (cid:140) Hackathons                   † Dynamique de Groupe ............................................... ................................ PainSense : D´etection de douleur et assistance par IA R´ealisation d’un projet `a vocation sociale et solidaire. InnovAI-Hackathon (Moroccan IA)        Leader du Groupe</description>
+    </project>
+    <project>
+      <name>Comp´etences Techniques</name>
+    </project>
+    <project>
+      <name>j: IntelligenceArtificielle: TensorFlow,PyTorch,Keras,Scikit- (cid:128): D´eveloppement Web: Spring Boot, React, HTML/CSS,</name>
+      <description>learn, XGBoost, Statsmodels           JavaScript 3: Langages: Python, C++, Julia, MATLAB, R, Java {: Outils: Git,Docker,VSCode,Jupyter,GoogleColab,IntelliJ ı: Bases de Donn´ees: MCD, MLD, MySQL, JDBC, PHP ¡: SciencedesDonn´ees: Pandas,NumPy,Matplotlib,Seaborn</description>
+    </project>
+  </projects>
+  <skills>
+    <!-- Chaque catégorie de compétence sera ajoutée ici -->
+  </skills>
+  <languages>
+    <!-- Chaque langue sera ajoutée ici -->
+  </languages>
+</cv>
