@@ -64,9 +64,8 @@ CREATE TABLE `cvs` (
   `cv_name` varchar(255) DEFAULT NULL,
   `template_xslt` text DEFAULT NULL,
   `est_publie` tinyint(1) DEFAULT 0,
-  `date_creation` date DEFAULT NULL,
-  `date_modification` date DEFAULT NULL,
-  `id_filiere` int(11) DEFAULT NULL
+  `date_creation` datetime DEFAULT NULL,
+  `date_modification` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -218,7 +217,6 @@ CREATE TABLE `utilisateurs` (
   `id` int(11) NOT NULL,
   `nom` varchar(255) DEFAULT NULL,
   `prenom` varchar(255) DEFAULT NULL,
-  `id_filiere` int(11) DEFAULT NULL,
   `email` varchar(255) NOT NULL,
   `mot_de_passe_hash` varchar(255) NOT NULL,
   `numero_telephone` varchar(20) DEFAULT NULL,
@@ -248,8 +246,7 @@ ALTER TABLE `competences`
 --
 ALTER TABLE `cvs`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `idx_cvs_utilisateur` (`id_utilisateur`),
-  ADD KEY `idx_cvs_filiere` (`id_filiere`);
+  ADD KEY `idx_cvs_utilisateur` (`id_utilisateur`);
 
 --
 -- Indexes for table `experiences`
@@ -305,7 +302,6 @@ ALTER TABLE `projets`
 ALTER TABLE `utilisateurs`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `email` (`email`),
-  ADD KEY `id_filiere` (`id_filiere`),
   ADD KEY `idx_utilisateurs_email` (`email`);
 
 --
@@ -392,8 +388,7 @@ ALTER TABLE `competences`
 -- Constraints for table `cvs`
 --
 ALTER TABLE `cvs`
-  ADD CONSTRAINT `cvs_ibfk_1` FOREIGN KEY (`id_utilisateur`) REFERENCES `utilisateurs` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `cvs_ibfk_2` FOREIGN KEY (`id_filiere`) REFERENCES `filieres` (`id`);
+  ADD CONSTRAINT `cvs_ibfk_1` FOREIGN KEY (`id_utilisateur`) REFERENCES `utilisateurs` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `experiences`
@@ -434,8 +429,6 @@ ALTER TABLE `projets`
 --
 -- Constraints for table `utilisateurs`
 --
-ALTER TABLE `utilisateurs`
-  ADD CONSTRAINT `utilisateurs_ibfk_1` FOREIGN KEY (`id_filiere`) REFERENCES `filieres` (`id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

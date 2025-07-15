@@ -22,25 +22,15 @@ class User extends Model {
         return $this->findByEmail($email);
     }
     
-    public function createUser($nom, $prenom, $email, $hashedPassword, $phoneNumber, $filiereId = null) {
-        // Validate filiere exists if provided
-        if ($filiereId !== null) {
-            $checkSql = "SELECT id FROM filieres WHERE id = :filiere_id";
-            $checkStmt = $this->execute($checkSql, [':filiere_id' => $filiereId]);
-            if (!$checkStmt->fetch()) {
-                throw new Exception("La filière sélectionnée n'existe pas.");
-            }
-        }
-        
-        $sql = "INSERT INTO {$this->table} (nom, prenom, email, mot_de_passe_hash, numero_telephone, id_filiere, date_inscription) 
-                VALUES (:nom, :prenom, :email, :password, :phone_number, :id_filiere, :date_inscription)";
+    public function createUser($nom, $prenom, $email, $hashedPassword, $phoneNumber) {
+        $sql = "INSERT INTO {$this->table} (nom, prenom, email, mot_de_passe_hash, numero_telephone, date_inscription) 
+                VALUES (:nom, :prenom, :email, :password, :phone_number, :date_inscription)";
         $this->execute($sql, [
             ':nom' => $nom,
             ':prenom' => $prenom,
             ':email' => $email,
             ':password' => $hashedPassword,
             ':phone_number' => $phoneNumber,
-            ':id_filiere' => $filiereId,
             ':date_inscription' => date('Y-m-d')
         ]);
         return $this->db->lastInsertId();
@@ -107,7 +97,7 @@ class User extends Model {
     }
     
     public function getUserById($id) {
-        $sql = "SELECT id, nom, prenom, email, numero_telephone, date_inscription, id_filiere FROM {$this->table} WHERE id = :id";
+        $sql = "SELECT id, nom, prenom, email, numero_telephone, date_inscription FROM {$this->table} WHERE id = :id";
         $stmt = $this->execute($sql, [':id' => $id]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }

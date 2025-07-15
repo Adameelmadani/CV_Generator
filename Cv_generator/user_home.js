@@ -51,8 +51,7 @@ async function checkUserSession() {
                 email: result.user_email,
                 nom: result.nom,
                 prenom: result.prenom,
-                tel: result.user_tel,
-                filiereId: result.filiere_id
+                tel: result.user_tel
             };
             
         } else {
@@ -213,17 +212,60 @@ function formatDate(dateString) {
         return 'Date non disponible';
     }
     
-    const date = new Date(dateString);
+    // Debug: log the original date string
+    console.log('Original date string:', dateString);
+    
+    // Check if the date string is in date-only format (YYYY-MM-DD)
+    const dateOnlyPattern = /^\d{4}-\d{2}-\d{2}$/;
+    if (dateOnlyPattern.test(dateString)) {
+        // This is a date-only string from database (no time information stored)
+        console.log('Date-only format detected - showing date without time');
+        
+        const date = new Date(dateString + 'T12:00:00'); // Use noon to avoid timezone issues
+        
+        if (isNaN(date.getTime())) {
+            return 'Date non disponible';
+        }
+        
+        return date.toLocaleDateString('fr-FR', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+    }
+    
+    // Create date object and handle timezone properly for datetime strings
+    let date;
+    
+    // If the date string doesn't include timezone info, treat it as local time
+    if (dateString.includes('T') && !dateString.includes('+') && !dateString.includes('Z')) {
+        // ISO format without timezone
+        date = new Date(dateString);
+    } else if (dateString.includes(' ') && !dateString.includes('T')) {
+        // MySQL datetime format (YYYY-MM-DD HH:MM:SS), treat as local time
+        date = new Date(dateString.replace(' ', 'T'));
+    } else {
+        // Standard date parsing
+        date = new Date(dateString);
+    }
+    
+    // Debug: log the parsed date
+    console.log('Parsed date:', date);
+    console.log('Date hours:', date.getHours(), 'minutes:', date.getMinutes());
     
     // Vérifier si la date est valide
     if (isNaN(date.getTime())) {
         return 'Date non disponible';
     }
     
+    // Format the date and time using local computer timezone
     return date.toLocaleDateString('fr-FR', {
         year: 'numeric',
         month: 'long',
         day: 'numeric'
+    }) + ' à ' + date.toLocaleTimeString('fr-FR', {
+        hour: '2-digit',
+        minute: '2-digit'
     });
 }
 

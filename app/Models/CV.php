@@ -7,7 +7,7 @@ class CV extends Model {
     protected $table = 'cvs';
     
     public function getUserCVs($userId) {
-        $sql = "SELECT c.id, c.contenu_xml, c.lien_pdf, c.est_publie, c.date_creation, c.date_modification, c.id_filiere,
+        $sql = "SELECT c.id, c.contenu_xml, c.lien_pdf, c.est_publie, c.date_creation, c.date_modification,
                        COALESCE(c.cv_name, CONCAT(p.prenom, ' ', p.nom), 'CV sans nom') as cv_name,
                        COALESCE(c.cv_name, CONCAT(p.prenom, ' ', p.nom), 'CV sans nom') as display_name,
                        c.date_creation as created_at,
@@ -33,24 +33,19 @@ class CV extends Model {
         return $stmt->fetch();
     }
     
-    public function createCV($userId, $xmlContent, $cvName = null, $pdfPath = null, $templateXslt = null, $userFiliereId = null) {
+    public function createCV($userId, $xmlContent, $cvName = null, $pdfPath = null, $templateXslt = null) {
         // Validate inputs
         if (empty($userId) || empty($xmlContent)) {
             error_log("ERROR: Invalid input data for CV creation - userId: " . $userId . ", xmlContent length: " . strlen($xmlContent));
             throw new Exception("Invalid input data for CV creation");
         }
         
-        // If userFiliereId is not provided, get it from the user data
-        if ($userFiliereId === null) {
-            $userModel = new User();
-            $userData = $userModel->findById($userId);
-            $userFiliereId = $userData['id_filiere'] ?? null;
-        }
-        
         // Log creation details for debugging
         error_log("CV::createCV - XML content length: " . strlen($xmlContent));
         error_log("CV::createCV - CV name: " . ($cvName ?: 'auto-generated'));
-        error_log("CV::createCV - User filiere ID: " . ($userFiliereId ?: 'none'));
+        
+        // Use the same timestamp for both creation and modification dates
+        $currentDateTime = date('Y-m-d H:i:s');
         
         $data = [
             ':id_utilisateur' => $userId,
@@ -59,13 +54,12 @@ class CV extends Model {
             ':lien_pdf' => $pdfPath,
             ':template_xslt' => $templateXslt,
             ':est_publie' => false,
-            ':date_creation' => date('Y-m-d'),
-            ':date_modification' => date('Y-m-d'),
-            ':id_filiere' => $userFiliereId
+            ':date_creation' => $currentDateTime,
+            ':date_modification' => $currentDateTime
         ];
         
-        $sql = "INSERT INTO {$this->table} (id_utilisateur, contenu_xml, cv_name, lien_pdf, template_xslt, est_publie, date_creation, date_modification, id_filiere) 
-                VALUES (:id_utilisateur, :contenu_xml, :cv_name, :lien_pdf, :template_xslt, :est_publie, :date_creation, :date_modification, :id_filiere)";
+        $sql = "INSERT INTO {$this->table} (id_utilisateur, contenu_xml, cv_name, lien_pdf, template_xslt, est_publie, date_creation, date_modification) 
+                VALUES (:id_utilisateur, :contenu_xml, :cv_name, :lien_pdf, :template_xslt, :est_publie, :date_creation, :date_modification)";
         
         try {
             $stmt = $this->execute($sql, $data);
@@ -99,7 +93,7 @@ class CV extends Model {
             ':user_id' => $userId,
             ':cv_name' => $cvName,
             ':contenu_xml' => $xmlContent,
-            ':date_modification' => date('Y-m-d')
+            ':date_modification' => date('Y-m-d H:i:s')
         ];
         
         $sql = "UPDATE {$this->table} 
@@ -162,7 +156,7 @@ class CV extends Model {
             ':cv_id' => $cvId,
             ':user_id' => $userId,
             ':lien_pdf' => $pdfPath,
-            ':date_modification' => date('Y-m-d')
+            ':date_modification' => date('Y-m-d H:i:s')
         ]);
     }
     
@@ -175,7 +169,7 @@ class CV extends Model {
             ':cv_id' => $cvId,
             ':user_id' => $userId,
             ':est_publie' => $isPublished,
-            ':date_modification' => date('Y-m-d')
+            ':date_modification' => date('Y-m-d H:i:s')
         ]);
     }
 }

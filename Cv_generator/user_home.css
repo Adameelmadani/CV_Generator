@@ -1039,11 +1039,11 @@ body {
 
 /* Publish/Unpublish button */
 .cv-card-actions .action-btn:nth-child(2):hover {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
 .cv-card-actions .action-btn:nth-child(2).published:hover {
-  background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
 .cv-card-actions .action-btn:nth-child(2):hover i {
@@ -1053,21 +1053,21 @@ body {
 
 /* Download button (fa-cloud-download-alt) */
 .cv-card-actions .action-btn:nth-child(3):hover {
-  background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
 .cv-card-actions .action-btn:nth-child(3):hover i {
-  color: #2d3748;
+  color: white;
   animation: downloadShake 0.6s ease-in-out;
 }
 
 /* Delete button (fa-trash-alt) */
 .cv-card-actions .action-btn.delete:hover {
-  background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
 .cv-card-actions .action-btn.delete:hover i {
-  color: #e53e3e;
+  color: white;
   animation: deleteWiggle 0.6s ease-in-out;
 }
 

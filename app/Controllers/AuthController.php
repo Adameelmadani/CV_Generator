@@ -27,7 +27,6 @@ class AuthController extends Controller {
             $email = trim($_POST['signup_email'] ?? '');
             $password = $_POST['signup_password'] ?? '';
             $telephone = trim($_POST['signup_tel'] ?? '');
-            $filiereId = !empty($_POST['signup_filiere']) ? intval($_POST['signup_filiere']) : null;
             
             // Validation des données
             $errors = [];
@@ -77,7 +76,7 @@ class AuthController extends Controller {
             $hashedPassword = $this->userModel->hashPassword($password);
             
             // Créer l'utilisateur
-            $userId = $this->userModel->createUser($nom, $prenom, $email, $hashedPassword, $telephone, $filiereId);
+            $userId = $this->userModel->createUser($nom, $prenom, $email, $hashedPassword, $telephone);
             
             // Créer la session
             $this->session['userId'] = $userId;
@@ -85,7 +84,6 @@ class AuthController extends Controller {
             $this->session['nom'] = $nom;
             $this->session['prenom'] = $prenom;
             $this->session['userTel'] = $telephone;
-            $this->session['filiereId'] = $filiereId;
             $this->session['loginTime'] = time(); // Add login timestamp
             
             // Regenerate session ID for security
@@ -145,7 +143,6 @@ class AuthController extends Controller {
             $this->session['nom'] = $user['nom'];
             $this->session['prenom'] = $user['prenom'];
             $this->session['userTel'] = $user['numero_telephone'];
-            $this->session['filiereId'] = $user['id_filiere'];
             $this->session['loginTime'] = time(); // Add login timestamp
             
             // Regenerate session ID for security
@@ -222,7 +219,6 @@ class AuthController extends Controller {
                 'username' => $displayName, // Use full name as username
                 'nom' => $user['nom'],
                 'prenom' => $user['prenom'],
-                'filiere_id' => $user['id_filiere'],
                 'session_id' => session_id(),
                 'login_time' => $this->session['loginTime'] ?? null
             ]);

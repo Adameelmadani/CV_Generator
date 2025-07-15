@@ -1,63 +1,12 @@
-// Données des filières (will be loaded from API)
-let filieres = [];
-
 // Initialiser la page
 document.addEventListener("DOMContentLoaded", function () {
-  loadFilieres();
   setupEventListeners();
   setupNameValidation();
   setupRHDisplay();
 });
 
-// Charger les filières dans le select
-async function loadFilieres() {
-  try {
-    const response = await fetch("filieres_mvc.php?action=getAllFilieres");
-    const result = await response.json();
-    
-    if (result.status === "success") {
-      filieres = result.filieres;
-      const select = document.getElementById("signup_filiere");
-      if (select) {
-        // Clear existing options except the default one
-        select.innerHTML = '<option value="">Sélectionnez votre filière</option>';
-        
-        filieres.forEach((filiere) => {
-          const option = document.createElement("option");
-          option.value = filiere.id;
-          option.textContent = filiere.nom;
-          select.appendChild(option);
-        });
-      }
-    } else {
-      console.error("Error loading filieres:", result.message);
-    }
-  } catch (error) {
-    console.error("Error fetching filieres:", error);
-  }
-}
-
 // Configuration des événements
 function setupEventListeners() {
-  // Événement pour afficher la description de la filière
-  const filiereSelect = document.getElementById("signup_filiere");
-  if (filiereSelect) {
-    filiereSelect.addEventListener("change", function () {
-      const selectedId = parseInt(this.value);
-      const descriptionDiv = document.getElementById("filiereDescription");
-
-      if (selectedId && descriptionDiv) {
-        const filiere = filieres.find((f) => f.id === selectedId);
-        if (filiere) {
-          descriptionDiv.innerHTML = `<strong>${filiere.nom}</strong><br>${filiere.description}`;
-          descriptionDiv.classList.add("show");
-        }
-      } else if (descriptionDiv) {
-        descriptionDiv.classList.remove("show");
-      }
-    });
-  }
-
   // Événements pour les formulaires
   const loginForm = document.getElementById("loginForm");
   const signupForm = document.getElementById("signupForm");

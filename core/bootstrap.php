@@ -1,5 +1,9 @@
 <?php
 
+// Set the default timezone for the entire application
+// Morocco uses GMT+1 (CET) during winter and GMT+1 (no DST since 2018)
+date_default_timezone_set('Africa/Casablanca');
+
 // Load configuration
 require_once __DIR__ . '/../config/app.php';
 

@@ -11,7 +11,7 @@ define('APP_CONFIG', [
     'app' => [
         'name' => 'CV Craft',
         'version' => '2.0',
-        'timezone' => 'Europe/Paris'
+        'timezone' => 'Africa/Casablanca'  // Morocco GMT+1 (no DST since 2018)
     ],
     'session' => [
         'name' => 'CV_CRAFT_SESSION',
