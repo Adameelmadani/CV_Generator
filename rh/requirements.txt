@@ -1,0 +1,9 @@
+transformers
+torch
+scikit-learn
+mysql-connector-python
+flask
+flask-cors
+numpy
+redis
+aiohttp
