@@ -306,6 +306,11 @@ class CVController extends Controller {
         
         error_log("CV Generation - Guest Mode: " . ($isGuestMode ? 'true' : 'false'));
         
+        // Debug: Check for custom CV name in POST data
+        if (isset($_POST['custom_cv_name'])) {
+            error_log("CV Generation - Custom CV name received: " . $_POST['custom_cv_name']);
+        }
+        
         $userId = null;
         if (!$isGuestMode) {
             try {
@@ -445,41 +450,111 @@ class CVController extends Controller {
                 // Read XML content
                 $xmlContent = file_get_contents($file['tmp_name']);
             } else if ($isPDF) {
+                // Validate PDF before processing
+                $pdfHeader = file_get_contents($file['tmp_name'], false, null, 0, 10);
+                if (substr($pdfHeader, 0, 4) !== '%PDF') {
+                    $this->jsonResponse([
+                        'status' => 'error',
+                        'message' => 'Le fichier sélectionné n\'est pas un PDF valide. Vérifiez le format du fichier.'
+                    ], 400);
+                    return;
+                }
+                
                 // Save PDF temporarily
                 $tmpPdf = sys_get_temp_dir() . '/cv_import_' . uniqid() . '.pdf';
                 $tmpXml = sys_get_temp_dir() . '/cv_import_' . uniqid() . '.xml';
-                move_uploaded_file($file['tmp_name'], $tmpPdf);
-                // Call parse_cv.py (chemin corrigé)
-                $python = 'python';
+                
+                if (!move_uploaded_file($file['tmp_name'], $tmpPdf)) {
+                    $this->jsonResponse([
+                        'status' => 'error',
+                        'message' => 'Impossible de sauvegarder le fichier temporairement. Vérifiez les permissions.'
+                    ], 500);
+                    return;
+                }
+                // Call parse_cv.py with proper Python path
+                // Try different Python executables
+                $pythonPaths = [
+                    'C:\\Users\\Idea\\anaconda3\\envs\\TensorFlow\\python.exe',
+                    'python',
+                    'python3',
+                    'py'
+                ];
+                
+                $python = null;
+                foreach ($pythonPaths as $pythonPath) {
+                    // Test if this Python executable works
+                    $testCmd = escapeshellcmd("$pythonPath -c \"import sys; print('OK')\"") . " 2>&1";
+                    exec($testCmd, $testOutput, $testRet);
+                    if ($testRet === 0) {
+                        $python = $pythonPath;
+                        error_log("Using Python: $python");
+                        break;
+                    }
+                }
+                
+                if (!$python) {
+                    $this->jsonResponse([
+                        'status' => 'error',
+                        'message' => 'Python n\'est pas installé ou accessible. Veuillez installer Python.'
+                    ], 500);
+                    if (file_exists($tmpPdf)) unlink($tmpPdf);
+                    return;
+                }
+                
                 $script = __DIR__ . '/../../parsing/parse_cv.py';
-                $cmd = escapeshellcmd("$python $script $tmpPdf $tmpXml") . " 2>&1";
+                
+                // Escape paths properly for Windows
+                $escapedScript = escapeshellarg($script);
+                $escapedPdf = escapeshellarg($tmpPdf);
+                $escapedXml = escapeshellarg($tmpXml);
+                
+                $cmd = "\"$python\" \"$script\" \"$tmpPdf\" \"$tmpXml\" 2>&1";
                 exec($cmd, $output, $ret);
+                
+                // Enhanced logging
+                error_log("=== PDF Import Debug Info ===");
                 error_log("CMD: $cmd");
-                error_log("RET: $ret");
-                error_log("OUTPUT: " . implode("\n", $output));
-                error_log("SCRIPT: $script");
-                error_log("TMPPDF: $tmpPdf");
-                error_log("TMPXML: $tmpXml");
+                error_log("Return code: $ret");
+                error_log("Python script exists: " . (file_exists($script) ? 'YES' : 'NO'));
+                error_log("PDF file exists: " . (file_exists($tmpPdf) ? 'YES' : 'NO'));
+                error_log("PDF file size: " . (file_exists($tmpPdf) ? filesize($tmpPdf) : 0) . " bytes");
+                error_log("Output XML exists: " . (file_exists($tmpXml) ? 'YES' : 'NO'));
+                error_log("Output lines count: " . count($output));
+                error_log("Script output:");
+                foreach ($output as $line) {
+                    error_log("  " . $line);
+                }
                 
                 // Vérifications détaillées
                 if ($ret !== 0) {
                     $error_message = "Erreur lors du parsing du PDF (code: $ret). ";
                     $output_text = implode("\n", $output);
                     
+                    // More specific error detection
                     if (strpos($output_text, "Module lxml non trouvé") !== false) {
                         $error_message .= "Problème de dépendance Python: module lxml manquant.";
-                    } elseif (strpos($output_text, "Tesseract non trouvé") !== false) {
-                        $error_message .= "Tesseract OCR n'est pas installé. Installez-le pour traiter les PDF contenant des images.";
-                    } elseif (strpos($output_text, "Le PDF semble vide") !== false) {
-                        $error_message .= "Le PDF ne contient pas de texte lisible.";
-                    } elseif (strpos($output_text, "ERREUR: Le fichier PDF") !== false) {
+                    } elseif (strpos($output_text, "Tesseract non trouvé") !== false || strpos($output_text, "Tesseract not found") !== false) {
+                        $error_message .= "Tesseract OCR n'est pas installé ou configuré correctement.";
+                    } elseif (strpos($output_text, "Le PDF semble vide") !== false || strpos($output_text, "PDF est vide") !== false) {
+                        $error_message .= "Le PDF ne contient pas de texte lisible ou est vide.";
+                    } elseif (strpos($output_text, "ERREUR: Le fichier PDF") !== false || strpos($output_text, "n'existe pas") !== false) {
                         $error_message .= "Le fichier PDF est corrompu ou inaccessible.";
                     } elseif (strpos($output_text, "Aucun texte n'a pu être extrait") !== false) {
-                        $error_message .= "Le PDF contient uniquement des images et l'OCR n'a pas pu extraire de texte. Vérifiez la qualité des images.";
+                        $error_message .= "Le PDF contient uniquement des images et l'OCR n'a pas pu extraire de texte. Essayez avec un PDF contenant du texte sélectionnable.";
                     } elseif (strpos($output_text, "OCR a échoué") !== false) {
                         $error_message .= "L'OCR n'a pas pu lire le texte des images. Vérifiez la qualité et la résolution du PDF.";
+                    } elseif (strpos($output_text, "Permission denied") !== false || strpos($output_text, "access denied") !== false) {
+                        $error_message .= "Problème de permissions sur les fichiers temporaires.";
+                    } elseif (strpos($output_text, "'python' is not recognized") !== false || strpos($output_text, "python: command not found") !== false) {
+                        $error_message .= "Python n'est pas installé ou pas dans le PATH système.";
+                    } elseif (strpos($output_text, "No module named") !== false) {
+                        $error_message .= "Module Python manquant. Veuillez installer les dépendances requises.";
+                    } elseif (strpos($output_text, "FileNotFoundError") !== false) {
+                        $error_message .= "Fichier introuvable. Vérifiez les chemins et permissions.";
+                    } elseif (empty($output_text)) {
+                        $error_message .= "Aucune sortie du script Python. Vérifiez que Python et les dépendances sont installés.";
                     } else {
-                        $error_message .= "Veuillez vérifier le format du CV.";
+                        $error_message .= "Erreur inconnue lors du traitement. Vérifiez le format du CV et réessayez.";
                     }
                     
                     $this->jsonResponse([
@@ -532,8 +607,22 @@ class CVController extends Controller {
                 ], 400);
                 return;
             }
-            // Extract CV name from XML or use filename
-            $cvName = $this->extractCVNameFromXML($xml) ?: pathinfo($file['name'], PATHINFO_FILENAME);
+            // Extract CV name from custom input, XML, or use filename as fallback
+            $cvName = '';
+            
+            // First priority: custom CV name from form data
+            if (isset($_POST['custom_cv_name']) && !empty(trim($_POST['custom_cv_name']))) {
+                $cvName = trim($_POST['custom_cv_name']);
+                // Sanitize the custom name
+                $cvName = preg_replace('/[^a-zA-Z0-9\s\-_]/', '', $cvName);
+                $cvName = str_replace(' ', '_', $cvName);
+                error_log("Import CV - Using custom name: " . $cvName);
+            } else {
+                // Fallback: extract from XML or use filename
+                $cvName = $this->extractCVNameFromXML($xml) ?: pathinfo($file['name'], PATHINFO_FILENAME);
+                error_log("Import CV - Using extracted/filename: " . $cvName);
+            }
+            
             // Save to database
             $cvId = $this->cvModel->createCV($userId, $xmlContent, $cvName);
             $this->jsonResponse([
@@ -595,17 +684,7 @@ class CVController extends Controller {
     }
     
     private function generateCVName($formData) {
-        // First check if we have a stored custom CV name in session from previous generation
-        if (isset($_SESSION['custom_cv_name']) && !empty(trim($_SESSION['custom_cv_name']))) {
-            $customName = trim($_SESSION['custom_cv_name']);
-            // Sanitize the stored custom name
-            $customName = preg_replace('/[^a-zA-Z0-9\s\-_]/', '', $customName);
-            $customName = str_replace(' ', '_', $customName);
-            error_log("Using stored custom CV name from session: " . $customName);
-            return $customName;
-        }
-        
-        // Check if a custom CV name was provided in current request
+        // Check if a custom CV name was provided in current request - THIS SHOULD BE FIRST PRIORITY
         if (isset($formData['custom_cv_name']) && !empty(trim($formData['custom_cv_name']))) {
             $customName = trim($formData['custom_cv_name']);
             // Sanitize the custom name
@@ -615,10 +694,20 @@ class CVController extends Controller {
             return $customName;
         }
         
+        // Second check if we have a stored custom CV name in session from previous generation
+        if (isset($_SESSION['custom_cv_name']) && !empty(trim($_SESSION['custom_cv_name']))) {
+            $customName = trim($_SESSION['custom_cv_name']);
+            // Sanitize the stored custom name
+            $customName = preg_replace('/[^a-zA-Z0-9\s\-_]/', '', $customName);
+            $customName = str_replace(' ', '_', $customName);
+            error_log("Using stored custom CV name from session: " . $customName);
+            return $customName;
+        }
+        
         // Fallback to default naming scheme
         $nom = $formData['nom'] ?? '';
         $prenom = $formData['prenom'] ?? '';
-        $timestamp = date('Y-m-d H:i:s');
+        $timestamp = date('Y-m-d_H-i-s');
         
         $defaultName = "CV_{$prenom}_{$nom}_{$timestamp}";
         error_log("Using default CV name: " . $defaultName);
@@ -1324,7 +1413,8 @@ class CVController extends Controller {
     }
     
     private function downloadXML($xmlContent, $prenom, $nom) {
-        $filename = "CV_{$prenom}_{$nom}.xml";
+        $filename = $this->generateDownloadFilename($prenom, $nom);
+        $filename = str_replace('.pdf', '.xml', $filename);
         
         header('Content-Type: application/xml');
         header('Content-Disposition: attachment; filename="' . $filename . '"');
@@ -1346,7 +1436,9 @@ class CVController extends Controller {
         try {
             $files = $this->generatePDF($xmlContent, 0);
             $texFile = $files['tex_file'];
-            $zipFileName = $workingDir . "CV_{$prenom}_{$nom}_LaTeX.zip";
+            
+            $baseFilename = $this->generateDownloadFilename($prenom, $nom);
+            $zipFileName = $workingDir . str_replace('.pdf', '_LaTeX.zip', $baseFilename);
             
             // Template file path
             $templatePath = $workingDir . 'templates/modern.cls';
@@ -1354,7 +1446,8 @@ class CVController extends Controller {
             $zip = new ZipArchive();
             if ($zip->open($zipFileName, ZipArchive::CREATE) === TRUE) {
                 // Add LaTeX file
-                $zip->addFile($texFile, "CV_{$prenom}_{$nom}.tex");
+                $texFilename = str_replace('.pdf', '.tex', $baseFilename);
+                $zip->addFile($texFile, $texFilename);
                 
                 // Add template file if it exists
                 if (file_exists($templatePath)) {
@@ -1365,8 +1458,9 @@ class CVController extends Controller {
                 
                 $zip->close();
                 
+                $downloadZipName = str_replace('.pdf', '_LaTeX.zip', $baseFilename);
                 header('Content-Type: application/zip');
-                header('Content-Disposition: attachment; filename="CV_' . $prenom . '_' . $nom . '_LaTeX.zip"');
+                header('Content-Disposition: attachment; filename="' . $downloadZipName . '"');
                 header('Content-Length: ' . filesize($zipFileName));
                 header('Cache-Control: no-cache, must-revalidate');
                 header('Pragma: no-cache');
@@ -1394,7 +1488,7 @@ class CVController extends Controller {
         try {
             $files = $this->generatePDF($xmlContent, 0);
             $pdfFile = $files['pdf_file'];
-            $filename = "CV_{$prenom}_{$nom}.pdf";
+            $filename = $this->generateDownloadFilename($prenom, $nom);
             
             header('Content-Type: application/pdf');
             header('Content-Disposition: attachment; filename="' . $filename . '"');
@@ -1424,10 +1518,13 @@ class CVController extends Controller {
         
         try {
             $files = $this->generatePDF($xmlContent, 0);
-            $zipFileName = $workingDir . "CV_{$prenom}_{$nom}_Complete.zip";
+            
+            $baseFilename = $this->generateDownloadFilename($prenom, $nom);
+            $zipFileName = $workingDir . str_replace('.pdf', '_Complete.zip', $baseFilename);
             
             // Create XML file
-            $xmlFile = $workingDir . "CV_{$prenom}_{$nom}.xml";
+            $xmlFilename = str_replace('.pdf', '.xml', $baseFilename);
+            $xmlFile = $workingDir . $xmlFilename;
             file_put_contents($xmlFile, $xmlContent);
             
             // Template file path
@@ -1436,9 +1533,12 @@ class CVController extends Controller {
             $zip = new ZipArchive();
             if ($zip->open($zipFileName, ZipArchive::CREATE) === TRUE) {
                 // Add all files to ZIP
-                $zip->addFile($files['pdf_file'], "CV_{$prenom}_{$nom}.pdf");
-                $zip->addFile($xmlFile, "CV_{$prenom}_{$nom}.xml");
-                $zip->addFile($files['tex_file'], "CV_{$prenom}_{$nom}.tex");
+                $pdfFilename = $baseFilename;
+                $texFilename = str_replace('.pdf', '.tex', $baseFilename);
+                
+                $zip->addFile($files['pdf_file'], $pdfFilename);
+                $zip->addFile($xmlFile, $xmlFilename);
+                $zip->addFile($files['tex_file'], $texFilename);
                 
                 // Add template file if it exists
                 if (file_exists($templatePath)) {
@@ -1449,8 +1549,9 @@ class CVController extends Controller {
                 
                 $zip->close();
                 
+                $downloadZipName = str_replace('.pdf', '_Complete.zip', $baseFilename);
                 header('Content-Type: application/zip');
-                header('Content-Disposition: attachment; filename="CV_' . $prenom . '_' . $nom . '_Complete.zip"');
+                header('Content-Disposition: attachment; filename="' . $downloadZipName . '"');
                 header('Content-Length: ' . filesize($zipFileName));
                 header('Cache-Control: no-cache, must-revalidate');
                 header('Pragma: no-cache');
@@ -1685,6 +1786,8 @@ class CVController extends Controller {
         
         // If force_new_cv flag is set, always create a new CV
         if ($forceNewCV) {
+            error_log("Force new CV requested - creating fresh CV with name: " . $cvName);
+            
             // Clear ALL session CV data to ensure fresh start
             unset($_SESSION['force_new_cv']); // Clear the flag
             unset($_SESSION['current_cv_id']);
@@ -1916,8 +2019,8 @@ class CVController extends Controller {
         try {
             // Parse XML to get personal info for filename
             $xml = simplexml_load_string($xmlContent);
-            $prenom = $this->cleanForLatex((string)$xml->personalInfo->firstname);
-            $nom = $this->cleanForLatex((string)$xml->personalInfo->lastname);
+            $prenom = (string)$xml->personalInfo->firstname;
+            $nom = (string)$xml->personalInfo->lastname;
             
             // Create saved_pdfs directory if it doesn't exist
             $savedPDFsDir = __DIR__ . '/../../Cv_generator/saved_pdfs/';
@@ -1925,8 +2028,8 @@ class CVController extends Controller {
                 mkdir($savedPDFsDir, 0755, true);
             }
             
-            // Generate permanent filename
-            $permanentFileName = "CV_{$prenom}_{$nom}_{$cvId}_{$userId}.pdf";
+            // Generate permanent filename with unique identifiers for storage
+            $permanentFileName = $this->generateStorageFilename($prenom, $nom, $cvId, $userId);
             $permanentPath = $savedPDFsDir . $permanentFileName;
             
             // Copy the temporary PDF to permanent location
@@ -1968,8 +2071,8 @@ class CVController extends Controller {
             }
             
             // Check if saved PDF exists
-            if (!empty($cv['pdf_path'])) {
-                $pdfPath = __DIR__ . '/../../Cv_generator/' . $cv['pdf_path'];
+            if (!empty($cv['lien_pdf'])) {
+                $pdfPath = __DIR__ . '/../../Cv_generator/' . $cv['lien_pdf'];
                 
                 if (file_exists($pdfPath)) {
                     // Serve the saved PDF
@@ -2007,10 +2110,11 @@ class CVController extends Controller {
     }
     
     public function downloadSavedPDF() {
-        $userId = $this->requireAuth();
+        $userId = $this->requireAuthForDownload();
         
         if (!isset($_GET['cv_id'])) {
             http_response_code(400);
+            header('Content-Type: text/plain');
             exit('CV ID required');
         }
         
@@ -2022,18 +2126,45 @@ class CVController extends Controller {
             
             if (!$cv) {
                 http_response_code(404);
+                header('Content-Type: text/plain');
                 exit('CV not found');
             }
             
             // Parse XML to get user's name for filename
-            $xml = simplexml_load_string($cv['xml_content']);
+            $xmlContent = $cv['contenu_xml'];
+            
+            // Validate XML content
+            if (empty($xmlContent)) {
+                error_log("downloadSavedPDF - No XML content for CV ID: $cvId");
+                http_response_code(404);
+                header('Content-Type: text/plain');
+                exit('CV content not found.');
+            }
+            
+            $xml = simplexml_load_string($xmlContent);
+            if (!$xml) {
+                error_log("downloadSavedPDF - Invalid XML content for CV ID: $cvId");
+                http_response_code(500);
+                header('Content-Type: text/plain');
+                exit('CV content is corrupted.');
+            }
+            
             $prenom = (string)$xml->personalInfo->firstname;
             $nom = (string)$xml->personalInfo->lastname;
-            $filename = "CV_{$prenom}_{$nom}.pdf";
+            
+            // Use consistent filename format for download
+            $filename = $this->generateDownloadFilename($prenom, $nom);
             
             // Check if saved PDF exists
-            if (!empty($cv['pdf_path'])) {
-                $pdfPath = __DIR__ . '/../../Cv_generator/' . $cv['pdf_path'];
+            if (!empty($cv['lien_pdf'])) {
+                $pdfPath = __DIR__ . '/../../Cv_generator/' . $cv['lien_pdf'];
+                
+                // Debug logging to help troubleshoot path issues
+                error_log("downloadSavedPDF - CV ID: $cvId");
+                error_log("downloadSavedPDF - lien_pdf from DB: " . $cv['lien_pdf']);
+                error_log("downloadSavedPDF - constructed path: $pdfPath");
+                error_log("downloadSavedPDF - file exists: " . (file_exists($pdfPath) ? 'YES' : 'NO'));
+                error_log("downloadSavedPDF - __DIR__: " . __DIR__);
                 
                 if (file_exists($pdfPath)) {
                     // Serve the saved PDF for download with user's name
@@ -2045,302 +2176,195 @@ class CVController extends Controller {
                     header('Expires: 0');
                     readfile($pdfPath);
                     exit();
+                } else {
+                    error_log("downloadSavedPDF - PDF file not found at path: $pdfPath");
+                    // Try to regenerate the PDF
+                    $this->regenerateAndDownloadPDF($cvId, $userId, $xmlContent, $filename);
+                    return;
                 }
+            } else {
+                error_log("downloadSavedPDF - No lien_pdf in database for CV ID: $cvId");
+                // Try to regenerate the PDF
+                $this->regenerateAndDownloadPDF($cvId, $userId, $xmlContent, $filename);
+                return;
             }
             
-            // No saved PDF found - return error
+            // No saved PDF found - return error (this should not be reached now)
             http_response_code(404);
+            header('Content-Type: text/plain');
             exit('PDF not available. Please generate the CV first.');
             
         } catch (Exception $e) {
             error_log("Error in downloadSavedPDF: " . $e->getMessage());
             http_response_code(500);
+            header('Content-Type: text/plain');
             exit('Error downloading CV');
         }
     }
 
     /**
+     * Regenerate and download PDF when saved PDF is not found
+     */
+    private function regenerateAndDownloadPDF($cvId, $userId, $xmlContent, $filename) {
+        try {
+            error_log("regenerateAndDownloadPDF - Regenerating PDF for CV ID: $cvId");
+            
+            // Generate new PDF
+            $files = $this->generatePDF($xmlContent, $cvId);
+            
+            // Save this PDF for future use
+            $this->savePermanentPDF($files, $cvId, $userId, $xmlContent);
+            
+            // Serve the PDF for download
+            header('Content-Type: application/pdf');
+            header('Content-Disposition: attachment; filename="' . $filename . '"');
+            header('Content-Length: ' . filesize($files['pdf_file']));
+            header('Cache-Control: no-cache, must-revalidate');
+            header('Pragma: no-cache');
+            header('Expires: 0');
+            readfile($files['pdf_file']);
+            
+            // Clean up temporary files
+            $this->cleanupFiles($files);
+            exit();
+            
+        } catch (Exception $e) {
+            error_log("Error in regenerateAndDownloadPDF: " . $e->getMessage());
+            http_response_code(500);
+            header('Content-Type: text/plain');
+            exit('Error regenerating PDF');
+        }
+    }
+
+    /**
+     * Authentication method specifically for download endpoints
+     * Returns user ID or sends appropriate error headers without JSON
+     */
+    private function requireAuthForDownload() {
+        if (!isset($this->session['userId']) || empty($this->session['userId'])) {
+            error_log("Download authentication failed - no user ID in session");
+            http_response_code(401);
+            header('Content-Type: text/plain');
+            exit('Authentication required');
+        }
+        
+        return $this->session['userId'];
+    }
+
+    /**
+     * Generate consistent download filename for PDFs
+     * @param string $prenom First name
+     * @param string $nom Last name  
+     * @return string Clean filename for download
+     */
+    private function generateDownloadFilename($prenom, $nom) {
+        // Clean the names to ensure valid filenames
+        $cleanPrenom = preg_replace('/[^a-zA-Z0-9_-]/', '_', $prenom);
+        $cleanNom = preg_replace('/[^a-zA-Z0-9_-]/', '_', $nom);
+        
+        return "CV_{$cleanPrenom}_{$cleanNom}.pdf";
+    }
+    
+    /**
+     * Generate unique storage filename for PDFs (includes IDs for uniqueness)
+     * @param string $prenom First name
+     * @param string $nom Last name
+     * @param int $cvId CV ID
+     * @param int $userId User ID
+     * @return string Unique filename for storage
+     */
+    private function generateStorageFilename($prenom, $nom, $cvId, $userId) {
+        // Clean the names to ensure valid filenames
+        $cleanPrenom = preg_replace('/[^a-zA-Z0-9_-]/', '_', $prenom);
+        $cleanNom = preg_replace('/[^a-zA-Z0-9_-]/', '_', $nom);
+        
+        return "CV_{$cleanPrenom}_{$cleanNom}_{$cvId}_{$userId}.pdf";
+    }
+
+    /**
      * Generate CV name from XML content
-     * @param string $xmlContent XML content of the CV
+     * @param string $xmlContent The XML content to extract name from
      * @return string Generated CV name
      */
     private function generateCVNameFromXML($xmlContent) {
         try {
-            // Validate XML content first
-            if (empty($xmlContent) || trim($xmlContent) === '' || trim($xmlContent) === 'test') {
-                error_log("generateCVNameFromXML - Invalid XML content: '" . $xmlContent . "'");
-                return "CV_Unknown";
-            }
-            
-            // Suppress XML parsing errors for cleaner error handling
-            libxml_use_internal_errors(true);
             $xml = simplexml_load_string($xmlContent);
-            
-            if ($xml) {
-                $prenom = trim((string)$xml->personalInfo->firstname);
-                $nom = trim((string)$xml->personalInfo->lastname);
-                
-                if (!empty($prenom) && !empty($nom)) {
-                    return "CV_{$prenom}_{$nom}";
-                }
-            } else {
-                // Log XML parsing errors
-                $errors = libxml_get_errors();
-                foreach ($errors as $error) {
-                    error_log("XML parsing error: " . $error->message);
-                }
-                libxml_clear_errors();
-            }
-            
-            // Restore normal error handling
-            libxml_use_internal_errors(false);
-            
-        } catch (Exception $e) {
-            error_log("Error parsing XML for CV name: " . $e->getMessage());
-        }
-        
-        // Fallback to generic name
-        return "CV_" . date('Y-m-d_H-i-s');
-    }
-    
-    /**
-     * Regenerate XML content from database sections when XML is corrupted
-     */
-    private function regenerateXMLFromSections($cvId, $userId) {
-        try {
-            $db = Database::getInstance();
-            $conn = $db->getConnection();
-            
-            error_log("regenerateXMLFromSections - Starting for CV ID: $cvId");
-            
-            $sectionData = [];
-            
-            // Personal Information
-            $stmt = $conn->prepare("SELECT * FROM informations_personnelles WHERE id_cv = ?");
-            $stmt->execute([$cvId]);
-            $personalInfo = $stmt->fetch(PDO::FETCH_ASSOC);
-            
-            if ($personalInfo) {
-                $sectionData['nom'] = $personalInfo['nom'];
-                $sectionData['prenom'] = $personalInfo['prenom'];
-                $sectionData['location'] = $personalInfo['localisation'];
-                $sectionData['email'] = $personalInfo['email'];
-                $sectionData['telephone'] = $personalInfo['telephone'];
-                $sectionData['website'] = $personalInfo['site_web'];
-                $sectionData['linkedin'] = $personalInfo['linkedin'];
-                $sectionData['github'] = $personalInfo['github'];
-                $sectionData['photo_path'] = $personalInfo['chemin_photo'];
-            }
-            
-            // Profile
-            $stmt = $conn->prepare("SELECT * FROM profils WHERE id_cv = ?");
-            $stmt->execute([$cvId]);
-            $profile = $stmt->fetch(PDO::FETCH_ASSOC);
-            
-            if ($profile) {
-                $sectionData['profil_description'] = $profile['description'];
-            }
-            
-            // Education
-            $stmt = $conn->prepare("SELECT * FROM formations WHERE id_cv = ?");
-            $stmt->execute([$cvId]);
-            $education = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            
-            if (!empty($education)) {
-                $sectionData['education_degree'] = [];
-                $sectionData['education_dates'] = [];
-                $sectionData['education_university'] = [];
-                $sectionData['education_field'] = [];
-                $sectionData['education_details'] = [];
-                
-                foreach ($education as $edu) {
-                    $sectionData['education_degree'][] = $edu['diplome'];
-                    $sectionData['education_dates'][] = $edu['dates'];
-                    $sectionData['education_university'][] = $edu['universite'];
-                    $sectionData['education_field'][] = $edu['specialite'];
-                    $sectionData['education_details'][] = $edu['description'];
-                }
-            }
-            
-            // Experience
-            $stmt = $conn->prepare("SELECT * FROM experiences WHERE id_cv = ?");
-            $stmt->execute([$cvId]);
-            $experience = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            
-            if (!empty($experience)) {
-                $sectionData['experience_company'] = [];
-                $sectionData['experience_dates'] = [];
-                $sectionData['experience_position'] = [];
-                $sectionData['experience_location'] = [];
-                $sectionData['experience_details'] = [];
-                
-                foreach ($experience as $exp) {
-                    $sectionData['experience_company'][] = $exp['entreprise'];
-                    $sectionData['experience_dates'][] = $exp['dates'];
-                    $sectionData['experience_position'][] = $exp['poste'];
-                    $sectionData['experience_location'][] = $exp['lieu'];
-                    $sectionData['experience_details'][] = $exp['description'];
-                }
-            }
-            
-            // Projects
-            $stmt = $conn->prepare("SELECT * FROM projets WHERE id_cv = ?");
-            $stmt->execute([$cvId]);
-            $projects = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            
-            if (!empty($projects)) {
-                $sectionData['project_name'] = [];
-                $sectionData['project_link'] = [];
-                $sectionData['project_details'] = [];
-                
-                foreach ($projects as $project) {
-                    $sectionData['project_name'][] = $project['nom_projet'];
-                    $sectionData['project_link'][] = $project['lien_projet'];
-                    $sectionData['project_details'][] = $project['description'];
-                }
-            }
-            
-            // Skills
-            $stmt = $conn->prepare("SELECT * FROM competences WHERE id_cv = ?");
-            $stmt->execute([$cvId]);
-            $skills = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            
-            if (!empty($skills)) {
-                $sectionData['skill_category'] = [];
-                $sectionData['skill_items'] = [];
-                
-                foreach ($skills as $skill) {
-                    $sectionData['skill_category'][] = $skill['categorie'];
-                    $sectionData['skill_items'][] = $skill['competences'];
-                }
-            }
-            
-            // Languages
-            $stmt = $conn->prepare("SELECT * FROM langues WHERE id_cv = ?");
-            $stmt->execute([$cvId]);
-            $languages = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            
-            if (!empty($languages)) {
-                $sectionData['language_name'] = [];
-                $sectionData['language_level'] = [];
-                
-                foreach ($languages as $lang) {
-                    $sectionData['language_name'][] = $lang['nom_langue'];
-                    $sectionData['language_level'][] = $lang['niveau'];
-                }
-            }
-            
-            // Check if we have at least some data
-            if (empty($sectionData['nom']) && empty($sectionData['prenom'])) {
-                error_log("regenerateXMLFromSections - No personal info found for CV ID: $cvId");
-                return null;
-            }
-            
-            // Generate XML
-            $newXML = $this->generateXMLContent($sectionData, $sectionData['photo_path'] ?? null);
-            
-            // Validate the generated XML
-            $xml = simplexml_load_string($newXML);
             if (!$xml) {
-                error_log("regenerateXMLFromSections - Generated XML is invalid for CV ID: $cvId");
-                return null;
+                error_log("generateCVNameFromXML - Invalid XML content");
+                return "CV_" . date('Y-m-d_H-i-s');
             }
             
-            error_log("regenerateXMLFromSections - Successfully regenerated XML for CV ID: $cvId");
-            return $newXML;
+            $prenom = (string)$xml->personalInfo->firstname;
+            $nom = (string)$xml->personalInfo->lastname;
+            
+            // Clean the names to ensure valid filename
+            $cleanPrenom = preg_replace('/[^a-zA-Z0-9_-]/', '_', $prenom);
+            $cleanNom = preg_replace('/[^a-zA-Z0-9_-]/', '_', $nom);
+            
+            if (empty($cleanPrenom) && empty($cleanNom)) {
+                return "CV_" . date('Y-m-d_H-i-s');
+            }
+            
+            $timestamp = date('Y-m-d_H-i-s');
+            return "CV_{$cleanPrenom}_{$cleanNom}_{$timestamp}";
             
         } catch (Exception $e) {
-            error_log("regenerateXMLFromSections - Error: " . $e->getMessage());
-            return null;
-        }
-    }
-
-    public function getUserFilieres() {
-        // Since we're removing filière associations, this method is deprecated
-        // but we'll keep it for backward compatibility and return an empty response
-        $this->jsonResponse([
-            'status' => 'success',
-            'filieres' => [],
-            'message' => 'Filière associations have been removed. Publishing is now direct.'
-        ]);
-    }
-
-    public function getFilieres() {
-        try {
-            require_once __DIR__ . '/../Models/Filiere.php';
-            $filiereModel = new Filiere();
-            $filieres = $filiereModel->getAllFilieres();
-            
-            $this->jsonResponse([
-                'status' => 'success',
-                'filieres' => $filieres
-            ]);
-            
-        } catch (Exception $e) {
-            error_log("Error in getFilieres: " . $e->getMessage());
-            $this->jsonResponse([
-                'status' => 'error',
-                'message' => 'Error retrieving filieres: ' . $e->getMessage()
-            ], 500);
+            error_log("generateCVNameFromXML - Error: " . $e->getMessage());
+            return "CV_" . date('Y-m-d_H-i-s');
         }
     }
 
     public function publishCV() {
         $userId = $this->requireAuth();
         
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            $this->jsonResponse([
-                'status' => 'error',
-                'message' => 'Method not allowed'
-            ], 405);
-            return;
-        }
-
-        $input = $this->getJsonInput();
+        // Get JSON input
+        $input = json_decode(file_get_contents('php://input'), true);
         
-        if (!isset($input['cv_id'])) {
+        if (!isset($input['cv_id']) || !isset($input['is_published'])) {
             $this->jsonResponse([
                 'status' => 'error',
-                'message' => 'CV ID is required'
+                'message' => 'CV ID and publish status are required'
             ], 400);
             return;
         }
-
+        
         $cvId = intval($input['cv_id']);
-        $isPublished = isset($input['is_published']) ? (bool)$input['is_published'] : true;
-
+        $isPublished = $input['is_published'] ? 1 : 0;
+        
         try {
-            // Verify the CV belongs to the user
+            // Verify that the CV belongs to the user
             $cv = $this->cvModel->getUserCV($cvId, $userId);
             if (!$cv) {
                 $this->jsonResponse([
                     'status' => 'error',
-                    'message' => 'CV not found'
+                    'message' => 'CV not found or access denied'
                 ], 404);
                 return;
             }
-
-            // Update the publication status
-            $result = $this->cvModel->publishCV($cvId, $userId, $isPublished);
             
-            if ($result) {
+            // Update the publication status
+            $success = $this->cvModel->publishCV($cvId, $userId, $isPublished);
+            
+            if ($success) {
+                $action = $isPublished ? 'publié' : 'dépublié';
                 $this->jsonResponse([
                     'status' => 'success',
-                    'message' => $isPublished ? 'CV published successfully' : 'CV unpublished successfully',
+                    'message' => "CV {$action} avec succès",
+                    'cv_id' => $cvId,
                     'is_published' => $isPublished
                 ]);
             } else {
                 $this->jsonResponse([
                     'status' => 'error',
-                    'message' => 'Failed to update CV publication status'
+                    'message' => 'Erreur lors de la mise à jour du statut de publication'
                 ], 500);
             }
-
+            
         } catch (Exception $e) {
             error_log("Error in publishCV: " . $e->getMessage());
             $this->jsonResponse([
                 'status' => 'error',
-                'message' => 'Error updating CV publication status: ' . $e->getMessage()
+                'message' => 'Erreur serveur lors de la publication'
             ], 500);
         }
     }

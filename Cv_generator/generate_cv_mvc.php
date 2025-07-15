@@ -7,7 +7,7 @@ ob_start();
 error_reporting(E_ALL);
 ini_set('display_errors', 0);
 ini_set('log_errors', 1);
-ini_set('error_log', __DIR__ . '/debug_cv_generation_errors.log');
+// ini_set('error_log', __DIR__ . '/debug_cv_generation_errors.log'); // Disabled debug logging
 
 require_once __DIR__ . '/../core/bootstrap.php';
 require_once __DIR__ . '/../app/Controllers/CVController.php';

@@ -1,7 +1,7 @@
 <?php
 
 // Load configuration
-$config = require_once __DIR__ . '/../config/app.php';
+require_once __DIR__ . '/../config/app.php';
 
 // Autoloader for classes
 spl_autoload_register(function ($className) {
@@ -25,8 +25,3 @@ require_once __DIR__ . '/Database.php';
 require_once __DIR__ . '/Model.php';
 require_once __DIR__ . '/Controller.php';
 require_once __DIR__ . '/Router.php';
-
-// Make config globally available
-if (!defined('APP_CONFIG')) {
-    define('APP_CONFIG', $config);
-}

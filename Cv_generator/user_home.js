@@ -20,7 +20,9 @@ document.addEventListener('DOMContentLoaded', function() {
 // Vérifier la session utilisateur
 async function checkUserSession() {
     try {
-        const response = await fetch('../Login_Signup/check_session_mvc.php');
+        const response = await fetch('../Login_Signup/check_session_mvc.php', {
+            credentials: 'same-origin'
+        });
         
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -78,7 +80,9 @@ async function loadUserCVs() {
     console.log('Loading user CVs...');
     
     try {
-        const response = await fetch('get_user_cvs_mvc.php');
+        const response = await fetch('get_user_cvs_mvc.php', {
+            credentials: 'same-origin'
+        });
         console.log('Response status:', response.status);
         console.log('Response headers:', [...response.headers.entries()]);
         
@@ -172,7 +176,8 @@ function displayCVs() {
     deleteAllBtn.style.display = 'inline-block';
     gridElement.className = `cv-grid ${currentView === 'list' ? 'list-view' : ''}`;
     
-    gridElement.innerHTML = userCVs.map(cv => `
+    gridElement.innerHTML = userCVs.map(cv => {
+        return `
         <div class="cv-card" onclick="previewCV(${cv.id})">
             <div class="cv-card-header">
                 <div class="cv-card-info-left">
@@ -182,24 +187,24 @@ function displayCVs() {
                 </div>
                 <div class="cv-card-actions">
                     <button class="action-btn" onclick="event.stopPropagation(); editCV(${cv.id})" title="Modifier">
-                        <i class="fas fa-edit"></i>
+                        <i class="fas fa-pen-fancy"></i>
                     </button>
                     <button class="action-btn ${cv.est_publie ? 'published' : ''}" onclick="event.stopPropagation(); ${cv.est_publie ? 'unpublishCV(' + cv.id + ')' : 'publishCV(' + cv.id + ')'}" title="${cv.est_publie ? 'Dépublier' : 'Publier'}">
-                        <i class="fas ${cv.est_publie ? 'fa-eye-slash' : 'fa-share-alt'}"></i>
+                        <i class="fas ${cv.est_publie ? 'fa-eye-slash' : 'fa-eye'}"></i>
                     </button>
                     <button class="action-btn" onclick="event.stopPropagation(); downloadCV(${cv.id})" title="Télécharger">
-                        <i class="fas fa-download"></i>
+                        <i class="fas fa-cloud-download-alt"></i>
                     </button>
                     <button class="action-btn delete" onclick="event.stopPropagation(); deleteCV(${cv.id}, '${cv.display_name}', '${cv.created_at}')" title="Supprimer">
-                        <i class="fas fa-trash"></i>
+                        <i class="fas fa-trash-alt"></i>
                     </button>
                 </div>
             </div>
             <div class="cv-card-info">
                 <div class="cv-card-date">Modifié le ${formatDate(cv.updated_at)}</div>
             </div>
-        </div>
-    `).join('');
+        </div>`;
+    }).join('');
 }
 
 // Formater la date
@@ -383,7 +388,36 @@ function setupCVNameInputListeners() {
 
 // Importer un CV
 function importCV() {
-    document.getElementById('importModal').classList.add('show');
+    const modal = document.getElementById('importModal');
+    const importCVNameInput = document.getElementById('importCVNameInput');
+    const importCVNameError = document.getElementById('importCVNameError');
+    const fileInput = document.getElementById('fileInput');
+    const importBtn = document.getElementById('importBtn');
+    
+    // Réinitialiser complètement le modal
+    if (importCVNameInput) {
+        importCVNameInput.value = ''; // S'assurer que le champ est vide
+        importCVNameInput.removeAttribute('readonly'); // S'assurer qu'il n'est pas en lecture seule
+    }
+    if (importCVNameError) {
+        importCVNameError.style.display = 'none';
+        importCVNameError.textContent = '';
+    }
+    if (fileInput) {
+        fileInput.value = '';
+    }
+    if (importBtn) {
+        importBtn.disabled = true; // Désactivé par défaut
+    }
+    
+    modal.classList.add('show');
+    
+    // Mettre le focus sur le champ de nom pour forcer l'utilisateur à commencer par là
+    setTimeout(() => {
+        if (importCVNameInput) {
+            importCVNameInput.focus();
+        }
+    }, 100);
 }
 
 // Prévisualiser un CV (charge le PDF sauvegardé)
@@ -457,17 +491,110 @@ async function downloadCVDirect(cvId, format = 'pdf') {
         
         // For PDF format, use the fast saved PDF download
         if (format === 'pdf') {
-            // Use the new endpoint that serves saved PDFs directly
-            const downloadUrl = `download_saved_cv_mvc.php?cv_id=${cvId}`;
+            console.log('Starting direct PDF download for CV ID:', cvId);
             
-            // Create a temporary link and trigger download
-            const link = document.createElement('a');
-            link.href = downloadUrl;
-            link.download = ''; // Let the server set the filename
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            return;
+            // Use explicit path to avoid routing issues
+            const downloadUrl = `./download_saved_cv_mvc.php?cv_id=${cvId}`;
+            console.log('Download URL:', downloadUrl);
+            
+            // Try to download the saved PDF first
+            try {
+                const response = await fetch(downloadUrl, {
+                    credentials: 'same-origin'
+                });
+                
+                if (response.ok) {
+                    // PDF found, download it
+                    const blob = await response.blob();
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    
+                    // Try to get filename from response headers
+                    let filename = 'CV.pdf';
+                    const contentDisposition = response.headers.get('Content-Disposition');
+                    if (contentDisposition) {
+                        const matches = contentDisposition.match(/filename="?([^"]+)"?/);
+                        if (matches && matches[1]) {
+                            filename = matches[1];
+                        }
+                    }
+                    
+                    link.download = filename;
+                    link.style.display = 'none';
+                    document.body.appendChild(link);
+                    
+                    console.log('Downloading saved PDF:', filename);
+                    link.click();
+                    
+                    // Clean up
+                    setTimeout(() => {
+                        document.body.removeChild(link);
+                        URL.revokeObjectURL(url);
+                    }, 1000);
+                    
+                    console.log('PDF download completed successfully');
+                    return;
+                    
+                } else if (response.status === 404) {
+                    // PDF not found, try to regenerate it
+                    console.log('Saved PDF not found, trying to regenerate...');
+                    
+                    // Fall back to the original download method that regenerates the PDF
+                    const regenerateResponse = await fetch('download_cv_mvc.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ 
+                            cv_id: cvId,
+                            format: 'pdf'
+                        })
+                    });
+                    
+                    if (regenerateResponse.ok) {
+                        const blob = await regenerateResponse.blob();
+                        const url = URL.createObjectURL(blob);
+                        const link = document.createElement('a');
+                        link.href = url;
+                        
+                        // Get filename from response headers
+                        let filename = 'CV.pdf';
+                        const contentDisposition = regenerateResponse.headers.get('Content-Disposition');
+                        if (contentDisposition) {
+                            const matches = contentDisposition.match(/filename="?([^"]+)"?/);
+                            if (matches && matches[1]) {
+                                filename = matches[1];
+                            }
+                        }
+                        
+                        link.download = filename;
+                        link.style.display = 'none';
+                        document.body.appendChild(link);
+                        
+                        console.log('Downloading regenerated PDF:', filename);
+                        link.click();
+                        
+                        // Clean up
+                        setTimeout(() => {
+                            document.body.removeChild(link);
+                            URL.revokeObjectURL(url);
+                        }, 1000);
+                        
+                        console.log('PDF regeneration and download completed successfully');
+                        return;
+                    } else {
+                        throw new Error(`Failed to regenerate PDF: ${regenerateResponse.status} - ${regenerateResponse.statusText}`);
+                    }
+                } else {
+                    throw new Error(`Failed to download PDF: ${response.status} - ${response.statusText}`);
+                }
+                
+            } catch (error) {
+                console.error('Error downloading PDF:', error);
+                alert('Erreur lors du téléchargement du PDF: ' + error.message);
+                return;
+            }
         }
         
         // For other formats (XML, LaTeX, All), use the original compilation method
@@ -634,21 +761,121 @@ async function confirmDownload() {
     try {
         // For PDF format, use the fast saved PDF download
         if (format === 'pdf') {
-            // Use the new endpoint that serves saved PDFs directly
-            const downloadUrl = `download_saved_cv_mvc.php?cv_id=${currentCVForDownload}`;
+            console.log('Starting PDF download for CV ID:', currentCVForDownload);
             
-            // Create a temporary link and trigger download
-            const link = document.createElement('a');
-            link.href = downloadUrl;
-            link.download = ''; // Let the server set the filename
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            // Use explicit path to avoid routing issues
+            const downloadUrl = `./download_saved_cv_mvc.php?cv_id=${currentCVForDownload}`;
+            console.log('Download URL:', downloadUrl);
+            console.log('Current location:', window.location.href);
             
-            // Fermer la modale après téléchargement
-            closeModal('downloadFormatModal');
-            currentCVForDownload = null;
-            return;
+            // Try to download the saved PDF first
+            try {
+                const response = await fetch(downloadUrl, {
+                    credentials: 'same-origin'
+                });
+                
+                if (response.ok) {
+                    // PDF found, download it
+                    const blob = await response.blob();
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    
+                    // Try to get filename from response headers
+                    let filename = 'CV.pdf';
+                    const contentDisposition = response.headers.get('Content-Disposition');
+                    if (contentDisposition) {
+                        const matches = contentDisposition.match(/filename="?([^"]+)"?/);
+                        if (matches && matches[1]) {
+                            filename = matches[1];
+                        }
+                    }
+                    
+                    link.download = filename;
+                    link.style.display = 'none';
+                    document.body.appendChild(link);
+                    
+                    console.log('Downloading saved PDF:', filename);
+                    link.click();
+                    
+                    // Clean up
+                    setTimeout(() => {
+                        document.body.removeChild(link);
+                        URL.revokeObjectURL(url);
+                    }, 1000);
+                    
+                    console.log('PDF download completed successfully');
+                    
+                    // Fermer la modale après téléchargement
+                    closeModal('downloadFormatModal');
+                    currentCVForDownload = null;
+                    return;
+                    
+                } else if (response.status === 404) {
+                    // PDF not found, try to regenerate it
+                    console.log('Saved PDF not found, trying to regenerate...');
+                    
+                    // Fall back to the original download method that regenerates the PDF
+                    const regenerateResponse = await fetch('download_cv_mvc.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ 
+                            cv_id: currentCVForDownload,
+                            format: 'pdf'
+                        })
+                    });
+                    
+                    if (regenerateResponse.ok) {
+                        const blob = await regenerateResponse.blob();
+                        const url = URL.createObjectURL(blob);
+                        const link = document.createElement('a');
+                        link.href = url;
+                        
+                        // Get filename from response headers
+                        let filename = 'CV.pdf';
+                        const contentDisposition = regenerateResponse.headers.get('Content-Disposition');
+                        if (contentDisposition) {
+                            const matches = contentDisposition.match(/filename="?([^"]+)"?/);
+                            if (matches && matches[1]) {
+                                filename = matches[1];
+                            }
+                        }
+                        
+                        link.download = filename;
+                        link.style.display = 'none';
+                        document.body.appendChild(link);
+                        
+                        console.log('Downloading regenerated PDF:', filename);
+                        link.click();
+                        
+                        // Clean up
+                        setTimeout(() => {
+                            document.body.removeChild(link);
+                            URL.revokeObjectURL(url);
+                        }, 1000);
+                        
+                        console.log('PDF regeneration and download completed successfully');
+                        
+                        // Fermer la modale après téléchargement
+                        closeModal('downloadFormatModal');
+                        currentCVForDownload = null;
+                        return;
+                    } else {
+                        throw new Error(`Failed to regenerate PDF: ${regenerateResponse.status} - ${regenerateResponse.statusText}`);
+                    }
+                } else {
+                    throw new Error(`Failed to download PDF: ${response.status} - ${response.statusText}`);
+                }
+                
+            } catch (error) {
+                console.error('Error downloading PDF:', error);
+                alert('Erreur lors du téléchargement du PDF: ' + error.message);
+                closeModal('downloadFormatModal');
+                currentCVForDownload = null;
+                return;
+            }
         }
         
         // For other formats (XML, LaTeX, All), use the original compilation method
@@ -786,6 +1013,9 @@ function setupEventListeners() {
     // Setup CV name input listeners
     setupCVNameInputListeners();
     
+    // Setup validation for import CV name input
+    setupImportCVNameInputListeners();
+    
     // Fermer les modals en cliquant à l'extérieur
     document.addEventListener('click', function(e) {
         if (e.target.classList.contains('modal')) {
@@ -814,8 +1044,8 @@ function setupEventListeners() {
     fileInput.addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (file && (file.type === 'text/xml' || file.type === 'application/pdf' || file.name.endsWith('.xml') || file.name.endsWith('.pdf'))) {
-            importBtn.disabled = false;
             importZone.querySelector('h4').textContent = file.name;
+            validateImportForm(); // Use the new validation function
         } else {
             importBtn.disabled = true;
             alert('Veuillez sélectionner un fichier PDF ou XML valide.');
@@ -850,12 +1080,78 @@ function setupEventListeners() {
     
     // Gestion de l'import
     importBtn.addEventListener('click', async function() {
+        console.log('🔍 Import button clicked'); // Debug log
+        
         const file = fileInput.files[0];
-        if (!file) return;
+        const importCVNameInput = document.getElementById('importCVNameInput');
+        const importCVNameError = document.getElementById('importCVNameError');
+        
+        console.log('🔍 File:', file); // Debug log
+        console.log('🔍 CV Name:', importCVNameInput ? importCVNameInput.value : 'input not found'); // Debug log
+        
+        if (!file) {
+            console.log('❌ No file selected'); // Debug log
+            alert('Veuillez sélectionner un fichier à importer.');
+            return;
+        }
+        
+        // Validation du nom du CV
+        const cvName = importCVNameInput.value.trim();
+        
+        console.log('🔍 CV Name trimmed:', cvName); // Debug log
+        
+        // Clear previous errors
+        importCVNameError.style.display = 'none';
+        importCVNameError.textContent = '';
+        
+        // Validate CV name - plus strict pour forcer la saisie manuelle
+        if (!cvName) {
+            console.log('❌ CV name is empty'); // Debug log
+            showImportCVNameError('❌ Vous devez obligatoirement saisir un nom pour votre CV');
+            importCVNameInput.focus();
+            return;
+        }
+        
+        // Vérifier que l'utilisateur n'a pas juste copié le placeholder
+        const placeholder = 'Saisissez le nom de votre CV...';
+        if (cvName === placeholder || cvName.toLowerCase() === placeholder.toLowerCase()) {
+            console.log('❌ CV name is placeholder'); // Debug log
+            showImportCVNameError('❌ Veuillez saisir votre propre nom, pas le texte d\'exemple');
+            importCVNameInput.focus();
+            importCVNameInput.select(); // Sélectionner le texte pour faciliter la réécriture
+            return;
+        }
+        
+        if (cvName.length < 3) {
+            console.log('❌ CV name too short'); // Debug log
+            showImportCVNameError('❌ Le nom du CV doit contenir au moins 3 caractères que vous tapez');
+            importCVNameInput.focus();
+            return;
+        }
+        
+        if (cvName.length > 100) {
+            console.log('❌ CV name too long'); // Debug log
+            showImportCVNameError('❌ Le nom du CV ne peut pas dépasser 100 caractères');
+            importCVNameInput.focus();
+            return;
+        }
+        
+        // Check for invalid characters
+        const invalidChars = /[<>:"/\\|?*]/g;
+        if (invalidChars.test(cvName)) {
+            console.log('❌ CV name has invalid characters'); // Debug log
+            showImportCVNameError('❌ Le nom ne peut pas contenir les caractères: < > : " / \\ | ? *');
+            importCVNameInput.focus();
+            return;
+        }
+        
+        console.log('✅ All validations passed, proceeding with import'); // Debug log
         
         const formData = new FormData();
         // On garde le même champ pour compatibilité backend
         formData.append('xml_file', file);
+        // Ajouter le nom personnalisé du CV
+        formData.append('custom_cv_name', cvName);
         
         const progressElement = document.getElementById('importProgress');
         const progressFill = document.getElementById('progressFill');
@@ -877,7 +1173,7 @@ function setupEventListeners() {
                 progressText.textContent = 'Import terminé !';
                 
                 // Rediriger vers la page d’édition du CV importé
-                window.location.href = 'home.html?edit=' + result.cv_id;
+                window.location.href = 'user_home.html';
                 return; // Arrêter ici pour ne pas recharger la liste
             } else {
                 alert('Erreur lors de l\'import: ' + result.message);
@@ -964,6 +1260,7 @@ async function publishCV(cvId) {
             headers: {
                 'Content-Type': 'application/json',
             },
+            credentials: 'same-origin',
             body: JSON.stringify({
                 cv_id: cvId,
                 is_published: true
@@ -1000,6 +1297,7 @@ async function unpublishCV(cvId) {
             headers: {
                 'Content-Type': 'application/json',
             },
+            credentials: 'same-origin',
             body: JSON.stringify({
                 cv_id: cvId,
                 is_published: false
@@ -1063,4 +1361,103 @@ function showMessage(message, type = 'info') {
     setTimeout(() => {
         messageElement.remove();
     }, 3000);
+}
+
+// Show CV import name validation error
+function showImportCVNameError(message) {
+    const errorElement = document.getElementById('importCVNameError');
+    errorElement.textContent = message;
+    errorElement.style.display = 'block';
+}
+
+// Setup import CV name input listeners for real-time validation
+function setupImportCVNameInputListeners() {
+    const importCVNameInput = document.getElementById('importCVNameInput');
+    const importBtn = document.getElementById('importBtn');
+    
+    if (importCVNameInput) {
+        // Real-time validation as user types
+        importCVNameInput.addEventListener('input', function() {
+            const errorElement = document.getElementById('importCVNameError');
+            errorElement.style.display = 'none';
+            
+            // Validate import form on input
+            validateImportForm();
+        });
+        
+        // Focus event pour guider l'utilisateur
+        importCVNameInput.addEventListener('focus', function() {
+            const errorElement = document.getElementById('importCVNameError');
+            if (this.value.trim() === '') {
+                errorElement.textContent = '💡 Tapez un nom unique pour identifier votre CV (ex: "Mon_CV_Professionnel", "CV_Marketing_2025")';
+                errorElement.style.display = 'block';
+                errorElement.style.color = '#0066cc'; // Bleu pour l'info, pas rouge pour l'erreur
+            }
+        });
+        
+        // Blur event pour revenir à la validation normale
+        importCVNameInput.addEventListener('blur', function() {
+            const errorElement = document.getElementById('importCVNameError');
+            if (errorElement.style.color === 'rgb(0, 102, 204)') { // Si c'était un message d'info
+                errorElement.style.display = 'none';
+                errorElement.style.color = ''; // Remettre la couleur par défaut
+            }
+        });
+        
+        // Handle Enter key to trigger import
+        importCVNameInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if (importBtn && !importBtn.disabled) {
+                    importBtn.click();
+                }
+            }
+        });
+        
+        // Handle Escape key
+        importCVNameInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal('importModal');
+            }
+        });
+    }
+}
+
+// Validate import form and enable/disable import button
+function validateImportForm() {
+    const fileInput = document.getElementById('fileInput');
+    const importCVNameInput = document.getElementById('importCVNameInput');
+    const importBtn = document.getElementById('importBtn');
+    
+    const hasFile = fileInput.files.length > 0;
+    const cvName = importCVNameInput.value.trim();
+    
+    console.log('🔍 validateImportForm - hasFile:', hasFile, 'cvName:', cvName); // Debug log
+    
+    // Validation du nom :
+    // - Au moins 3 caractères
+    // - Pas seulement des espaces
+    // - Pas de caractères invalides
+    const hasValidName = cvName.length >= 3 && 
+                        cvName.length <= 100 && 
+                        !/[<>:"/\\|?*]/g.test(cvName);
+    
+    console.log('🔍 validateImportForm - hasValidName:', hasValidName); // Debug log
+    
+    if (importBtn) {
+        const shouldEnable = hasFile && hasValidName;
+        importBtn.disabled = !shouldEnable;
+        console.log('🔍 validateImportForm - button enabled:', shouldEnable); // Debug log
+        
+        // Afficher un message d'aide si le nom n'est pas valide
+        if (cvName.length > 0 && !hasValidName) {
+            if (cvName.length < 3) {
+                showImportCVNameError('Le nom doit contenir au moins 3 caractères');
+            } else if (cvName.length > 100) {
+                showImportCVNameError('Le nom ne peut pas dépasser 100 caractères');
+            } else if (/[<>:"/\\|?*]/g.test(cvName)) {
+                showImportCVNameError('Caractères interdits: < > : " / \\ | ? *');
+            }
+        }
+    }
 }

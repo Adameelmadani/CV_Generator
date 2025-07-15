@@ -135,19 +135,47 @@
                 </button>
             </div>
             <div class="modal-body">
-                <div class="import-zone" id="importZone">
-                    <div class="import-content">
-                        <i class="fas fa-cloud-upload-alt"></i>
-                        <h4>Glissez votre fichier PDF ou XML ici</h4>
-                        <p>ou cliquez pour sélectionner un fichier</p>
-                        <input type="file" id="fileInput" accept=".xml,.pdf" hidden>
+                <!-- CV Name Input Section - Very visible -->
+                <div class="cv-name-section" style="background: #f8fafc; padding: 20px; border-radius: 8px; border: 2px solid #3b82f6; margin-bottom: 24px;">
+                    <h4 style="margin: 0 0 12px 0; color: #1e40af; font-size: 16px;">
+                        <i class="fas fa-edit"></i> Étape 1 : Nommez votre CV
+                    </h4>
+                    <div class="input-group" style="margin-bottom: 8px;">
+                        <label for="importCVNameInput" style="font-weight: 600; color: #1f2937; margin-bottom: 8px; display: block;">
+                            Nom du CV : <span style="color: #ef4444; font-size: 18px;">*</span>
+                        </label>
+                        <input type="text" id="importCVNameInput" 
+                               placeholder="Saisissez le nom de votre CV..." 
+                               maxlength="100" 
+                               autocomplete="off" 
+                               required
+                               style="width: 100%; padding: 12px 16px; border: 2px solid #d1d5db; border-radius: 6px; font-size: 16px; background: white;">
+                        <small class="help-text" style="color: #6b7280; font-size: 14px; margin-top: 4px; display: block;">
+                            <strong>Obligatoire :</strong> Vous devez taper un nom personnalisé pour identifier ce CV dans votre liste
+                        </small>
                     </div>
+                    <div class="error-message" id="importCVNameError" style="display: none; color: #ef4444; font-size: 14px; margin-top: 8px;"></div>
                 </div>
-                <div class="import-progress" id="importProgress" style="display: none;">
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="progressFill"></div>
+                
+                <!-- File Upload Section -->
+                <div class="file-upload-section">
+                    <h4 style="margin: 0 0 12px 0; color: #1e40af; font-size: 16px;">
+                        <i class="fas fa-upload"></i> Étape 2 : Sélectionnez votre fichier
+                    </h4>
+                    <div class="import-zone" id="importZone">
+                        <div class="import-content">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <h4>Glissez votre fichier PDF ou XML ici</h4>
+                            <p>ou cliquez pour sélectionner un fichier</p>
+                            <input type="file" id="fileInput" accept=".xml,.pdf" hidden>
+                        </div>
                     </div>
-                    <span id="progressText">Import en cours...</span>
+                    <div class="import-progress" id="importProgress" style="display: none;">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
+                        <span id="progressText">Import en cours...</span>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">

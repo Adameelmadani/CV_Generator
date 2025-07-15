@@ -8,8 +8,8 @@ class CV extends Model {
     
     public function getUserCVs($userId) {
         $sql = "SELECT c.id, c.contenu_xml, c.lien_pdf, c.est_publie, c.date_creation, c.date_modification, c.id_filiere,
-                       COALESCE(CONCAT(p.prenom, ' ', p.nom), 'CV sans nom') as cv_name,
-                       COALESCE(CONCAT(p.prenom, ' ', p.nom), 'CV sans nom') as display_name,
+                       COALESCE(c.cv_name, CONCAT(p.prenom, ' ', p.nom), 'CV sans nom') as cv_name,
+                       COALESCE(c.cv_name, CONCAT(p.prenom, ' ', p.nom), 'CV sans nom') as display_name,
                        c.date_creation as created_at,
                        c.date_modification as updated_at
                 FROM {$this->table} c

@@ -619,6 +619,15 @@ let currentStep = 1;
             throw new Error('XML parsing error: ' + parseError.textContent);
           }
           
+          // Parse personalization section
+          const personalizationSection = xmlDoc.querySelector('personalization');
+          if (personalizationSection) {
+            const primaryColorElement = personalizationSection.querySelector('primaryColor');
+            if (primaryColorElement) {
+              // Color value will be processed later
+            }
+          }
+          
           console.log('✓ XML parsé avec succès');
           
           // Debug: Show the actual XML structure
@@ -983,20 +992,52 @@ let currentStep = 1;
           }
           
           // Personnalisation (couleur)
-          const customization = xmlDoc.querySelector('customization') || xmlDoc.querySelector('theme');
+          const customization = xmlDoc.querySelector('personalization') || 
+                                xmlDoc.querySelector('customization') || 
+                                xmlDoc.querySelector('theme');
           if (customization) {
             const primaryColor = customization.querySelector('primaryColor, color')?.textContent || '';
             if (primaryColor) {
-              console.log('✓ Chargement de la couleur personnalisée:', primaryColor);
-              
               // Set the color in both the hidden field and the visible color picker
               setFieldValue('primary_color', primaryColor);
               
-              const colorPicker = document.getElementById('primary_color_external');
-              if (colorPicker) {
-                colorPicker.value = primaryColor;
-              }
+              // Use setTimeout to ensure color picker is fully initialized
+              setTimeout(() => {
+                const colorPicker = document.getElementById('primary_color_external');
+                if (colorPicker) {
+                  colorPicker.value = primaryColor;
+                  
+                  // Update color preview and preset selection immediately
+                  if (typeof updateColorPreview === 'function') {
+                    updateColorPreview(primaryColor);
+                  }
+                  if (typeof updatePresetSelection === 'function') {
+                    updatePresetSelection(primaryColor);
+                  }
+                  
+                  // Trigger the color picker events to update preview and presets
+                  const changeEvent = new Event('change', { bubbles: true });
+                  colorPicker.dispatchEvent(changeEvent);
+                  
+                  // Force update the live preview after color is loaded
+                  if (typeof schedulePreviewUpdate === 'function') {
+                    schedulePreviewUpdate(50);
+                  }
+                  
+                  // Also ensure preview colors are updated if preview is visible
+                  if (previewVisible && typeof updatePreviewColors === 'function') {
+                    setTimeout(() => {
+                      updatePreviewColors();
+                    }, 100);
+                  }
+                } else {
+                }
+              }, 250); // Increased delay to ensure no conflicts with initialization
+            } else {
+              console.log('⚠️ Aucune couleur trouvée dans la personnalisation');
             }
+          } else {
+            console.log('⚠️ Section personnalisation non trouvée dans le XML');
           }
           
           console.log('✅ Formulaire peuplé avec succès');
@@ -1013,7 +1054,9 @@ let currentStep = 1;
           // Check certificates and projects (need to be declared here)
           const certificatesFound = xmlDoc.querySelectorAll('certificates certificate');
           const projectsFound = xmlDoc.querySelectorAll('projects project');
-          const customizationFound = xmlDoc.querySelector('customization') || xmlDoc.querySelector('theme');
+          const customizationFound = xmlDoc.querySelector('personalization') || 
+                                    xmlDoc.querySelector('customization') || 
+                                    xmlDoc.querySelector('theme');
           
           console.log('- Certificats:', certificatesFound.length, 'trouvés');
           console.log('- Projets:', projectsFound.length, 'trouvés');
@@ -1028,7 +1071,45 @@ let currentStep = 1;
           // Optional: Show a brief success notification
           setTimeout(() => {
             console.log('🎉 CV chargé et prêt pour modification');
-          }, 100);
+            
+            // Don't reinitialize color picker here as it overrides the loaded color
+            // The color picker is already initialized on page load
+            
+            // Ensure the color is properly reflected in the UI and live preview
+            const primaryColorField = document.getElementById('primary_color');
+            const externalColorPicker = document.getElementById('primary_color_external');
+            if (primaryColorField && externalColorPicker && primaryColorField.value) {
+              const savedColor = primaryColorField.value;
+              
+              // Only update external picker if it doesn't match the saved color
+              if (externalColorPicker.value !== savedColor) {
+                externalColorPicker.value = savedColor;
+              }
+              
+              // Update preset selection one more time to be sure
+              if (typeof updatePresetSelection === 'function') {
+                updatePresetSelection(savedColor);
+              }
+              
+              // Force update the live preview with the loaded color if preview is visible
+              if (previewVisible) {
+                if (typeof updatePreviewColors === 'function') {
+                  updatePreviewColors();
+                }
+                if (typeof schedulePreviewUpdate === 'function') {
+                  schedulePreviewUpdate(100);
+                }
+              }
+              
+              // Check if the color matches any preset
+              const matchingPreset = document.querySelector(`.color-preset[data-color="${savedColor}"]`);
+              if (matchingPreset) {
+                // Matching preset found
+              } else {
+                // No matching preset - custom color will be shown in picker only
+              }
+            }
+          }, 400); // Increased delay to happen after color loading
           
         } catch (error) {
           console.error('❌ Erreur lors du parsing XML:', error);
@@ -1451,6 +1532,15 @@ let currentStep = 1;
           // Wait for the async PDF generation
           await updatePreview();
           
+          // Ensure colors are applied after preview update
+          const currentColor = document.getElementById('primary_color')?.value || 
+                              document.getElementById('primary_color_external')?.value;
+          if (currentColor && typeof updatePreviewColors === 'function') {
+            setTimeout(() => {
+              updatePreviewColors();
+            }, 50);
+          }
+          
         } catch (error) {
           console.error('Preview update failed:', error);
         }
@@ -1478,6 +1568,15 @@ let currentStep = 1;
           
           // Initialize live preview immediately
           initializeLivePreview();
+          
+          // Ensure color is applied to the preview when it opens
+          const currentColor = document.getElementById('primary_color')?.value || 
+                              document.getElementById('primary_color_external')?.value;
+          if (currentColor && typeof updatePreviewColors === 'function') {
+            setTimeout(() => {
+              updatePreviewColors();
+            }, 100);
+          }
           
           // Immediate first update with indicator
           updatePreviewWithIndicator();
@@ -2045,8 +2144,27 @@ let currentStep = 1;
         const hiddenColorInput = document.getElementById('primary_color');
         const colorPresets = document.querySelectorAll('.color-preset');
         
-        // Set initial color
-        updateColorPreview(externalColorPicker.value);
+        if (!externalColorPicker || !hiddenColorInput) {
+          console.error('❌ Color picker elements not found');
+          return;
+        }
+        
+        // Preserve already loaded color or use initial color
+        // Priority: hiddenColorInput.value (from loaded CV) > externalColorPicker.value (user selection) > default
+        let initialColor = hiddenColorInput.value || externalColorPicker.value || '#667eea';
+        
+        // Don't override if color is already properly set
+        if (hiddenColorInput.value && hiddenColorInput.value !== '#667eea') {
+          initialColor = hiddenColorInput.value;
+        }
+        
+        // Sync both inputs
+        externalColorPicker.value = initialColor;
+        hiddenColorInput.value = initialColor;
+        
+        // Set initial color preview and preset selection
+        updateColorPreview(initialColor);
+        updatePresetSelection(initialColor);
         
         // External color picker change event
         externalColorPicker.addEventListener('change', function() {
@@ -2076,9 +2194,6 @@ let currentStep = 1;
             schedulePreviewUpdate(100);
           });
         });
-        
-        // Initialize preset selection
-        updatePresetSelection(externalColorPicker.value);
       }
       
       function updateColorPreview(color) {
@@ -2088,13 +2203,21 @@ let currentStep = 1;
       
       function updatePresetSelection(selectedColor) {
         const colorPresets = document.querySelectorAll('.color-preset');
+        let foundMatch = false;
+        
         colorPresets.forEach(preset => {
-          if (preset.getAttribute('data-color') === selectedColor) {
+          const presetColor = preset.getAttribute('data-color');
+          if (presetColor === selectedColor) {
             preset.classList.add('selected');
+            foundMatch = true;
           } else {
             preset.classList.remove('selected');
           }
         });
+        
+        if (!foundMatch) {
+          // No matching preset found - custom color
+        }
       }
       
       function hexToRgb(hex) {
@@ -2233,17 +2356,13 @@ let currentStep = 1;
             submitBtn.innerHTML = '<i class="fas fa-check"></i> CV généré avec succès!';
             submitBtn.style.background = '#28a745';
             
-            // Trigger download immediately without notification
-            if (result.download_url) {
-              window.location.href = result.download_url;
-            } else if (result.pdf_path) {
-              window.location.href = result.pdf_path;
-            } else if (result.cv_id) {
-              // Fallback: construct download URL from CV ID with correct parameters
-              // Get the selected format from the form
-              const selectedFormat = document.querySelector('input[name="format"]:checked')?.value || 'pdf';
-              window.location.href = 'download_cv_mvc.php?id=' + result.cv_id + '&format=' + selectedFormat;
-            }
+            // Store CV data for download later
+            window.generatedCVData = {
+              download_url: result.download_url,
+              pdf_path: result.pdf_path,
+              cv_id: result.cv_id,
+              selectedFormat: document.querySelector('input[name="format"]:checked')?.value || 'pdf'
+            };
             
             // Clear custom CV name from sessionStorage after first successful generation
             // This ensures the server session now has the name stored
@@ -2251,7 +2370,12 @@ let currentStep = 1;
               sessionStorage.removeItem('newCVName');
             }
             
-            // Reset button after download
+            // Show publish confirmation modal instead of immediate download
+            console.log('🔄 About to show publish modal...');
+            console.log('generatedCVData:', window.generatedCVData);
+            showPublishModal();
+            
+            // Reset button
             resetButtonAfterDownload(submitBtn, originalText);
             
           } else {
@@ -2276,3 +2400,260 @@ let currentStep = 1;
       }
       
       // ============ END FORM SUBMISSION HANDLER ============
+
+      // ============ PUBLISH MODAL FUNCTIONS ============
+      
+      function showPublishModal() {
+        console.log('🔄 showPublishModal called - showing standalone modal window');
+        
+        // Enhanced modal display to ensure it appears as a proper popup window
+        const showModal = () => {
+          let modal = document.getElementById('publishModal');
+          console.log('Modal element found:', !!modal);
+          
+          if (!modal) {
+            console.log('🔧 Creating emergency modal...');
+            createEmergencyModal();
+            modal = document.getElementById('emergencyModal');
+          }
+          
+          if (modal) {
+            // Ensure the modal is properly positioned and visible
+            modal.style.display = 'flex';
+            modal.style.position = 'fixed';
+            modal.style.top = '0';
+            modal.style.left = '0';
+            modal.style.right = '0';
+            modal.style.bottom = '0';
+            modal.style.zIndex = '99999';
+            modal.style.background = 'rgba(0, 0, 0, 0.5)';
+            modal.style.justifyContent = 'center';
+            modal.style.alignItems = 'center';
+            modal.style.padding = '20px';
+            
+            // Add show class for animation
+            modal.classList.add('show');
+            
+            // Prevent body scrolling while modal is open
+            document.body.style.overflow = 'hidden';
+            document.body.style.position = 'fixed';
+            document.body.style.top = '0';
+            document.body.style.left = '0';
+            document.body.style.right = '0';
+            
+            console.log('✅ Modal displayed as standalone window');
+            
+            // Focus management
+            modal.setAttribute('tabindex', '-1');
+            modal.focus();
+            
+          } else {
+            console.error('❌ Could not create or find publish modal');
+          }
+        };
+        
+        // Show immediately
+        showModal();
+      }
+      
+      // Create emergency modal with proper structure
+      function createEmergencyModal() {
+        const modalHTML = `
+          <div class="modal show" id="emergencyModal" style="display: flex; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 99999; background: rgba(0, 0, 0, 0.5); justify-content: center; align-items: center; padding: 20px;">
+            <div class="modal-content" style="background: white; border-radius: 8px; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25); max-width: 600px; width: 100%; max-height: 90vh; overflow: hidden; display: flex; flex-direction: column;">
+              <div class="modal-header" style="padding: 24px 32px; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; background: #f9fafb;">
+                <h3 style="font-size: 1.25rem; font-weight: 600; color: #1f2937; display: flex; align-items: center; gap: 8px; margin: 0;">
+                  <i class="fas fa-share" style="color: #10b981;"></i> CV généré avec succès!
+                </h3>
+                <button class="close-btn" onclick="hidePublishModal(); removeEmergencyModal();" style="background: none; border: none; font-size: 20px; color: #6b7280; cursor: pointer; padding: 8px; border-radius: 4px;">
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+              <div class="modal-body" style="padding: 32px; flex: 1; background: white;">
+                <p style="color: #374151; margin-bottom: 24px; line-height: 1.6;">Votre CV a été généré avec succès. Souhaitez-vous le publier pour qu'il soit visible par les recruteurs?</p>
+                <div class="publish-options" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 24px 0;">
+                  <div class="option-card" style="padding: 20px; border: 2px solid #e5e7eb; border-radius: 8px; text-align: center; cursor: pointer; background: white;">
+                    <i class="fas fa-globe" style="font-size: 2rem; margin-bottom: 12px; display: block; color: #10b981;"></i>
+                    <h4 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 8px; color: #1f2937;">Publier</h4>
+                    <p style="font-size: 0.9rem; color: #6b7280; margin: 0; line-height: 1.4;">Rendre votre CV visible dans la base de données pour les recruteurs</p>
+                  </div>
+                  <div class="option-card" style="padding: 20px; border: 2px solid #e5e7eb; border-radius: 8px; text-align: center; cursor: pointer; background: white;">
+                    <i class="fas fa-lock" style="font-size: 2rem; margin-bottom: 12px; display: block; color: #667eea;"></i>
+                    <h4 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 8px; color: #1f2937;">Garder privé</h4>
+                    <p style="font-size: 0.9rem; color: #6b7280; margin: 0; line-height: 1.4;">Télécharger uniquement, sans le publier</p>
+                  </div>
+                </div>
+              </div>
+              <div class="modal-footer" style="padding: 24px 32px; border-top: 1px solid #e5e7eb; display: flex; gap: 12px; justify-content: flex-end; background: #f9fafb;">
+                <button class="btn btn-secondary" onclick="skipPublish(); hidePublishModal(); removeEmergencyModal();" style="padding: 12px 24px; border: 1px solid #d1d5db; border-radius: 6px; background: #f3f4f6; color: #374151; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                  <i class="fas fa-download"></i> Télécharger seulement
+                </button>
+                <button class="btn btn-primary" onclick="publishAndDownload(); removeEmergencyModal();" style="padding: 12px 24px; border: none; border-radius: 6px; background: #667eea; color: white; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                  <i class="fas fa-share"></i> Publier et télécharger
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+      }
+      
+      function removeEmergencyModal() {
+        const emergency = document.getElementById('emergencyModal');
+        if (emergency) {
+          emergency.remove();
+        }
+      }
+      
+      function hidePublishModal() {
+        const modal = document.getElementById('publishModal') || document.getElementById('emergencyModal');
+        if (modal) {
+          // Hide the modal
+          modal.classList.remove('show');
+          modal.style.display = 'none';
+          
+          // Restore body scrolling - IMPORTANT!
+          document.body.style.overflow = '';
+          document.body.style.position = '';
+          document.body.style.top = '';
+          document.body.style.left = '';
+          document.body.style.right = '';
+          
+          console.log('✅ Modal hidden and page scroll restored');
+        }
+      }
+      
+      // Make functions globally available
+      window.showPublishModal = showPublishModal;
+      window.hidePublishModal = hidePublishModal;
+      
+      // Global functions for modal buttons with enhanced functionality - updated for user_home.css
+      window.publishAndDownload = async function() {
+        if (!window.generatedCVData || !window.generatedCVData.cv_id) {
+          console.error('❌ No CV data available for publishing');
+          alert('Erreur: Aucune donnée de CV disponible pour la publication');
+          return;
+        }
+        
+        try {
+          // Show loading state on any publish button found - updated selectors
+          const modal = document.getElementById('publishModal') || document.getElementById('emergencyModal');
+          const publishBtn = modal ? (modal.querySelector('#publishAndDownloadBtn') || modal.querySelector('.btn-primary')) : null;
+          let originalText = '';
+          
+          if (publishBtn) {
+            originalText = publishBtn.innerHTML;
+            publishBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Publication...';
+            publishBtn.disabled = true;
+            publishBtn.classList.add('success');
+          }
+          
+          // Make publish request with JSON data
+          const publishData = {
+            cv_id: window.generatedCVData.cv_id,
+            is_published: 1
+          };
+          
+          const response = await fetch('publish_cv_mvc.php', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Requested-With': 'XMLHttpRequest',
+              'Accept': 'application/json',
+            },
+            body: JSON.stringify(publishData)
+          });
+          
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          
+          const result = await response.json();
+          
+          if (result.status === 'success') {
+            // Success - update button and proceed to download
+            if (publishBtn) {
+              publishBtn.innerHTML = '<i class="fas fa-check"></i> Publié!';
+              publishBtn.style.background = '#28a745';
+            }
+            
+            // Wait a moment then hide modal and start download
+            setTimeout(() => {
+              hidePublishModal();
+              triggerDownload();
+            }, 1000);
+            
+          } else {
+            console.error('❌ Publish error:', result.message);
+            alert('Erreur lors de la publication: ' + (result.message || 'Erreur inconnue'));
+            
+            // Reset button
+            if (publishBtn) {
+              publishBtn.innerHTML = originalText;
+              publishBtn.disabled = false;
+              publishBtn.style.background = '';
+            }
+          }
+          
+        } catch (error) {
+          console.error('❌ Publish error:', error);
+          alert('Erreur lors de la publication: ' + error.message);
+          
+          // Reset button - use the same modal-specific selector
+          const modal = document.getElementById('publishModal');
+          const publishBtn = modal ? modal.querySelector('.btn-primary') : null;
+          if (publishBtn) {
+            publishBtn.innerHTML = '<i class="fas fa-share"></i> Publier et télécharger';
+            publishBtn.disabled = false;
+            publishBtn.style.background = '';
+          }
+        }
+      };
+      
+      window.skipPublish = function() {
+        console.log('⏭️ Skipping publish, downloading only...');
+        hidePublishModal();
+        triggerDownload();
+      };
+      
+      function triggerDownload() {
+        if (!window.generatedCVData) {
+          console.error('❌ No CV data available for download');
+          alert('Erreur: Aucune donnée de CV disponible pour le téléchargement');
+          return;
+        }
+        
+        // Trigger download
+        if (window.generatedCVData.download_url) {
+          window.location.href = window.generatedCVData.download_url;
+        } else if (window.generatedCVData.pdf_path) {
+          window.location.href = window.generatedCVData.pdf_path;
+        } else if (window.generatedCVData.cv_id) {
+          // Fallback: construct download URL from CV ID
+          const downloadUrl = 'download_cv_mvc.php?id=' + window.generatedCVData.cv_id + 
+                             '&format=' + (window.generatedCVData.selectedFormat || 'pdf');
+          window.location.href = downloadUrl;
+        }
+        
+        // Clear the stored data
+        window.generatedCVData = null;
+      }
+
+      // Initialize modal functionality - updated for user_home.css structure
+      document.addEventListener('DOMContentLoaded', function() {
+        const modal = document.getElementById('publishModal');
+        if (modal) {
+          const publishBtn = modal.querySelector('#publishAndDownloadBtn');
+          const skipBtn = modal.querySelector('#skipPublishBtn');
+          const closeBtn = modal.querySelector('.close-btn');
+          
+          if (publishBtn) publishBtn.addEventListener('click', window.publishAndDownload);
+          if (skipBtn) skipBtn.addEventListener('click', window.skipPublish);
+          if (closeBtn) closeBtn.addEventListener('click', window.skipPublish);
+          
+          // Close modal when clicking outside (on the modal background)
+          modal.addEventListener('click', function(e) {
+            if (e.target === modal) window.skipPublish();
+          });
+        }
+      });
