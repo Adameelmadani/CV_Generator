@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Système de Recherche CV - Index</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            text-align: center;
+            max-width: 600px;
+            width: 90%;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+        }
+        
+        .description {
+            font-size: 1.1rem;
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 15px 30px;
+            margin: 10px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(45deg, #48bb78, #38a169);
+            box-shadow: 0 5px 15px rgba(72, 187, 120, 0.3);
+        }
+        
+        .btn-secondary:hover {
+            box-shadow: 0 8px 25px rgba(72, 187, 120, 0.4);
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .feature {
+            background: rgba(255, 255, 255, 0.7);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: left;
+        }
+        
+        .feature h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+        
+        .feature p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .emoji {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Système de Recherche CV</h1>
+        <p class="description">
+            Interface avancée pour rechercher et filtrer les CV dans votre base de données cv_craft. 
+            Trouvez rapidement les profils qui correspondent à vos besoins avec notre système intelligent.
+        </p>
+        
+        <div>
+            <a href="cv_search_interface.html" class="btn">
+                🚀 Accéder à l'Interface
+            </a>
+            <a href="README_CV_SEARCH.md" class="btn btn-secondary">
+                � Documentation
+            </a>
+        </div>
+        
+        <div class="features">
+            <div class="feature">
+                <div class="emoji">⚡</div>
+                <h3>Recherche Rapide</h3>
+                <p>Recherche instantanée avec comptage précis des mots-clés et support des synonymes</p>
+            </div>
+            <div class="feature">
+                <div class="emoji">🎨</div>
+                <h3>Interface Premium</h3>
+                <p>Design moderne et responsive avec animations sophistiquées</p>
+            </div>
+            <div class="feature">
+                <div class="emoji">🔧</div>
+                <h3>Filtres Avancés</h3>
+                <p>Filtrage par ville, compétences, et nombreux autres critères</p>
+            </div>
+            <div class="feature">
+                <div class="emoji">📊</div>
+                <h3>Statistiques</h3>
+                <p>Métriques en temps réel sur vos recherches et résultats</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

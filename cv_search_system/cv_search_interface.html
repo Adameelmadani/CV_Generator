@@ -1,0 +1,1586 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recherche CV - Interface Recruteur Responsive</title>
+    <style>
+        /* Reset et Base */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        /* Container Principal */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+
+        /* Header Responsive */
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 15px 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .header h1 {
+            font-size: clamp(1.8rem, 5vw, 3rem);
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: clamp(0.9rem, 2.5vw, 1.2rem);
+            color: #666;
+            margin-bottom: 0;
+        }
+
+        /* Main Content Grid */
+        .main-content {
+            display: grid;
+            gap: 20px;
+            padding: 0 10px;
+        }
+
+        /* Search Section */
+        .search-section {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            border: 1px solid #f0f0f0;
+        }
+
+        .search-form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 200px;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #fafafa;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            background: white;
+        }
+
+        .search-btn {
+            padding: 12px 20px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 100px;
+            white-space: nowrap;
+        }
+
+        .search-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        /* Filters Responsive */
+        .filters {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .filter-group label {
+            font-weight: 600;
+            color: #555;
+            font-size: 14px;
+        }
+
+        .filter-group input,
+        .filter-group select {
+            padding: 10px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            background: #fafafa;
+            transition: all 0.3s ease;
+        }
+
+        .filter-group input:focus,
+        .filter-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+        }
+
+        /* Stats Section Responsive */
+        .stats-section {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            border: 1px solid #f0f0f0;
+        }
+
+        .stats-section h2 {
+            font-size: clamp(1.3rem, 4vw, 2rem);
+            margin-bottom: 15px;
+            color: #333;
+            text-align: center;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .stat-value {
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: clamp(0.8rem, 2vw, 1rem);
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* CV Cards Ultra Premium Design */
+        .cv-card-simple {
+            border: 1px solid #e2e8f0;
+            border-radius: 24px;
+            padding: 30px;
+            margin-bottom: 25px;
+            transition: all 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+            background: linear-gradient(135deg, #ffffff 0%, #f8faff 50%, #ffffff 100%);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 
+                0 4px 20px rgba(102, 126, 234, 0.08),
+                0 1px 3px rgba(0, 0, 0, 0.05);
+            backdrop-filter: blur(10px);
+        }
+
+        .cv-card-simple::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, 
+                #667eea 0%, 
+                #764ba2 25%, 
+                #f093fb 50%, 
+                #f5576c 75%, 
+                #4facfe 100%);
+            transform: translateX(-100%);
+            transition: transform 0.8s ease;
+        }
+
+        .cv-card-simple::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, 
+                rgba(102, 126, 234, 0.02) 0%, 
+                rgba(118, 75, 162, 0.02) 100%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+        }
+
+        .cv-card-simple:hover::before {
+            transform: translateX(0);
+        }
+
+        .cv-card-simple:hover::after {
+            opacity: 1;
+        }
+
+        .cv-card-simple:hover {
+            box-shadow: 
+                0 25px 50px rgba(102, 126, 234, 0.15),
+                0 10px 20px rgba(102, 126, 234, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.6);
+            transform: translateY(-10px) scale(1.02);
+            border-color: #667eea;
+            background: linear-gradient(135deg, #ffffff 0%, #f0f4ff 50%, #ffffff 100%);
+        }
+
+        /* Effet de particules flottantes */
+        .cv-card-simple:hover::before {
+            animation: rainbow-flow 2s infinite;
+        }
+
+        @keyframes rainbow-flow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .cv-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 20px;
+            position: relative;
+        }
+
+        .cv-header::after {
+            content: '';
+            position: absolute;
+            bottom: -12px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                #667eea 20%, 
+                #764ba2 50%, 
+                #f093fb 80%, 
+                transparent 100%);
+            border-radius: 1px;
+        }
+
+        .cv-main-info {
+            flex: 1;
+            min-width: 280px;
+        }
+
+        .cv-name {
+            font-size: clamp(1.2rem, 3vw, 1.5rem);
+            font-weight: 800;
+            color: #1a202c;
+            margin-bottom: 10px;
+            letter-spacing: -0.025em;
+            line-height: 1.2;
+            background: linear-gradient(135deg, #2d3748 0%, #4a5568 50%, #667eea 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+        }
+
+        .cv-name::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.6s ease;
+        }
+
+        .cv-card-simple:hover .cv-name::after {
+            width: 100%;
+        }
+
+        .cv-author {
+            font-size: clamp(1rem, 2.5vw, 1.2rem);
+            color: #4a5568;
+            margin-bottom: 8px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: color 0.3s ease;
+        }
+
+        .cv-author::before {
+            content: '👤';
+            font-size: 1.1em;
+            padding: 4px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            filter: grayscale(0.3);
+            transition: filter 0.3s ease;
+        }
+
+        .cv-card-simple:hover .cv-author::before {
+            filter: grayscale(0);
+        }
+
+        .cv-email {
+            color: #718096;
+            font-size: clamp(0.9rem, 2vw, 1rem);
+            word-break: break-word;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .cv-email::before {
+            content: '📧';
+            font-size: 1em;
+            padding: 4px;
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            border-radius: 50%;
+            filter: grayscale(0.3);
+            transition: filter 0.3s ease;
+        }
+
+        .cv-card-simple:hover .cv-email::before {
+            filter: grayscale(0);
+        }
+
+        .cv-frequency {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-size: clamp(0.8rem, 2vw, 0.9rem);
+            font-weight: 700;
+            white-space: nowrap;
+            box-shadow: 
+                0 6px 20px rgba(102, 126, 234, 0.3),
+                0 2px 8px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            transition: all 0.4s ease;
+        }
+
+        .cv-frequency::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, 
+                transparent, 
+                rgba(255,255,255,0.15), 
+                transparent);
+            transform: rotate(45deg);
+            animation: shimmer 3s infinite;
+        }
+
+        .cv-frequency::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, 
+                rgba(255,255,255,0.1) 0%, 
+                transparent 50%, 
+                rgba(255,255,255,0.1) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .cv-card-simple:hover .cv-frequency::after {
+            opacity: 1;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            50% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+            100% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+        }
+
+        .cv-info-simple {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 18px;
+            margin-bottom: 25px;
+            padding: 25px;
+            background: linear-gradient(135deg, 
+                #f8fafc 0%, 
+                #e2e8f0 20%, 
+                #f1f5f9 40%, 
+                #e2e8f0 60%, 
+                #f8fafc 100%);
+            border-radius: 18px;
+            border: 1px solid #e2e8f0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cv-info-simple::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, 
+                rgba(102, 126, 234, 0.02) 0%, 
+                rgba(118, 75, 162, 0.02) 50%, 
+                rgba(102, 126, 234, 0.02) 100%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .cv-card-simple:hover .cv-info-simple::before {
+            opacity: 1;
+        }
+
+        .cv-info-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px 18px;
+            background: linear-gradient(135deg, white 0%, #fafbfc 100%);
+            border-radius: 15px;
+            box-shadow: 
+                0 3px 12px rgba(0, 0, 0, 0.05),
+                0 1px 3px rgba(0, 0, 0, 0.1);
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            border: 1px solid #f1f5f9;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cv-info-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: linear-gradient(180deg, #667eea, #764ba2, #f093fb);
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+        }
+
+        .cv-info-item:hover::before {
+            transform: scaleY(1);
+        }
+
+        .cv-info-item:hover {
+            box-shadow: 
+                0 8px 25px rgba(102, 126, 234, 0.15),
+                0 3px 8px rgba(0, 0, 0, 0.1);
+            transform: translateY(-4px) scale(1.02);
+            border-color: #667eea;
+            background: linear-gradient(135deg, white 0%, #f0f4ff 100%);
+        }
+
+        .cv-info-icon {
+            font-size: 1.4em;
+            opacity: 0.8;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+        }
+
+        .cv-info-item:hover .cv-info-icon {
+            opacity: 1;
+            transform: scale(1.15) rotate(5deg);
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .cv-info-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .cv-location {
+            color: #4a5568;
+            font-size: clamp(0.9rem, 2vw, 1rem);
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .cv-skill {
+            color: #2d3748;
+            font-size: clamp(0.9rem, 2vw, 1rem);
+            font-weight: 700;
+            transition: color 0.3s ease;
+        }
+
+        .cv-date {
+            color: #718096;
+            font-size: clamp(0.85rem, 2vw, 0.95rem);
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .cv-info-item:hover .cv-location,
+        .cv-info-item:hover .cv-skill,
+        .cv-info-item:hover .cv-date {
+            color: #667eea;
+        }
+
+        .cv-info-label {
+            font-size: 0.75rem;
+            color: #9ca3af;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .cv-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 30px;
+            padding-top: 25px;
+            border-top: 2px solid #e2e8f0;
+            position: relative;
+        }
+
+        .cv-actions::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                #667eea 30%, 
+                #764ba2 50%, 
+                #f093fb 70%, 
+                transparent 100%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .cv-card-simple:hover .cv-actions::before {
+            opacity: 1;
+        }
+
+        .btn-view-details, .btn-view-data {
+            border: none;
+            padding: 14px 28px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: clamp(0.9rem, 2vw, 1rem);
+            font-weight: 700;
+            transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+            white-space: nowrap;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            position: relative;
+            overflow: hidden;
+            min-width: 140px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-view-details {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 50%, #2f855a 100%);
+            color: white;
+            box-shadow: 
+                0 6px 20px rgba(72, 187, 120, 0.3),
+                0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-view-details:hover {
+            background: linear-gradient(135deg, #38a169 0%, #2f855a 50%, #276749 100%);
+            transform: translateY(-4px) scale(1.05);
+            box-shadow: 
+                0 12px 30px rgba(72, 187, 120, 0.4),
+                0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-view-data {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            color: white;
+            box-shadow: 
+                0 6px 20px rgba(102, 126, 234, 0.3),
+                0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-view-data:hover {
+            background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 50%, #d946ef 100%);
+            transform: translateY(-4px) scale(1.05);
+            box-shadow: 
+                0 12px 30px rgba(102, 126, 234, 0.4),
+                0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-view-details::before, .btn-view-data::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255,255,255,0.3), 
+                transparent);
+            transition: left 0.8s ease;
+        }
+
+        .btn-view-details:hover::before, .btn-view-data:hover::before {
+            left: 100%;
+        }
+
+        .btn-view-details::after, .btn-view-data::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s ease, height 0.3s ease;
+        }
+
+        .btn-view-details:active::after, .btn-view-data:active::after {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-view-details:active, .btn-view-data:active {
+            transform: translateY(-2px) scale(0.98);
+        }
+
+        /* Effet de pulsation pour les boutons */
+        .btn-view-details {
+            animation: pulse-green 3s infinite;
+        }
+
+        .btn-view-data {
+            animation: pulse-blue 3s infinite;
+        }
+
+        @keyframes pulse-green {
+            0% { box-shadow: 0 6px 20px rgba(72, 187, 120, 0.3), 0 2px 8px rgba(0, 0, 0, 0.1); }
+            50% { box-shadow: 0 8px 25px rgba(72, 187, 120, 0.4), 0 3px 10px rgba(0, 0, 0, 0.15); }
+            100% { box-shadow: 0 6px 20px rgba(72, 187, 120, 0.3), 0 2px 8px rgba(0, 0, 0, 0.1); }
+        }
+
+        @keyframes pulse-blue {
+            0% { box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3), 0 2px 8px rgba(0, 0, 0, 0.1); }
+            50% { box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4), 0 3px 10px rgba(0, 0, 0, 0.15); }
+            100% { box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3), 0 2px 8px rgba(0, 0, 0, 0.1); }
+        }
+
+        /* Loading et Error States */
+        .loading, .error {
+            text-align: center;
+            padding: 30px 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+
+        .loading {
+            background: linear-gradient(45deg, #f0f8ff, #e6f3ff);
+            color: #2c5aa0;
+            border: 2px solid #cce7ff;
+        }
+
+        .error {
+            background: linear-gradient(45deg, #fff5f5, #ffe6e6);
+            color: #e53e3e;
+            border: 2px solid #fbb6b6;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+
+        .no-results h3 {
+            color: #ff6b6b;
+            margin-bottom: 15px;
+            font-size: clamp(1.2rem, 3vw, 1.5rem);
+        }
+
+        /* Modal Responsive */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 2% auto;
+            padding: 0;
+            border-radius: 15px;
+            width: 95%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+
+        .cv-details-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 15px 15px 0 0;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .cv-details-header h2 {
+            margin: 0;
+            font-size: clamp(1.2rem, 3vw, 1.5rem);
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 5px;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s;
+        }
+
+        .close-modal:hover {
+            background-color: rgba(255,255,255,0.2);
+        }
+
+        .cv-details-body {
+            padding: 20px;
+        }
+
+        .cv-details-body .cv-section {
+            margin-bottom: 25px;
+        }
+
+        .cv-details-body .cv-section h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: clamp(1rem, 3vw, 1.2rem);
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 5px;
+        }
+
+        .cv-details-body .cv-section ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .cv-details-body .cv-section li {
+            margin-bottom: 12px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            font-size: clamp(0.9rem, 2vw, 1rem);
+        }
+
+        .cv-details-body .cv-section a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .cv-details-body .cv-section a:hover {
+            text-decoration: underline;
+        }
+
+        /* Media Queries pour Responsive */
+        @media (max-width: 768px) {
+            .container {
+                margin: 5px;
+                padding: 15px;
+                border-radius: 15px;
+            }
+
+            .main-content {
+                gap: 15px;
+                padding: 0 5px;
+            }
+
+            .search-section, .stats-section {
+                padding: 15px;
+            }
+
+            .search-form {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .search-input {
+                min-width: 100%;
+            }
+
+            .filters {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .cv-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .cv-info-simple {
+                grid-template-columns: 1fr;
+            }
+
+            .cv-actions {
+                justify-content: center;
+            }
+
+            .modal-content {
+                width: 98%;
+                margin: 1% auto;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header {
+                padding: 10px 5px;
+            }
+
+            .search-section, .stats-section {
+                padding: 12px;
+            }
+
+            .cv-card-simple {
+                padding: 12px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .cv-actions {
+                flex-direction: column;
+                gap: 5px;
+            }
+
+            .btn-view-details, .btn-view-data {
+                width: 100%;
+                text-align: center;
+            }
+        }
+
+        /* Section des résultats avec animation */
+        .results-section {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.1);
+            margin-top: 20px;
+            border: 1px solid #e8ecf4;
+        }
+
+        .results-section h3 {
+            font-size: clamp(1.3rem, 4vw, 1.8rem);
+            color: #2d3748;
+            margin-bottom: 25px;
+            text-align: center;
+            font-weight: 700;
+            position: relative;
+            padding-bottom: 15px;
+        }
+
+        .results-section h3::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 2px;
+        }
+
+        .results-list {
+            display: grid;
+            gap: 25px;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Animation staggered pour les cartes */
+        .cv-card-simple:nth-child(1) { animation-delay: 0.1s; }
+        .cv-card-simple:nth-child(2) { animation-delay: 0.2s; }
+        .cv-card-simple:nth-child(3) { animation-delay: 0.3s; }
+        .cv-card-simple:nth-child(4) { animation-delay: 0.4s; }
+        .cv-card-simple:nth-child(5) { animation-delay: 0.5s; }
+
+        /* Effet de glow subtil */
+        .cv-card-simple:hover {
+            box-shadow: 
+                0 20px 40px rgba(102, 126, 234, 0.15),
+                0 0 0 1px rgba(102, 126, 234, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.6);
+        }
+
+        /* Badge pour les compétences populaires */
+        .cv-skill-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        }
+
+        /* Indicateur de correspondance */
+        .cv-match-indicator {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            box-shadow: 0 0 0 3px rgba(72, 187, 120, 0.2);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(72, 187, 120, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(72, 187, 120, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(72, 187, 120, 0); }
+        }
+
+        /* Hover effet pour les informations */
+        .cv-info-item:hover .cv-info-icon {
+            transform: scale(1.2);
+            opacity: 1;
+        }
+
+        /* Amélioration du no-results */
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
+            border-radius: 20px;
+            border: 2px dashed #e2e8f0;
+            margin: 20px 0;
+        }
+
+        .no-results h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: clamp(1.3rem, 3vw, 1.6rem);
+            font-weight: 700;
+        }
+
+        .no-results p {
+            color: #4a5568;
+            font-size: clamp(0.95rem, 2vw, 1.1rem);
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        /* Effet de survol pour toute la carte */
+        .cv-card-simple:hover .cv-name {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Responsive amélioré pour les cartes */
+        @media (max-width: 768px) {
+            .results-section {
+                padding: 20px;
+            }
+            
+            .cv-card-simple {
+                padding: 20px;
+            }
+            
+            .cv-actions {
+                justify-content: center;
+                gap: 10px;
+            }
+            
+            .btn-view-details, .btn-view-data {
+                flex: 1;
+                min-width: auto;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .cv-info-simple {
+                grid-template-columns: 1fr;
+                gap: 10px;
+                padding: 15px;
+            }
+            
+            .cv-actions {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .btn-view-details, .btn-view-data {
+                width: 100%;
+            }
+        }
+
+        /* Utilities */
+        .text-center { text-align: center; }
+        .hidden { display: none !important; }
+        .visible { display: block !important; }
+        
+        /* Amélioration de l'accessibilité */
+        .search-btn:focus,
+        .btn-view-details:focus,
+        .btn-view-data:focus {
+            outline: 2px solid #667eea;
+            outline-offset: 2px;
+        }
+
+        /* Scroll personnalisé */
+        .modal-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .modal-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .modal-content::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 10px;
+        }
+
+        .modal-content::-webkit-scrollbar-thumb:hover {
+            background: #764ba2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Recherche de CV</h1>
+            <p>Trouvez rapidement les profils qui correspondent à vos besoins</p>
+        </div>
+
+        <div class="main-content">
+            <div class="search-section">
+                <form id="searchForm" class="search-form">
+                    <input type="text" id="searchKeyword" class="search-input" placeholder="Rechercher par mot-clé (ex: Java, Python, Designer...)" required>
+                    <button type="submit" class="search-btn">🔍 Rechercher</button>
+                </form>
+
+                <div class="filters">
+                    <div class="filter-group">
+                        <label for="ville">Ville</label>
+                        <input type="text" id="ville" placeholder="Paris, Lyon, Marseille...">
+                    </div>
+                    <div class="filter-group">
+                        <label for="competences">Compétences requises</label>
+                        <input type="text" id="competences" placeholder="PHP, MySQL, JavaScript...">
+                    </div>
+                    <div class="filter-group">
+                        <label for="limit">Nombre de résultats</label>
+                        <select id="limit">
+                            <option value="10">10 résultats</option>
+                            <option value="25" selected>25 résultats</option>
+                            <option value="50">50 résultats</option>
+                            <option value="100">100 résultats</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stats-section">
+                <h2>📊 Statistiques</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalCvs">0</div>
+                        <div class="stat-label">CVs trouvés</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="avgFrequency">0</div>
+                        <div class="stat-label">Fréquence moy.</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="maxFrequency">0</div>
+                        <div class="stat-label">Fréquence max</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="searchTime">0s</div>
+                        <div class="stat-label">Temps recherche</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="loading" class="loading hidden">
+                <h3>🔄 Recherche en cours...</h3>
+                <p>Veuillez patienter pendant que nous analysons les CVs</p>
+            </div>
+
+            <div id="error" class="error hidden"></div>
+
+            <div id="results"></div>
+        </div>
+
+        <!-- Modal pour les détails du CV -->
+        <div id="cv-details-modal" class="modal">
+            <div class="modal-content">
+                <div id="cv-details-content"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
+        let currentKeyword = '';
+        let currentFilters = {};
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            loadGeneralStats();
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            // Gestion du formulaire de recherche
+            document.getElementById('searchForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                performSearch();
+            });
+
+            // Recherche en temps réel (optionnel)
+            document.getElementById('searchKeyword').addEventListener('keyup', function(e) {
+                if (e.key === 'Enter') {
+                    performSearch();
+                }
+            });
+        }
+
+        function performSearch() {
+            const keyword = document.getElementById('searchKeyword').value.trim();
+            const ville = document.getElementById('ville').value.trim();
+            const competences = document.getElementById('competences').value.trim();
+            const limit = document.getElementById('limit').value;
+
+            if (!keyword || keyword.length < 2) {
+                showError('Veuillez saisir un mot-clé d\'au moins 2 caractères');
+                return;
+            }
+
+            currentKeyword = keyword;
+            currentFilters = {
+                ville: ville || null,
+                competences_requises: competences ? competences.split(',').map(c => c.trim()) : null,
+                limit: parseInt(limit)
+            };
+
+            showLoading();
+            clearError();
+
+            const requestData = {
+                keyword: keyword,
+                limit: parseInt(limit),
+                filters: {}
+            };
+
+            if (ville) requestData.filters.ville = ville;
+            if (competences) requestData.filters.competences_requises = competences.split(',').map(c => c.trim());
+
+            fetch('cv_search_system.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(requestData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    displayResults(data.results, data.statistics, data.execution_time, keyword);
+                } else {
+                    showError(data.error || 'Erreur lors de la recherche');
+                }
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                showError('Erreur de connexion au serveur');
+            })
+            .finally(() => {
+                hideLoading();
+            });
+        }
+
+        function displayResults(results, statistics, searchTime, keyword) {
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('error').classList.add('hidden');
+
+            // Mettre à jour les statistiques
+            document.getElementById('totalCvs').textContent = statistics.total_cvs;
+            document.getElementById('avgFrequency').textContent = statistics.avg_frequency;
+            document.getElementById('maxFrequency').textContent = statistics.max_frequency;
+            document.getElementById('searchTime').textContent = searchTime.toFixed(3) + 's';
+
+            const resultsContainer = document.getElementById('results');
+
+            if (results.length === 0) {
+                resultsContainer.innerHTML = `
+                    <div class="no-results">
+                        <h3>Aucun CV trouvé</h3>
+                        <p>Aucun CV ne contient le mot-clé "<strong>${keyword}</strong>"</p>
+                        <p>Essayez avec un autre mot-clé ou modifiez vos filtres.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = `<div class="results-section">
+                <h3>Résultats pour "<strong>${keyword}</strong>" (${results.length} CV trouvés)</h3>
+                <div class="results-list">`;
+
+            results.forEach(cv => {
+                html += `
+                    <div class="cv-card-simple" onclick="viewCVPreview(${cv.cv_id})">
+                        <div class="cv-match-indicator" title="Correspondance trouvée"></div>
+                        <div class="cv-header">
+                            <div class="cv-main-info">
+                                <div class="cv-name">${cv.nom_cv}</div>
+                                <div class="cv-author">${cv.nom_complet}</div>
+                                <div class="cv-email">${cv.email}</div>
+                            </div>
+                            <div class="cv-frequency">${cv.frequency} occurrence${cv.frequency > 1 ? 's' : ''}</div>
+                        </div>
+                        
+                        <div class="cv-info-simple">
+                            <div class="cv-info-item">
+                                <div class="cv-info-icon">📍</div>
+                                <div class="cv-info-content">
+                                    <div class="cv-info-label">Localisation</div>
+                                    <div class="cv-location">${cv.localisation || 'Lieu non spécifié'}</div>
+                                </div>
+                            </div>
+                            <div class="cv-info-item">
+                                <div class="cv-info-icon">🛠️</div>
+                                <div class="cv-info-content">
+                                    <div class="cv-info-label">Compétence principale</div>
+                                    <div class="cv-skill">${cv.competence_principale || 'Compétences variées'}
+                                        <span class="cv-skill-badge">Top</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="cv-info-item">
+                                <div class="cv-info-icon">📅</div>
+                                <div class="cv-info-content">
+                                    <div class="cv-info-label">Date création</div>
+                                    <div class="cv-date">${cv.date_creation ? new Date(cv.date_creation).toLocaleDateString() : 'Date non spécifiée'}</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="cv-actions">
+                            <button class="btn-view-details" onclick="event.stopPropagation(); viewCVPreview(${cv.cv_id})">
+                                👁️ Aperçu
+                            </button>
+                            <button class="btn-view-data" onclick="event.stopPropagation(); showCVDetails(${cv.cv_id})" title="Voir les données brutes">
+                                📋 Données
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += '</div></div>';
+            resultsContainer.innerHTML = html;
+        }
+
+        // Fonction pour afficher l'aperçu du CV
+        function viewCVPreview(cvId) {
+            const previewUrl = `../Cv_generator/view_saved_cv_mvc.php?cv_id=${cvId}`;
+            window.open(previewUrl, '_blank');
+        }
+
+        // Fonction pour afficher les détails complets d'un CV (gardée pour usage futur)
+        function showCVDetails(cvId) {
+            const modal = document.getElementById('cv-details-modal');
+            const modalContent = document.getElementById('cv-details-content');
+            
+            modal.style.display = 'block';
+            modalContent.innerHTML = '<div class="loading">Chargement des détails...</div>';
+            
+            fetch(`cv_search_system.php?action=cv_details&cv_id=${cvId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        displayCVDetails(data.cv_details);
+                    } else {
+                        modalContent.innerHTML = `<div class="error">Erreur: ${data.error}</div>`;
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    modalContent.innerHTML = '<div class="error">Erreur lors du chargement des détails</div>';
+                });
+        }
+
+        // Fonction pour afficher les détails complets du CV
+        function displayCVDetails(cv) {
+            const info = cv.informations_personnelles || {};
+            const nom = info.nom || 'N/A';
+            const prenom = info.prenom || 'N/A';
+            const email = info.email || 'N/A';
+            const localisation = info.localisation || 'N/A';
+            const profil = cv.profil?.description || 'Aucun profil disponible';
+
+            let html = `
+                <div class="cv-details-header">
+                    <h2>${nom} ${prenom}</h2>
+                    <button class="close-modal" onclick="closeModal()">&times;</button>
+                </div>
+                
+                <div class="cv-details-body">
+                    <div class="cv-section">
+                        <h3>📍 Informations personnelles</h3>
+                        <ul>
+                            <li><strong>Email:</strong> ${email}</li>
+                            <li><strong>Localisation:</strong> ${localisation}</li>
+                            <li><strong>LinkedIn:</strong> ${info.linkedin || 'N/A'}</li>
+                            <li><strong>GitHub:</strong> ${info.github || 'N/A'}</li>
+                            <li><strong>Site web:</strong> ${info.site_web || 'N/A'}</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="cv-section">
+                        <h3>👤 Profil</h3>
+                        <p>${profil}</p>
+                    </div>
+                    
+                    <div class="cv-section">
+                        <h3>🛠️ Compétences</h3>
+                        <ul>
+                            ${cv.competences.map(comp => 
+                                `<li><strong>${comp.categorie || 'Général'}:</strong> ${comp.competences}</li>`
+                            ).join('')}
+                        </ul>
+                    </div>
+                    
+                    <div class="cv-section">
+                        <h3>💼 Expériences</h3>
+                        <ul>
+                            ${cv.experiences.map(exp => 
+                                `<li><strong>${exp.poste || 'Poste non spécifié'}</strong> chez ${exp.entreprise || 'Entreprise non spécifiée'}<br>
+                                ${exp.description ? `<em>${exp.description}</em><br>` : ''}
+                                ${exp.dates ? `<small>📅 ${exp.dates}</small>` : ''}</li>`
+                            ).join('')}
+                        </ul>
+                    </div>
+                    
+                    <div class="cv-section">
+                        <h3>🎓 Formations</h3>
+                        <ul>
+                            ${cv.formations.map(form => 
+                                `<li><strong>${form.diplome || 'Diplôme non spécifié'}</strong> - ${form.universite || 'Université non spécifiée'}<br>
+                                ${form.specialite ? `<em>${form.specialite}</em><br>` : ''}
+                                ${form.dates ? `<small>📅 ${form.dates}</small>` : ''}</li>`
+                            ).join('')}
+                        </ul>
+                    </div>
+                    
+                    <div class="cv-section">
+                        <h3>🚀 Projets</h3>
+                        <ul>
+                            ${cv.projets.map(proj => 
+                                `<li><strong>${proj.nom_projet || 'Projet sans nom'}</strong><br>
+                                ${proj.description ? `<em>${proj.description}</em><br>` : ''}
+                                ${proj.lien_projet ? `<a href="${proj.lien_projet}" target="_blank">🔗 Voir le projet</a>` : ''}</li>`
+                            ).join('')}
+                        </ul>
+                    </div>
+                    
+                    <div class="cv-section">
+                        <h3>🗣️ Langues</h3>
+                        <ul>
+                            ${cv.langues.map(lang => 
+                                `<li><strong>${lang.nom_langue || 'Langue non spécifiée'}:</strong> ${lang.niveau || 'Niveau non spécifié'}</li>`
+                            ).join('')}
+                        </ul>
+                    </div>
+                    
+                    <div class="cv-section">
+                        <h3>🏆 Certificats</h3>
+                        <ul>
+                            ${cv.certificats.map(cert => 
+                                `<li><strong>${cert.nom_certificat || 'Certificat sans nom'}</strong> - ${cert.organisme || 'Organisme non spécifié'}<br>
+                                ${cert.description ? `<em>${cert.description}</em><br>` : ''}
+                                ${cert.lieu ? `<small>📍 ${cert.lieu}</small>` : ''}</li>`
+                            ).join('')}
+                        </ul>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('cv-details-content').innerHTML = html;
+        }
+
+        // Fonction pour fermer la modal
+        function closeModal() {
+            document.getElementById('cv-details-modal').style.display = 'none';
+        }
+
+        // Fermer la modal en cliquant à l'extérieur
+        window.onclick = function(event) {
+            const modal = document.getElementById('cv-details-modal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        function loadGeneralStats() {
+            fetch('cv_search_system.php?action=stats')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Mettre à jour les statistiques générales si nécessaire
+                        console.log('Statistiques générales chargées');
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur lors du chargement des statistiques:', error);
+                });
+        }
+
+        function showLoading() {
+            document.getElementById('loading').classList.remove('hidden');
+            document.getElementById('error').classList.add('hidden');
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').classList.add('hidden');
+        }
+
+        function showError(message) {
+            document.getElementById('error').textContent = message;
+            document.getElementById('error').classList.remove('hidden');
+            document.getElementById('loading').classList.add('hidden');
+        }
+
+        function clearError() {
+            document.getElementById('error').classList.add('hidden');
+        }
+
+        // Gestion des événements clavier pour l'accessibilité
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // Gestion du redimensionnement
+        window.addEventListener('resize', function() {
+            // Réajuster le modal si nécessaire
+            const modal = document.getElementById('cv-details-modal');
+            if (modal.style.display === 'block') {
+                // Réajustement automatique grâce au CSS responsive
+            }
+        });
+    </script>
+</body>
+</html>
