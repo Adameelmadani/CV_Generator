@@ -1558,10 +1558,13 @@ let currentStep = 1;
       function togglePreview() {
         const previewSection = document.getElementById('previewSection');
         const toggleBtn = document.getElementById('previewToggleBtn');
+        const container = document.querySelector('.container');
         
         previewVisible = !previewVisible;
         
         if (previewVisible) {
+          // Add show-preview class to container for two-column layout
+          container.classList.add('show-preview');
           previewSection.style.display = 'block';
           toggleBtn.innerHTML = '<i class="fas fa-eye-slash"></i> Masquer';
           toggleBtn.style.background = '#dc3545';
@@ -1581,15 +1584,19 @@ let currentStep = 1;
           // Immediate first update with indicator
           updatePreviewWithIndicator();
           
-          // Auto-scroll to show preview
-          setTimeout(() => {
-            previewSection.scrollIntoView({ 
-              behavior: 'smooth', 
-              block: 'start' 
-            });
-          }, 100);
+          // Auto-scroll to show preview (only on mobile)
+          if (window.innerWidth <= 768) {
+            setTimeout(() => {
+              previewSection.scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'start' 
+              });
+            }, 100);
+          }
           
         } else {
+          // Remove show-preview class to return to single column
+          container.classList.remove('show-preview');
           previewSection.style.display = 'none';
           toggleBtn.innerHTML = '<i class="fas fa-eye"></i> Aperçu';
           toggleBtn.style.background = '#28a745';
