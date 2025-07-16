@@ -70,7 +70,7 @@ python parse_cv.py chemin/vers/cv.pdf chemin/vers/sortie.xml
 
 #### 1. Dépendances Python
 ```bash
-pip install pdfplumber pytesseract lxml Pillow
+pip install pdfminer.six pytesseract lxml Pillow pdf2image
 ```
 
 #### 2. Tesseract OCR (obligatoire pour les PDF contenant des images)

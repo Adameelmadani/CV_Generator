@@ -1,7 +1,8 @@
 import sys
 import re
 import os
-import pdfplumber
+# import pdfplumber  // SUPPRIMÉ
+from pdfminer.high_level import extract_text as pdfminer_extract_text
 import pytesseract
 try:
     from lxml import etree
@@ -9,16 +10,6 @@ except ImportError:
     print("ERREUR: Module lxml non trouvé. Installation requise: pip install lxml")
     sys.exit(1)
 print("PYTHON USED:", sys.executable)
-
-
-def restore_spaces(text):
-    text = re.sub(r'([a-zéèàùâêîôûç])([A-ZÉÈÀÙÂÊÎÔÛÇ])', r'\1 \2', text)
-    text = re.sub(r'([a-zéèàùâêîôûç])\\.([A-ZÉÈÀÙÂÊÎÔÛÇ])', r'\1. \2', text)
-    text = re.sub(r"-\n", "", text)  # Correction des mots coupés
-    text = re.sub(r'd039;', "'", text)  # Apostrophe mal encodée
-    text = re.sub(r'[\x00-\x1F]+', ' ', text)  # Nettoyage caractères invisibles
-    return text
-
 
 def extract_text_from_pdf(pdf_path):
     text = ""
@@ -34,98 +25,81 @@ def extract_text_from_pdf(pdf_path):
         return ""
     
     try:
-        extract_options = {"x_tolerance": 3, "layout": True}
-        with pdfplumber.open(pdf_path) as pdf:
-            if len(pdf.pages) == 0:
-                print("ERREUR: Le PDF ne contient aucune page")
+        # Première tentative : extraction texte natif avec pdfminer.six
+        try:
+            pdfminer_text = pdfminer_extract_text(pdf_path)
+            if pdfminer_text and pdfminer_text.strip():
+                print(f"Texte natif détecté avec pdfminer.six ({len(pdfminer_text)} caractères)")
+                text = pdfminer_text
+            else:
+                print("[ATTENTION] PDFminer n'a pas extrait de texte natif, fallback OCR requis")
+        except Exception as e:
+            print(f"[ERREUR] lors de l'extraction pdfminer: {e}")
+            print("[ATTENTION] Fallback OCR requis")
+            pdfminer_text = ""
+
+        if not text.strip():
+            # Fallback OCR sur chaque page (nécessite pdf2image ou fitz/PyMuPDF pour conversion image)
+            try:
+                from pdf2image import convert_from_path
+            except ImportError:
+                print("ERREUR: Module pdf2image non trouvé. Installation requise: pip install pdf2image")
                 return ""
-            
-            total_pages = len(pdf.pages)
-            print(f"Nombre de pages détectées: {total_pages}")
-            
-            # Détecter si le PDF contient principalement des images
-            has_native_text = False
-            for i, page in enumerate(pdf.pages):
-                page_text = page.extract_text(**extract_options)
-                if page_text and page_text.strip():
-                    has_native_text = True
-                    break
-            
-            if not has_native_text:
-                print("[ATTENTION] PDF contient principalement des images - OCR requis")
-            
-            for i, page in enumerate(pdf.pages):
-                print(f"\n--- Traitement page {i+1}/{total_pages} ---")
-                
-                # Essayer d'abord l'extraction de texte natif
-                page_text = page.extract_text(**extract_options)
-                if page_text and page_text.strip():
-                    print(f"Page {i+1}: Texte natif détecté ({len(page_text)} caractères)")
-                    text += page_text + "\n"
-                else:
-                    print(f"Page {i+1}: Pas de texte natif, utilisation de l'OCR...")
-                    
-                    # Amélioration de l'OCR avec plusieurs tentatives
-                    ocr_success = False
-                    
-                    # Tentative 1: Résolution standard
+            try:
+                images = convert_from_path(pdf_path, dpi=200)
+            except Exception as e:
+                print(f"ERREUR lors de la conversion PDF->images: {e}")
+                return ""
+            print(f"Nombre de pages détectées (OCR): {len(images)}")
+            for i, img in enumerate(images):
+                print(f"\n--- Traitement page {i+1}/{len(images)} (OCR) ---")
+                ocr_success = False
+                try:
+                    ocr_text = pytesseract.image_to_string(img, lang="fra", config='--psm 6')
+                    if ocr_text and ocr_text.strip():
+                        print(f"Page {i+1}: OCR réussi (résolution 200)")
+                        text += ocr_text + "\n"
+                        ocr_success = True
+                except Exception as e:
+                    print(f"Page {i+1}: Erreur OCR (résolution 200): {e}")
+                if not ocr_success:
                     try:
-                        img = page.to_image(resolution=200).original
-                        ocr_text = pytesseract.image_to_string(img, lang="fra", config='--psm 6')
-                        if ocr_text and ocr_text.strip():
-                            print(f"Page {i+1}: OCR réussi (résolution 200)")
-                            text += ocr_text + "\n"
-                            ocr_success = True
-                    except Exception as e:
-                        print(f"Page {i+1}: Erreur OCR (résolution 200): {e}")
-                    
-                    # Tentative 2: Résolution plus élevée si la première échoue
-                    if not ocr_success:
-                        try:
-                            img = page.to_image(resolution=300).original
-                            ocr_text = pytesseract.image_to_string(img, lang="fra", config='--psm 6')
+                        # Reconvertir à plus haute résolution
+                        images_300 = convert_from_path(pdf_path, dpi=300, first_page=i+1, last_page=i+1)
+                        if images_300:
+                            ocr_text = pytesseract.image_to_string(images_300[0], lang="fra", config='--psm 6')
                             if ocr_text and ocr_text.strip():
                                 print(f"Page {i+1}: OCR réussi (résolution 300)")
                                 text += ocr_text + "\n"
                                 ocr_success = True
-                        except Exception as e:
-                            print(f"Page {i+1}: Erreur OCR (résolution 300): {e}")
-                    
-                    # Tentative 3: Mode de segmentation différent
-                    if not ocr_success:
-                        try:
-                            img = page.to_image(resolution=200).original
-                            ocr_text = pytesseract.image_to_string(img, lang="fra", config='--psm 3')
-                            if ocr_text and ocr_text.strip():
-                                print(f"Page {i+1}: OCR réussi (mode auto)")
-                                text += ocr_text + "\n"
-                                ocr_success = True
-                        except Exception as e:
-                            print(f"Page {i+1}: Erreur OCR (mode auto): {e}")
-                    
-                    if not ocr_success:
-                        print(f"Page {i+1}: [ATTENTION] OCR a échoué sur cette page")
-                        # Ajouter un message d'erreur dans le texte pour indiquer le problème
-                        text += f"\n[ERREUR OCR: Impossible de lire le texte de la page {i+1}]\n"
-            
-            if not text.strip():
-                print("ERREUR: Aucun texte n'a pu être extrait du PDF")
-                print("Causes possibles:")
-                print("- Le PDF ne contient que des images de mauvaise qualité")
-                print("- Tesseract n'est pas correctement installé")
-                print("- Les langues françaises ne sont pas installées pour Tesseract")
-                return ""
-                
+                    except Exception as e:
+                        print(f"Page {i+1}: Erreur OCR (résolution 300): {e}")
+                if not ocr_success:
+                    try:
+                        ocr_text = pytesseract.image_to_string(img, lang="fra", config='--psm 3')
+                        if ocr_text and ocr_text.strip():
+                            print(f"Page {i+1}: OCR réussi (mode auto)")
+                            text += ocr_text + "\n"
+                            ocr_success = True
+                    except Exception as e:
+                        print(f"Page {i+1}: Erreur OCR (mode auto): {e}")
+                if not ocr_success:
+                    print(f"Page {i+1}: [ATTENTION] OCR a échoué sur cette page")
+                    text += f"\n[ERREUR OCR: Impossible de lire le texte de la page {i+1}]\n"
+        if not text.strip():
+            print("ERREUR: Aucun texte n'a pu être extrait du PDF")
+            print("Causes possibles:")
+            print("- Le PDF ne contient que des images de mauvaise qualité")
+            print("- Tesseract n'est pas correctement installé")
+            print("- Les langues françaises ne sont pas installées pour Tesseract")
+            return ""
         print("--- Extraction terminée ---")
         print(f"Longueur du texte extrait: {len(text)} caractères")
-        
         # Nettoyer le texte extrait
         text = re.sub(r"d039;", "'", text)
         text = re.sub(r'\n\s*\n', '\n', text)  # Supprimer les lignes vides multiples
         text = text.strip()
-        
         return text
-        
     except Exception as e:
         print(f"ERREUR Critique lors de l'ouverture ou de la lecture du PDF: {e}")
         return ""
@@ -337,7 +311,6 @@ def extract_info(text):
             profil_lines = profil_lines[1:]
         # Correction ici :
         description = " ".join(profil_lines)
-        description = restore_spaces(description)
         info['profil'] = {'description': description}
 
     # Expériences
