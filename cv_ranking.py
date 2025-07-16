@@ -400,6 +400,148 @@ class CVRanker:
         
         return ranked_cvs
 
+    def vectorize_document(self, tokens, all_terms):
+        """
+        Convertit une liste de tokens en vecteur numérique
+        
+        Args:
+            tokens (list): Liste des tokens du document
+            all_terms (list): Liste de tous les termes dans le corpus
+            
+        Returns:
+            list: Vecteur représentant le document
+        """
+        vector = [0] * len(all_terms)
+        for i, term in enumerate(all_terms):
+            vector[i] = tokens.count(term)
+        return vector
+    
+    def cosine_similarity(self, vec_a, vec_b):
+        """
+        Calcule la similarité cosinus entre deux vecteurs
+        
+        Args:
+            vec_a (list): Premier vecteur
+            vec_b (list): Deuxième vecteur
+            
+        Returns:
+            float: Similarité cosinus entre les deux vecteurs
+        """
+        dot_product = sum(a * b for a, b in zip(vec_a, vec_b))
+        norm_a = math.sqrt(sum(a * a for a in vec_a))
+        norm_b = math.sqrt(sum(b * b for b in vec_b))
+        
+        if norm_a == 0 or norm_b == 0:
+            return 0
+            
+        return dot_product / (norm_a * norm_b)
+    
+    def rank_cvs_cosine(self, query):
+        """
+        Classe les CVs en fonction de la requête RH en utilisant la similarité cosinus
+        
+        Args:
+            query (dict): Requête avec description, tâches et compétences
+            
+        Returns:
+            list: Liste des CVs classés
+        """
+        # Prétraiter la requête
+        preprocessed_query = {
+            'description': self.preprocess_text(query.get('description', '')),
+            'tasks': self.preprocess_text(query.get('taches', '')),
+            'skills': self.preprocess_text(query.get('competences', ''))
+        }
+        
+        # Récupérer tous les CVs
+        cv_ids = self.get_all_cvs()
+        
+        # Récupérer tous les CV prétraités
+        all_cvs_preprocessed = {}
+        all_terms = {
+            'description': set(),
+            'tasks': set(),
+            'skills': set()
+        }
+        
+        # Construire l'ensemble de tous les termes
+        for cv_id in cv_ids:
+            cv_sections = self.get_cv_sections(cv_id)
+            
+            # Prétraiter les sections du CV
+            preprocessed_cv = {
+                'profile': self.preprocess_text(cv_sections['profile']),
+                'tasks': self.preprocess_text(cv_sections['tasks']),
+                'skills': self.preprocess_text(cv_sections['skills'])
+            }
+            
+            all_cvs_preprocessed[cv_id] = preprocessed_cv
+            
+            # Collecter tous les termes uniques
+            all_terms['description'].update(preprocessed_cv['profile'])
+            all_terms['tasks'].update(preprocessed_cv['tasks'])
+            all_terms['skills'].update(preprocessed_cv['skills'])
+        
+        # Ajouter les termes de la requête
+        all_terms['description'].update(preprocessed_query['description'])
+        all_terms['tasks'].update(preprocessed_query['tasks'])
+        all_terms['skills'].update(preprocessed_query['skills'])
+        
+        # Convertir les ensembles en listes pour indexation
+        all_terms = {
+            'description': list(all_terms['description']),
+            'tasks': list(all_terms['tasks']),
+            'skills': list(all_terms['skills'])
+        }
+        
+        # Vectoriser la requête
+        query_vectors = {
+            'description': self.vectorize_document(preprocessed_query['description'], all_terms['description']),
+            'tasks': self.vectorize_document(preprocessed_query['tasks'], all_terms['tasks']),
+            'skills': self.vectorize_document(preprocessed_query['skills'], all_terms['skills'])
+        }
+        
+        # Initialiser les scores
+        scores = []
+        
+        for cv_id in cv_ids:
+            preprocessed_cv = all_cvs_preprocessed[cv_id]
+            
+            # Vectoriser les sections du CV
+            cv_vectors = {
+                'description': self.vectorize_document(preprocessed_cv['profile'], all_terms['description']),
+                'tasks': self.vectorize_document(preprocessed_cv['tasks'], all_terms['tasks']),
+                'skills': self.vectorize_document(preprocessed_cv['skills'], all_terms['skills'])
+            }
+            
+            # Calculer la similarité cosinus pour chaque section
+            description_score = self.cosine_similarity(query_vectors['description'], cv_vectors['description'])
+            tasks_score = self.cosine_similarity(query_vectors['tasks'], cv_vectors['tasks'])
+            skills_score = self.cosine_similarity(query_vectors['skills'], cv_vectors['skills'])
+            
+            # Calculer le score total avec les coefficients
+            total_score = (0.2 * description_score) + (0.6 * tasks_score) + (0.2 * skills_score)
+            
+            # Récupérer les informations du CV
+            cv_info = self.get_cv_info(cv_id)
+            
+            # Ajouter le score à la liste
+            scores.append({
+                'cv_id': cv_id,
+                'total_score': total_score,
+                'description_score': description_score,
+                'tasks_score': tasks_score,
+                'skills_score': skills_score,
+                'nom_complet': f"{cv_info.get('prenom', '')} {cv_info.get('nom', '')}",
+                'email': cv_info.get('email', ''),
+                'telephone': cv_info.get('telephone', '')
+            })
+        
+        # Trier les CVs par score total décroissant
+        ranked_cvs = sorted(scores, key=lambda x: x['total_score'], reverse=True)
+        
+        return ranked_cvs
+
 # Exemple d'utilisation
 if __name__ == "__main__":
     # Télécharger les ressources NLTK (à exécuter une seule fois)
@@ -425,13 +567,16 @@ if __name__ == "__main__":
     
     # Connexion à la base de données
     if ranker.connect_to_db():
-        # Méthode de ranking à utiliser (TF ou TF-IDF)
-        method = "tf-idf"  # ou "tf" pour utiliser la méthode TF
+        # Méthode de ranking à utiliser (tf, tf-idf, cosine)
+        method = "cosine"
         
         # Classer les CVs selon la méthode choisie
         if method.lower() == "tf-idf":
             print("\nUtilisation de la méthode TF-IDF pour le classement...")
             ranked_cvs = ranker.rank_cvs_tf_idf(query)
+        elif method.lower() == "cosine":
+            print("\nUtilisation de la méthode de similarité cosinus pour le classement...")
+            ranked_cvs = ranker.rank_cvs_cosine(query)
         else:
             print("\nUtilisation de la méthode TF pour le classement...")
             ranked_cvs = ranker.rank_cvs_tf(query)
