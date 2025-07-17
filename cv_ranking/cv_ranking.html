@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CV Ranking System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4a6fa5;
+            --secondary-color: #166088;
+            --accent-color: #4fc3dc;
+            --background-color: #f5f7fa;
+            --card-color: #ffffff;
+            --text-color: #333333;
+            --text-light: #6c757d;
+            --border-color: #e0e0e0;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+        
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .header-links a {
+            color: white;
+            margin-left: 1.5rem;
+            text-decoration: none;
+            transition: opacity 0.3s;
+        }
+        
+        .header-links a:hover {
+            opacity: 0.8;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        
+        .card {
+            background-color: var(--card-color);
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .form-title {
+            color: var(--secondary-color);
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-color);
+        }
+        
+        textarea, input[type="text"], select {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            background-color: #fff;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        textarea:focus, input[type="text"]:focus, select:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
+        
+        .options-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+        }
+        
+        .options-group {
+            margin-right: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            border: none;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.1s;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #3c5a85;
+        }
+        
+        .btn-secondary {
+            background-color: #e9ecef;
+            color: var(--text-color);
+        }
+        
+        .btn-secondary:hover {
+            background-color: #dde2e6;
+        }
+        
+        .btn:active {
+            transform: translateY(1px);
+        }
+        
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            color: var(--text-light);
+        }
+        
+        .loading i {
+            margin-right: 0.5rem;
+        }
+        
+        .error-message {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1.5rem;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .stats-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .stat-card {
+            background-color: var(--card-color);
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            flex: 1;
+            min-width: 150px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+        
+        .cv-card {
+            background-color: var(--card-color);
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            display: flex;
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+        
+        .cv-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .cv-score {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-right: 1.5rem;
+            flex-shrink: 0;
+        }
+        
+        .cv-content {
+            flex: 1;
+        }
+        
+        .cv-title {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+            color: var(--secondary-color);
+        }
+        
+        .cv-subtitle {
+            color: var(--text-light);
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+        
+        .score-breakdown {
+            display: flex;
+            margin-top: 0.75rem;
+        }
+        
+        .score-item {
+            margin-right: 1.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .score-label {
+            color: var(--text-light);
+        }
+        
+        .score-value {
+            font-weight: 600;
+            color: var(--secondary-color);
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+        
+        .modal-content {
+            background-color: var(--card-color);
+            margin: 5% auto;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            max-width: 800px;
+            position: relative;
+        }
+        
+        .close {
+            position: absolute;
+            top: 1rem;
+            right: 1.5rem;
+            font-size: 1.5rem;
+            color: var(--text-light);
+            cursor: pointer;
+        }
+        
+        .cv-details-section {
+            margin-bottom: 1.5rem;
+        }
+        
+        .cv-details-section h4 {
+            color: var(--secondary-color);
+            margin-bottom: 0.75rem;
+        }
+        
+        @media (max-width: 768px) {
+            .options-row {
+                flex-direction: column;
+            }
+            .options-group {
+                margin-right: 0;
+                margin-bottom: 1rem;
+            }
+            .cv-card {
+                flex-direction: column;
+            }
+            .cv-score {
+                margin: 0 auto 1rem;
+            }
+            .score-breakdown {
+                flex-wrap: wrap;
+            }
+            .score-item {
+                margin-bottom: 0.5rem;
+                width: 50%;
+                margin-right: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo">CV Ranking System</div>
+            <div class="header-links">
+                <a href="index.html"><i class="fas fa-home"></i> Home</a>
+                <a href="cv_search_interface.html"><i class="fas fa-search"></i> CV Search</a>
+            </div>
+        </div>
+    </header>
+    
+    <div class="container">
+        <!-- Ranking Form -->
+        <div class="card">
+            <h2 class="form-title"><i class="fas fa-sort-amount-down"></i> Classement des CV par pertinence</h2>
+            
+            <form id="rankingForm">
+                <div class="form-group">
+                    <label for="description">Description du poste</label>
+                    <textarea id="description" name="description" placeholder="Décrivez le poste à pourvoir..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="taches">Tâches et environnement de travail</label>
+                    <textarea id="taches" name="taches" placeholder="Décrivez les tâches principales et l'environnement de travail..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="competences">Compétences requises</label>
+                    <textarea id="competences" name="competences" placeholder="Listez les compétences techniques et personnelles requises..."></textarea>
+                </div>
+                
+                <div class="options-row">
+                    <div class="options-group">
+                        <label for="method">Méthode de classement</label>
+                        <select id="method" name="method">
+                            <option value="embedding">Embedding (recommandé)</option>
+                            <option value="tf-idf">TF-IDF</option>
+                            <option value="cosine">Similarité cosinus</option>
+                            <option value="tf">Fréquence des termes</option>
+                        </select>
+                    </div>
+                    
+                    <div class="options-group">
+                        <label for="limit">Nombre de résultats</label>
+                        <select id="limit" name="limit">
+                            <option value="10">10 CV</option>
+                            <option value="25" selected>25 CV</option>
+                            <option value="50">50 CV</option>
+                            <option value="100">100 CV</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Classer les CV</button>
+                    <button type="reset" class="btn btn-secondary"><i class="fas fa-redo"></i> Réinitialiser</button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Loading Indicator -->
+        <div id="loading" class="loading hidden">
+            <i class="fas fa-spinner fa-spin"></i>
+            <span>Analyse et classement des CV en cours...</span>
+        </div>
+        
+        <!-- Error Message -->
+        <div id="error" class="error-message hidden"></div>
+        
+        <!-- Results Container -->
+        <div id="results" class="hidden">
+            <!-- Stats Row -->
+            <div class="stats-container">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalResults">0</div>
+                    <div class="stat-label">CV trouvés</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="avgScore">0.00</div>
+                    <div class="stat-label">Score moyen</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="executionTime">0.00s</div>
+                    <div class="stat-label">Temps d'exécution</div>
+                </div>
+            </div>
+            
+            <!-- Results List -->
+            <div id="resultsList"></div>
+        </div>
+        
+        <!-- CV Details Modal -->
+        <div id="cvModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal()">&times;</span>
+                <div id="cvDetails"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Form submission
+        document.getElementById('rankingForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            rankCVs();
+        });
+        
+        // Rank CVs function
+        async function rankCVs() {
+            // Get form values
+            const description = document.getElementById('description').value;
+            const taches = document.getElementById('taches').value;
+            const competences = document.getElementById('competences').value;
+            const method = document.getElementById('method').value;
+            const limit = parseInt(document.getElementById('limit').value);
+            
+            // Validate form (at least one field should be filled)
+            if (!description && !taches && !competences) {
+                showError('Veuillez remplir au moins un champ de recherche');
+                return;
+            }
+            
+            // Show loading, hide results and errors
+            document.getElementById('loading').classList.remove('hidden');
+            document.getElementById('results').classList.add('hidden');
+            document.getElementById('error').classList.add('hidden');
+            
+            // Prepare request data
+            const requestData = {
+                description: description,
+                taches: taches,
+                competences: competences,
+                method: method,
+                limit: limit
+            };
+            
+            try {
+                // Call API
+                const response = await fetch('http://localhost:5000/api/rank', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    displayResults(data);
+                } else {
+                    showError(data.message || 'Une erreur est survenue lors du classement des CV');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showError('Erreur de connexion au serveur');
+            } finally {
+                document.getElementById('loading').classList.add('hidden');
+            }
+        }
+        
+        // Display results function
+        function displayResults(data) {
+            // Show results container
+            document.getElementById('results').classList.remove('hidden');
+            
+            // Update stats
+            document.getElementById('totalResults').textContent = data.total_results;
+            
+            // Calculate average score
+            const avgScore = data.results.reduce((sum, cv) => sum + cv.total_score, 0) / data.results.length;
+            document.getElementById('avgScore').textContent = avgScore.toFixed(2);
+            
+            // Update execution time
+            document.getElementById('executionTime').textContent = data.execution_time.toFixed(3) + 's';
+            
+            // Generate result cards
+            const resultsList = document.getElementById('resultsList');
+            resultsList.innerHTML = '';
+            
+            if (data.results.length === 0) {
+                resultsList.innerHTML = `
+                    <div class="card">
+                        <p>Aucun CV ne correspond à vos critères de recherche.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            data.results.forEach(cv => {
+                // Format scores as percentages
+                const totalScore = (cv.total_score * 100).toFixed(0);
+                const descScore = (cv.description_score * 100).toFixed(0);
+                const tasksScore = (cv.tasks_score * 100).toFixed(0);
+                const skillsScore = (cv.skills_score * 100).toFixed(0);
+                
+                const card = document.createElement('div');
+                card.className = 'cv-card';
+                card.onclick = () => viewCVDetails(cv.cv_id);
+                
+                card.innerHTML = `
+                    <div class="cv-score">${totalScore}%</div>
+                    <div class="cv-content">
+                        <div class="cv-title">${cv.nom_complet || 'Candidat'}</div>
+                        <div class="cv-subtitle">
+                            ${cv.email ? `<i class="fas fa-envelope"></i> ${cv.email}` : ''}
+                            ${cv.telephone ? ` | <i class="fas fa-phone"></i> ${cv.telephone}` : ''}
+                        </div>
+                        <div class="score-breakdown">
+                            <div class="score-item">
+                                <span class="score-label">Description:</span>
+                                <span class="score-value">${descScore}%</span>
+                            </div>
+                            <div class="score-item">
+                                <span class="score-label">Tâches:</span>
+                                <span class="score-value">${tasksScore}%</span>
+                            </div>
+                            <div class="score-item">
+                                <span class="score-label">Compétences:</span>
+                                <span class="score-value">${skillsScore}%</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                resultsList.appendChild(card);
+            });
+        }
+        
+        // Show error message
+        function showError(message) {
+            const errorElement = document.getElementById('error');
+            errorElement.textContent = message;
+            errorElement.classList.remove('hidden');
+        }
+        
+        // View CV details
+        async function viewCVDetails(cvId) {
+            try {
+                // Show loading
+                document.getElementById('loading').classList.remove('hidden');
+                
+                // Fetch CV details
+                const response = await fetch(`http://localhost:5000/api/cv/${cvId}`);
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    // Display modal with CV details
+                    displayCVModal(data.cv);
+                } else {
+                    showError(data.message || 'Erreur lors de la récupération des détails du CV');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showError('Erreur de connexion au serveur');
+            } finally {
+                document.getElementById('loading').classList.add('hidden');
+            }
+        }
+        
+        // Display CV modal
+        function displayCVModal(cv) {
+            const modal = document.getElementById('cvModal');
+            const detailsContainer = document.getElementById('cvDetails');
+            
+            // Clear previous content
+            detailsContainer.innerHTML = '';
+            
+            // Create header section
+            const headerSection = document.createElement('div');
+            headerSection.className = 'cv-details-header';
+            
+            const personalInfo = cv.informations_personnelles || {};
+            
+            headerSection.innerHTML = `
+                <h2>${personalInfo.prenom || ''} ${personalInfo.nom || 'Candidat'}</h2>
+                <p>
+                    ${personalInfo.email ? `<i class="fas fa-envelope"></i> ${personalInfo.email}` : ''}
+                    ${personalInfo.telephone ? ` | <i class="fas fa-phone"></i> ${personalInfo.telephone}` : ''}
+                </p>
+            `;
+            
+            detailsContainer.appendChild(headerSection);
+            
+            // Add profile section if exists
+            if (cv.profile) {
+                addDetailSection(detailsContainer, 'Profil', cv.profile);
+            }
+            
+            // Add tasks section if exists
+            if (cv.tasks) {
+                addDetailSection(detailsContainer, 'Expériences et Formation', cv.tasks);
+            }
+            
+            // Add skills section if exists
+            if (cv.skills) {
+                addDetailSection(detailsContainer, 'Compétences et Langues', cv.skills);
+            }
+            
+            // Show modal
+            modal.style.display = 'block';
+        }
+        
+        // Add a section to CV details
+        function addDetailSection(container, title, content) {
+            const section = document.createElement('div');
+            section.className = 'cv-details-section';
+            
+            section.innerHTML = `
+                <h4>${title}</h4>
+                <p>${content}</p>
+            `;
+            
+            container.appendChild(section);
+        }
+        
+        // Close modal
+        function closeModal() {
+            document.getElementById('cvModal').style.display = 'none';
+        }
+        
+        // Close modal when clicking outside of it
+        window.onclick = function(event) {
+            const modal = document.getElementById('cvModal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
