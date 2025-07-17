@@ -32,6 +32,8 @@ class CVRanker:
         # Ajouter dictionnaires pour stocker les termes et documents pour le calcul d'IDF
         self.document_frequency = {}
         self.total_documents = 0
+        # Add embedding cache to avoid recomputing embeddings
+        self.embedding_cache = {}
         
     def connect_to_db(self):
         """Établit une connexion à la base de données"""
@@ -542,6 +544,167 @@ class CVRanker:
         
         return ranked_cvs
 
+    def get_embedding(self, text):
+        """
+        Génère un vecteur d'embedding pour un texte en utilisant TF-IDF
+        
+        Args:
+            text (str): Le texte à transformer en vecteur
+            
+        Returns:
+            np.ndarray: Vecteur d'embedding du texte
+        """
+        if not text:
+            return np.array([])
+        
+        # Vérifier si l'embedding est déjà en cache
+        cache_key = hash(text)
+        if cache_key in self.embedding_cache:
+            return self.embedding_cache[cache_key]
+        
+        # Prétraiter le texte
+        tokens = self.preprocess_text(text)
+        
+        # Construire un dictionnaire de fréquence des termes
+        term_freq = {}
+        for token in tokens:
+            if token in term_freq:
+                term_freq[token] += 1
+            else:
+                term_freq[token] = 1
+        
+        # Normaliser les fréquences
+        total_tokens = len(tokens)
+        if total_tokens > 0:
+            for token in term_freq:
+                term_freq[token] = term_freq[token] / total_tokens
+        
+        # Calculer l'IDF pour chaque terme si disponible
+        if self.document_frequency and self.total_documents > 0:
+            embedding_vector = []
+            for token, tf in term_freq.items():
+                idf = math.log(self.total_documents / (1 + self.document_frequency.get(token, 1)))
+                embedding_vector.append((token, tf * idf))
+        else:
+            # Utiliser uniquement la fréquence des termes si IDF n'est pas disponible
+            embedding_vector = [(token, freq) for token, freq in term_freq.items()]
+        
+        # Trier par importance (fréquence ou TF-IDF)
+        embedding_vector.sort(key=lambda x: x[1], reverse=True)
+        
+        # Limiter la taille du vecteur aux N termes les plus importants
+        max_terms = 300  # Paramètre ajustable
+        embedding_vector = embedding_vector[:max_terms]
+        
+        # Stocker dans le cache
+        self.embedding_cache[cache_key] = embedding_vector
+        
+        return embedding_vector
+    
+    def embedding_similarity(self, embedding1, embedding2):
+        """
+        Calcule la similarité entre deux embeddings
+        
+        Args:
+            embedding1 (list): Premier embedding [(terme, poids), ...]
+            embedding2 (list): Deuxième embedding [(terme, poids), ...]
+            
+        Returns:
+            float: Score de similarité entre 0 et 1
+        """
+        if not embedding1 or not embedding2:
+            return 0
+        
+        # Créer des dictionnaires pour un accès plus rapide
+        dict1 = dict(embedding1)
+        dict2 = dict(embedding2)
+        
+        # Trouver les termes communs
+        common_terms = set(dict1.keys()) & set(dict2.keys())
+        
+        if not common_terms:
+            return 0
+        
+        # Calculer la similarité en fonction des poids des termes communs
+        similarity = 0
+        for term in common_terms:
+            similarity += dict1[term] * dict2[term]
+        
+        # Normaliser par la norme des vecteurs
+        norm1 = math.sqrt(sum(w*w for _, w in embedding1))
+        norm2 = math.sqrt(sum(w*w for _, w in embedding2))
+        
+        if norm1 == 0 or norm2 == 0:
+            return 0
+            
+        return similarity / (norm1 * norm2)
+    
+    def rank_cvs_embedding(self, query):
+        """
+        Classe les CVs en fonction de la requête RH en utilisant les embeddings
+        
+        Args:
+            query (dict): Requête avec description, tâches et compétences
+            
+        Returns:
+            list: Liste des CVs classés
+        """
+        # Construire d'abord l'index de fréquence de documents pour les embeddings
+        self.build_document_frequency_index()
+        
+        # Générer des embeddings pour la requête
+        query_embeddings = {
+            'description': self.get_embedding(query.get('description', '')),
+            'tasks': self.get_embedding(query.get('taches', '')),
+            'skills': self.get_embedding(query.get('competences', ''))
+        }
+        
+        # Récupérer tous les CVs
+        cv_ids = self.get_all_cvs()
+        print(f"Traitement de {len(cv_ids)} CVs avec la méthode d'embedding...")
+        
+        # Initialiser les scores
+        scores = []
+        
+        for cv_id in cv_ids:
+            # Récupérer les sections du CV
+            cv_sections = self.get_cv_sections(cv_id)
+            
+            # Générer les embeddings pour chaque section du CV
+            cv_embeddings = {
+                'profile': self.get_embedding(cv_sections['profile']),
+                'tasks': self.get_embedding(cv_sections['tasks']),
+                'skills': self.get_embedding(cv_sections['skills'])
+            }
+            
+            # Calculer les similarités entre les embeddings de la requête et du CV
+            description_score = self.embedding_similarity(query_embeddings['description'], cv_embeddings['profile'])
+            tasks_score = self.embedding_similarity(query_embeddings['tasks'], cv_embeddings['tasks'])
+            skills_score = self.embedding_similarity(query_embeddings['skills'], cv_embeddings['skills'])
+            
+            # Calculer le score total avec les coefficients
+            total_score = (0.2 * description_score) + (0.6 * tasks_score) + (0.2 * skills_score)
+            
+            # Récupérer les informations du CV
+            cv_info = self.get_cv_info(cv_id)
+            
+            # Ajouter le score à la liste
+            scores.append({
+                'cv_id': cv_id,
+                'total_score': total_score,
+                'description_score': description_score,
+                'tasks_score': tasks_score,
+                'skills_score': skills_score,
+                'nom_complet': f"{cv_info.get('prenom', '')} {cv_info.get('nom', '')}",
+                'email': cv_info.get('email', ''),
+                'telephone': cv_info.get('telephone', '')
+            })
+        
+        # Trier les CVs par score total décroissant
+        ranked_cvs = sorted(scores, key=lambda x: x['total_score'], reverse=True)
+        
+        return ranked_cvs
+
 # Exemple d'utilisation
 if __name__ == "__main__":
     # Télécharger les ressources NLTK (à exécuter une seule fois)
@@ -567,8 +730,8 @@ if __name__ == "__main__":
     
     # Connexion à la base de données
     if ranker.connect_to_db():
-        # Méthode de ranking à utiliser (tf, tf-idf, cosine)
-        method = "cosine"
+        # Méthode de ranking à utiliser (tf, tf-idf, cosine, embedding)
+        method = "embedding"
         
         # Classer les CVs selon la méthode choisie
         if method.lower() == "tf-idf":
@@ -577,6 +740,9 @@ if __name__ == "__main__":
         elif method.lower() == "cosine":
             print("\nUtilisation de la méthode de similarité cosinus pour le classement...")
             ranked_cvs = ranker.rank_cvs_cosine(query)
+        elif method.lower() == "embedding":
+            print("\nUtilisation de la méthode d'embedding pour le classement...")
+            ranked_cvs = ranker.rank_cvs_embedding(query)
         else:
             print("\nUtilisation de la méthode TF pour le classement...")
             ranked_cvs = ranker.rank_cvs_tf(query)
