@@ -1003,3 +1003,700 @@
 [16-Jul-2025 14:42:00 Africa/Casablanca] Has projects: YES
 [16-Jul-2025 14:42:00 Africa/Casablanca] Has skills: YES
 [16-Jul-2025 14:42:00 Africa/Casablanca] Has languages: YES
+[20-Jul-2025 20:45:00 Africa/Casablanca] generateXMLContent - Starting XML generation
+[20-Jul-2025 20:45:00 Africa/Casablanca] generateXMLContent - Form data keys: education_degree, education_dates, education_university, education_field, education_details, experience_location, experience_dates, experience_company, experience_position, experience_description, project_name, project_link, project_description, skill_category, skill_items, language_name, language_level, certificate_name, certificate_date, certificate_issuer, certificate_location, certificate_description, editing_cv_id, existing_photo_path, primary_color, photo, nom, prenom, location, email, telephone, website, linkedin, github, profil_description, format
+[20-Jul-2025 20:45:00 Africa/Casablanca] generateXMLContent - XML generation completed, length: 519
+[20-Jul-2025 20:45:00 Africa/Casablanca] generateXMLContent - XML preview: <?xml version="1.0" encoding="UTF-8"?>
+<cv>
+  <personalization>
+    <primaryColor>#667eea</primaryColor>
+  </personalization>
+
+  <personalInfo>
+    <firstname>Mouhcine</firstname>
+    <lastname>Zouga<...
+[20-Jul-2025 20:45:00 Africa/Casablanca] Live Preview XML structure check:
+[20-Jul-2025 20:45:00 Africa/Casablanca] Has certificates: YES
+[20-Jul-2025 20:45:00 Africa/Casablanca] Has projects: YES
+[20-Jul-2025 20:45:00 Africa/Casablanca] Has skills: YES
+[20-Jul-2025 20:45:00 Africa/Casablanca] Has languages: YES
+[20-Jul-2025 20:45:06 Africa/Casablanca] generateXMLContent - Starting XML generation
+[20-Jul-2025 20:45:06 Africa/Casablanca] generateXMLContent - Form data keys: education_degree, education_dates, education_university, education_field, education_details, experience_location, experience_dates, experience_company, experience_position, experience_description, project_name, project_link, project_description, skill_category, skill_items, language_name, language_level, certificate_name, certificate_date, certificate_issuer, certificate_location, certificate_description, editing_cv_id, existing_photo_path, primary_color, photo, nom, prenom, location, email, telephone, website, linkedin, github, profil_description, format
+[20-Jul-2025 20:45:06 Africa/Casablanca] generateXMLContent - XML generation completed, length: 519
+[20-Jul-2025 20:45:06 Africa/Casablanca] generateXMLContent - XML preview: <?xml version="1.0" encoding="UTF-8"?>
+<cv>
+  <personalization>
+    <primaryColor>#667eea</primaryColor>
+  </personalization>
+
+  <personalInfo>
+    <firstname>Mouhcine</firstname>
+    <lastname>Zouga<...
+[20-Jul-2025 20:45:06 Africa/Casablanca] Live Preview XML structure check:
+[20-Jul-2025 20:45:06 Africa/Casablanca] Has certificates: YES
+[20-Jul-2025 20:45:06 Africa/Casablanca] Has projects: YES
+[20-Jul-2025 20:45:06 Africa/Casablanca] Has skills: YES
+[20-Jul-2025 20:45:06 Africa/Casablanca] Has languages: YES
+[20-Jul-2025 20:45:11 Africa/Casablanca] generateXMLContent - Starting XML generation
+[20-Jul-2025 20:45:11 Africa/Casablanca] generateXMLContent - Form data keys: education_degree, education_dates, education_university, education_field, education_details, experience_location, experience_dates, experience_company, experience_position, experience_description, project_name, project_link, project_description, skill_category, skill_items, language_name, language_level, certificate_name, certificate_date, certificate_issuer, certificate_location, certificate_description, editing_cv_id, existing_photo_path, primary_color, photo, nom, prenom, location, email, telephone, website, linkedin, github, profil_description, format
+[20-Jul-2025 20:45:11 Africa/Casablanca] generateXMLContent - XML generation completed, length: 578
+[20-Jul-2025 20:45:11 Africa/Casablanca] generateXMLContent - XML preview: <?xml version="1.0" encoding="UTF-8"?>
+<cv>
+  <personalization>
+    <primaryColor>#667eea</primaryColor>
+  </personalization>
+
+  <personalInfo>
+    <firstname>Mouhcine</firstname>
+    <lastname>Zouga<...
+[20-Jul-2025 20:45:11 Africa/Casablanca] Live Preview XML structure check:
+[20-Jul-2025 20:45:11 Africa/Casablanca] Has certificates: YES
+[20-Jul-2025 20:45:11 Africa/Casablanca] Has projects: YES
+[20-Jul-2025 20:45:11 Africa/Casablanca] Has skills: YES
+[20-Jul-2025 20:45:11 Africa/Casablanca] Has languages: YES
+[20-Jul-2025 20:45:19 Africa/Casablanca] generateXMLContent - Starting XML generation
+[20-Jul-2025 20:45:19 Africa/Casablanca] generateXMLContent - Form data keys: education_degree, education_dates, education_university, education_field, education_details, experience_location, experience_dates, experience_company, experience_position, experience_description, project_name, project_link, project_description, skill_category, skill_items, language_name, language_level, certificate_name, certificate_date, certificate_issuer, certificate_location, certificate_description, editing_cv_id, existing_photo_path, primary_color, photo, nom, prenom, location, email, telephone, website, linkedin, github, profil_description, format
+[20-Jul-2025 20:45:19 Africa/Casablanca] generateXMLContent - XML generation completed, length: 625
+[20-Jul-2025 20:45:19 Africa/Casablanca] generateXMLContent - XML preview: <?xml version="1.0" encoding="UTF-8"?>
+<cv>
+  <personalization>
+    <primaryColor>#667eea</primaryColor>
+  </personalization>
+
+  <personalInfo>
+    <firstname>Mouhcine</firstname>
+    <lastname>Zouga<...
+[20-Jul-2025 20:45:19 Africa/Casablanca] Live Preview XML structure check:
+[20-Jul-2025 20:45:19 Africa/Casablanca] Has certificates: YES
+[20-Jul-2025 20:45:19 Africa/Casablanca] Has projects: YES
+[20-Jul-2025 20:45:19 Africa/Casablanca] Has skills: YES
+[20-Jul-2025 20:45:19 Africa/Casablanca] Has languages: YES
+[20-Jul-2025 20:45:25 Africa/Casablanca] generateXMLContent - Starting XML generation
+[20-Jul-2025 20:45:25 Africa/Casablanca] generateXMLContent - Form data keys: education_degree, education_dates, education_university, education_field, education_details, experience_location, experience_dates, experience_company, experience_position, experience_description, project_name, project_link, project_description, skill_category, skill_items, language_name, language_level, certificate_name, certificate_date, certificate_issuer, certificate_location, certificate_description, editing_cv_id, existing_photo_path, primary_color, photo, nom, prenom, location, email, telephone, website, linkedin, github, profil_description, format
+[20-Jul-2025 20:45:25 Africa/Casablanca] generateXMLContent - XML generation completed, length: 655
+[20-Jul-2025 20:45:25 Africa/Casablanca] generateXMLContent - XML preview: <?xml version="1.0" encoding="UTF-8"?>
+<cv>
+  <personalization>
+    <primaryColor>#667eea</primaryColor>
+  </personalization>
+
+  <personalInfo>
+    <firstname>Mouhcine</firstname>
+    <lastname>Zouga<...
+[20-Jul-2025 20:45:25 Africa/Casablanca] Live Preview XML structure check:
+[20-Jul-2025 20:45:25 Africa/Casablanca] Has certificates: YES
+[20-Jul-2025 20:45:25 Africa/Casablanca] Has projects: YES
+[20-Jul-2025 20:45:25 Africa/Casablanca] Has skills: YES
+[20-Jul-2025 20:45:25 Africa/Casablanca] Has languages: YES
+[20-Jul-2025 20:45:33 Africa/Casablanca] generateXMLContent - Starting XML generation
+[20-Jul-2025 20:45:33 Africa/Casablanca] generateXMLContent - Form data keys: education_degree, education_dates, education_university, education_field, education_details, experience_location, experience_dates, experience_company, experience_position, experience_description, project_name, project_link, project_description, skill_category, skill_items, language_name, language_level, certificate_name, certificate_date, certificate_issuer, certificate_location, certificate_description, editing_cv_id, existing_photo_path, primary_color, photo, nom, prenom, location, email, telephone, website, linkedin, github, profil_description, format
+[20-Jul-2025 20:45:33 Africa/Casablanca] generateXMLContent - XML generation completed, length: 662
+[20-Jul-2025 20:45:33 Africa/Casablanca] generateXMLContent - XML preview: <?xml version="1.0" encoding="UTF-8"?>
+<cv>
+  <personalization>
+    <primaryColor>#667eea</primaryColor>
+  </personalization>
+
+  <personalInfo>
+    <firstname>Mouhcine</firstname>
+    <lastname>Zouga<...
+[20-Jul-2025 20:45:33 Africa/Casablanca] Live Preview XML structure check:
+[20-Jul-2025 20:45:33 Africa/Casablanca] Has certificates: YES
+[20-Jul-2025 20:45:33 Africa/Casablanca] Has projects: YES
+[20-Jul-2025 20:45:33 Africa/Casablanca] Has skills: YES
+[20-Jul-2025 20:45:33 Africa/Casablanca] Has languages: YES
+[20-Jul-2025 20:45:43 Africa/Casablanca] generateXMLContent - Starting XML generation
+[20-Jul-2025 20:45:43 Africa/Casablanca] generateXMLContent - Form data keys: education_degree, education_dates, education_university, education_field, education_details, experience_location, experience_dates, experience_company, experience_position, experience_description, project_name, project_link, project_description, skill_category, skill_items, language_name, language_level, certificate_name, certificate_date, certificate_issuer, certificate_location, certificate_description, editing_cv_id, existing_photo_path, primary_color, photo, nom, prenom, location, email, telephone, website, linkedin, github, profil_description, format
+[20-Jul-2025 20:45:43 Africa/Casablanca] generateXMLContent - XML generation completed, length: 792
+[20-Jul-2025 20:45:43 Africa/Casablanca] generateXMLContent - XML preview: <?xml version="1.0" encoding="UTF-8"?>
+<cv>
+  <personalization>
+    <primaryColor>#667eea</primaryColor>
+  </personalization>
+
+  <personalInfo>
+    <firstname>Mouhcine</firstname>
+    <lastname>Zouga<...
+[20-Jul-2025 20:45:43 Africa/Casablanca] Live Preview XML structure check:
+[20-Jul-2025 20:45:43 Africa/Casablanca] Has certificates: YES
+[20-Jul-2025 20:45:43 Africa/Casablanca] Has projects: YES
+[20-Jul-2025 20:45:43 Africa/Casablanca] Has skills: YES
+[20-Jul-2025 20:45:43 Africa/Casablanca] Has languages: YES
+[20-Jul-2025 20:45:49 Africa/Casablanca] generateXMLContent - Starting XML generation
+[20-Jul-2025 20:45:49 Africa/Casablanca] generateXMLContent - Form data keys: education_degree, education_dates, education_university, education_field, education_details, experience_location, experience_dates, experience_company, experience_position, experience_description, project_name, project_link, project_description, skill_category, skill_items, language_name, language_level, certificate_name, certificate_date, certificate_issuer, certificate_location, certificate_description, editing_cv_id, existing_photo_path, primary_color, photo, nom, prenom, location, email, telephone, website, linkedin, github, profil_description, format
+[20-Jul-2025 20:45:49 Africa/Casablanca] generateXMLContent - XML generation completed, length: 810
+[20-Jul-2025 20:45:49 Africa/Casablanca] generateXMLContent - XML preview: <?xml version="1.0" encoding="UTF-8"?>
+<cv>
+  <personalization>
+    <primaryColor>#667eea</primaryColor>
+  </personalization>
+
+  <personalInfo>
+    <firstname>Mouhcine</firstname>
+    <lastname>Zouga<...
+[20-Jul-2025 20:45:49 Africa/Casablanca] Live Preview XML structure check:
+[20-Jul-2025 20:45:49 Africa/Casablanca] Has certificates: YES
+[20-Jul-2025 20:45:49 Africa/Casablanca] Has projects: YES
+[20-Jul-2025 20:45:49 Africa/Casablanca] Has skills: YES
+[20-Jul-2025 20:45:49 Africa/Casablanca] Has languages: YES
+[20-Jul-2025 20:45:56 Africa/Casablanca] generateXMLContent - Starting XML generation
+[20-Jul-2025 20:45:56 Africa/Casablanca] generateXMLContent - Form data keys: education_degree, education_dates, education_university, education_field, education_details, experience_location, experience_dates, experience_company, experience_position, experience_description, project_name, project_link, project_description, skill_category, skill_items, language_name, language_level, certificate_name, certificate_date, certificate_issuer, certificate_location, certificate_description, editing_cv_id, existing_photo_path, primary_color, photo, nom, prenom, location, email, telephone, website, linkedin, github, profil_description, format
+[20-Jul-2025 20:45:56 Africa/Casablanca] generateXMLContent - XML generation completed, length: 828
+[20-Jul-2025 20:45:56 Africa/Casablanca] generateXMLContent - XML preview: <?xml version="1.0" encoding="UTF-8"?>
+<cv>
+  <personalization>
+    <primaryColor>#667eea</primaryColor>
+  </personalization>
+
+  <personalInfo>
+    <firstname>Mouhcine</firstname>
+    <lastname>Zouga<...
+[20-Jul-2025 20:45:56 Africa/Casablanca] Live Preview XML structure check:
+[20-Jul-2025 20:45:56 Africa/Casablanca] Has certificates: YES
+[20-Jul-2025 20:45:56 Africa/Casablanca] Has projects: YES
+[20-Jul-2025 20:45:56 Africa/Casablanca] Has skills: YES
+[20-Jul-2025 20:45:56 Africa/Casablanca] Has languages: YES
+[20-Jul-2025 20:46:02 Africa/Casablanca] generateXMLContent - Starting XML generation
+[20-Jul-2025 20:46:02 Africa/Casablanca] generateXMLContent - Form data keys: education_degree, education_dates, education_university, education_field, education_details, experience_location, experience_dates, experience_company, experience_position, experience_description, project_name, project_link, project_description, skill_category, skill_items, language_name, language_level, certificate_name, certificate_date, certificate_issuer, certificate_location, certificate_description, editing_cv_id, existing_photo_path, primary_color, photo, nom, prenom, location, email, telephone, website, linkedin, github, profil_description, format
+[20-Jul-2025 20:46:02 Africa/Casablanca] generateXMLContent - XML generation completed, length: 840
+[20-Jul-2025 20:46:02 Africa/Casablanca] generateXMLContent - XML preview: <?xml version="1.0" encoding="UTF-8"?>
+<cv>
+  <personalization>
+    <primaryColor>#667eea</primaryColor>
+  </personalization>
+
+  <personalInfo>
+    <firstname>Mouhcine</firstname>
+    <lastname>Zouga<...
+[20-Jul-2025 20:46:02 Africa/Casablanca] Live Preview XML structure check:
+[20-Jul-2025 20:46:02 Africa/Casablanca] Has certificates: YES
+[20-Jul-2025 20:46:02 Africa/Casablanca] Has projects: YES
+[20-Jul-2025 20:46:02 Africa/Casablanca] Has skills: YES
+[20-Jul-2025 20:46:02 Africa/Casablanca] Has languages: YES
+[20-Jul-2025 20:46:09 Africa/Casablanca] generateXMLContent - Starting XML generation
+[20-Jul-2025 20:46:09 Africa/Casablanca] generateXMLContent - Form data keys: education_degree, education_dates, education_university, education_field, education_details, experience_location, experience_dates, experience_company, experience_position, experience_description, project_name, project_link, project_description, skill_category, skill_items, language_name, language_level, certificate_name, certificate_date, certificate_issuer, certificate_location, certificate_description, editing_cv_id, existing_photo_path, primary_color, photo, nom, prenom, location, email, telephone, website, linkedin, github, profil_description, format
+[20-Jul-2025 20:46:09 Africa/Casablanca] generateXMLContent - XML generation completed, length: 861
+[20-Jul-2025 20:46:09 Africa/Casablanca] generateXMLContent - XML preview: <?xml version="1.0" encoding="UTF-8"?>
+<cv>
+  <personalization>
+    <primaryColor>#667eea</primaryColor>
+  </personalization>
+
+  <personalInfo>
+    <firstname>Mouhcine</firstname>
+    <lastname>Zouga<...
+[20-Jul-2025 20:46:09 Africa/Casablanca] Live Preview XML structure check:
+[20-Jul-2025 20:46:09 Africa/Casablanca] Has certificates: YES
+[20-Jul-2025 20:46:09 Africa/Casablanca] Has projects: YES
+[20-Jul-2025 20:46:09 Africa/Casablanca] Has skills: YES
+[20-Jul-2025 20:46:09 Africa/Casablanca] Has languages: YES
+[20-Jul-2025 20:46:27 Africa/Casablanca] generateXMLContent - Starting XML generation
+[20-Jul-2025 20:46:27 Africa/Casablanca] generateXMLContent - Form data keys: education_degree, education_dates, education_university, education_field, education_details, experience_location, experience_dates, experience_company, experience_position, experience_description, project_name, project_link, project_description, skill_category, skill_items, language_name, language_level, certificate_name, certificate_date, certificate_issuer, certificate_location, certificate_description, editing_cv_id, existing_photo_path, primary_color, photo, nom, prenom, location, email, telephone, website, linkedin, github, profil_description, format
+[20-Jul-2025 20:46:27 Africa/Casablanca] generateXMLContent - XML generation completed, length: 934
+[20-Jul-2025 20:46:27 Africa/Casablanca] generateXMLContent - XML preview: <?xml version="1.0" encoding="UTF-8"?>
+<cv>
+  <personalization>
+    <primaryColor>#667eea</primaryColor>
+  </personalization>
+
+  <personalInfo>
+    <firstname>Mouhcine</firstname>
+    <lastname>Zouga<...
+[20-Jul-2025 20:46:27 Africa/Casablanca] Live Preview XML structure check:
+[20-Jul-2025 20:46:27 Africa/Casablanca] Has certificates: YES
+[20-Jul-2025 20:46:27 Africa/Casablanca] Has projects: YES
+[20-Jul-2025 20:46:27 Africa/Casablanca] Has skills: YES
+[20-Jul-2025 20:46:27 Africa/Casablanca] Has languages: YES
+[20-Jul-2025 20:46:34 Africa/Casablanca] generateXMLContent - Starting XML generation
+[20-Jul-2025 20:46:34 Africa/Casablanca] generateXMLContent - Form data keys: education_degree, education_dates, education_university, education_field, education_details, experience_location, experience_dates, experience_company, experience_position, experience_description, project_name, project_link, project_description, skill_category, skill_items, language_name, language_level, certificate_name, certificate_date, certificate_issuer, certificate_location, certificate_description, editing_cv_id, existing_photo_path, primary_color, photo, nom, prenom, location, email, telephone, website, linkedin, github, profil_description, format
+[20-Jul-2025 20:46:34 Africa/Casablanca] generateXMLContent - XML generation completed, length: 939
+[20-Jul-2025 20:46:34 Africa/Casablanca] generateXMLContent - XML preview: <?xml version="1.0" encoding="UTF-8"?>
+<cv>
+  <personalization>
+    <primaryColor>#667eea</primaryColor>
+  </personalization>
+
+  <personalInfo>
+    <firstname>Mouhcine</firstname>
+    <lastname>Zouga<...
+[20-Jul-2025 20:46:34 Africa/Casablanca] Live Preview XML structure check:
+[20-Jul-2025 20:46:34 Africa/Casablanca] Has certificates: YES
+[20-Jul-2025 20:46:34 Africa/Casablanca] Has projects: YES
+[20-Jul-2025 20:46:34 Africa/Casablanca] Has skills: YES
+[20-Jul-2025 20:46:34 Africa/Casablanca] Has languages: YES
+[20-Jul-2025 20:46:45 Africa/Casablanca] generateXMLContent - Starting XML generation
+[20-Jul-2025 20:46:45 Africa/Casablanca] generateXMLContent - Form data keys: education_degree, education_dates, education_university, education_field, education_details, experience_location, experience_dates, experience_company, experience_position, experience_description, project_name, project_link, project_description, skill_category, skill_items, language_name, language_level, certificate_name, certificate_date, certificate_issuer, certificate_location, certificate_description, editing_cv_id, existing_photo_path, primary_color, photo, nom, prenom, location, email, telephone, website, linkedin, github, profil_description, format
+[20-Jul-2025 20:46:45 Africa/Casablanca] generateXMLContent - XML generation completed, length: 1120
+[20-Jul-2025 20:46:45 Africa/Casablanca] generateXMLContent - XML preview: <?xml version="1.0" encoding="UTF-8"?>
+<cv>
+  <personalization>
+    <primaryColor>#667eea</primaryColor>
+  </personalization>
+
+  <personalInfo>
+    <firstname>Mouhcine</firstname>
+    <lastname>Zouga<...
+[20-Jul-2025 20:46:45 Africa/Casablanca] Live Preview XML structure check:
+[20-Jul-2025 20:46:45 Africa/Casablanca] Has certificates: YES
+[20-Jul-2025 20:46:45 Africa/Casablanca] Has projects: YES
+[20-Jul-2025 20:46:45 Africa/Casablanca] Has skills: YES
+[20-Jul-2025 20:46:45 Africa/Casablanca] Has languages: YES
+[20-Jul-2025 20:46:52 Africa/Casablanca] generateXMLContent - Starting XML generation
+[20-Jul-2025 20:46:52 Africa/Casablanca] generateXMLContent - Form data keys: education_degree, education_dates, education_university, education_field, education_details, experience_location, experience_dates, experience_company, experience_position, experience_description, project_name, project_link, project_description, skill_category, skill_items, language_name, language_level, certificate_name, certificate_date, certificate_issuer, certificate_location, certificate_description, editing_cv_id, existing_photo_path, primary_color, photo, nom, prenom, location, email, telephone, website, linkedin, github, profil_description, format
+[20-Jul-2025 20:46:52 Africa/Casablanca] generateXMLContent - XML generation completed, length: 1142
+[20-Jul-2025 20:46:52 Africa/Casablanca] generateXMLContent - XML preview: <?xml version="1.0" encoding="UTF-8"?>
+<cv>
+  <personalization>
+    <primaryColor>#667eea</primaryColor>
+  </personalization>
+
+  <personalInfo>
+    <firstname>Mouhcine</firstname>
+    <lastname>Zouga<...
+[20-Jul-2025 20:46:52 Africa/Casablanca] Live Preview XML structure check:
+[20-Jul-2025 20:46:52 Africa/Casablanca] Has certificates: YES
+[20-Jul-2025 20:46:52 Africa/Casablanca] Has projects: YES
+[20-Jul-2025 20:46:52 Africa/Casablanca] Has skills: YES
+[20-Jul-2025 20:46:52 Africa/Casablanca] Has languages: YES
+[20-Jul-2025 20:47:02 Africa/Casablanca] generateXMLContent - Starting XML generation
+[20-Jul-2025 20:47:02 Africa/Casablanca] generateXMLContent - Form data keys: education_degree, education_dates, education_university, education_field, education_details, experience_location, experience_dates, experience_company, experience_position, experience_description, project_name, project_link, project_description, skill_category, skill_items, language_name, language_level, certificate_name, certificate_date, certificate_issuer, certificate_location, certificate_description, editing_cv_id, existing_photo_path, primary_color, photo, nom, prenom, location, email, telephone, website, linkedin, github, profil_description, format
+[20-Jul-2025 20:47:02 Africa/Casablanca] generateXMLContent - XML generation completed, length: 1143
+[20-Jul-2025 20:47:02 Africa/Casablanca] generateXMLContent - XML preview: <?xml version="1.0" encoding="UTF-8"?>
+<cv>
+  <personalization>
+    <primaryColor>#667eea</primaryColor>
+  </personalization>
+
+  <personalInfo>
+    <firstname>Mouhcine</firstname>
+    <lastname>Zouga<...
+[20-Jul-2025 20:47:02 Africa/Casablanca] Live Preview XML structure check:
+[20-Jul-2025 20:47:02 Africa/Casablanca] Has certificates: YES
+[20-Jul-2025 20:47:02 Africa/Casablanca] Has projects: YES
+[20-Jul-2025 20:47:02 Africa/Casablanca] Has skills: YES
+[20-Jul-2025 20:47:02 Africa/Casablanca] Has languages: YES
+[20-Jul-2025 20:47:09 Africa/Casablanca] generateXMLContent - Starting XML generation
+[20-Jul-2025 20:47:09 Africa/Casablanca] generateXMLContent - Form data keys: education_degree, education_dates, education_university, education_field, education_details, experience_location, experience_dates, experience_company, experience_position, experience_description, project_name, project_link, project_description, skill_category, skill_items, language_name, language_level, certificate_name, certificate_date, certificate_issuer, certificate_location, certificate_description, editing_cv_id, existing_photo_path, primary_color, photo, nom, prenom, location, email, telephone, website, linkedin, github, profil_description, format
+[20-Jul-2025 20:47:09 Africa/Casablanca] generateXMLContent - XML generation completed, length: 1160
+[20-Jul-2025 20:47:09 Africa/Casablanca] generateXMLContent - XML preview: <?xml version="1.0" encoding="UTF-8"?>
+<cv>
+  <personalization>
+    <primaryColor>#667eea</primaryColor>
+  </personalization>
+
+  <personalInfo>
+    <firstname>Mouhcine</firstname>
+    <lastname>Zouga<...
+[20-Jul-2025 20:47:09 Africa/Casablanca] Live Preview XML structure check:
+[20-Jul-2025 20:47:09 Africa/Casablanca] Has certificates: YES
+[20-Jul-2025 20:47:09 Africa/Casablanca] Has projects: YES
+[20-Jul-2025 20:47:09 Africa/Casablanca] Has skills: YES
+[20-Jul-2025 20:47:09 Africa/Casablanca] Has languages: YES
+[20-Jul-2025 20:47:15 Africa/Casablanca] generateXMLContent - Starting XML generation
+[20-Jul-2025 20:47:15 Africa/Casablanca] generateXMLContent - Form data keys: education_degree, education_dates, education_university, education_field, education_details, experience_location, experience_dates, experience_company, experience_position, experience_description, project_name, project_link, project_description, skill_category, skill_items, language_name, language_level, certificate_name, certificate_date, certificate_issuer, certificate_location, certificate_description, editing_cv_id, existing_photo_path, primary_color, photo, nom, prenom, location, email, telephone, website, linkedin, github, profil_description, format
+[20-Jul-2025 20:47:15 Africa/Casablanca] generateXMLContent - XML generation completed, length: 1210
+[20-Jul-2025 20:47:15 Africa/Casablanca] generateXMLContent - XML preview: <?xml version="1.0" encoding="UTF-8"?>
+<cv>
+  <personalization>
+    <primaryColor>#667eea</primaryColor>
+  </personalization>
+
+  <personalInfo>
+    <firstname>Mouhcine</firstname>
+    <lastname>Zouga<...
+[20-Jul-2025 20:47:15 Africa/Casablanca] Live Preview XML structure check:
+[20-Jul-2025 20:47:15 Africa/Casablanca] Has certificates: YES
+[20-Jul-2025 20:47:15 Africa/Casablanca] Has projects: YES
+[20-Jul-2025 20:47:15 Africa/Casablanca] Has skills: YES
+[20-Jul-2025 20:47:15 Africa/Casablanca] Has languages: YES
+[20-Jul-2025 20:47:30 Africa/Casablanca] generateXMLContent - Starting XML generation
+[20-Jul-2025 20:47:30 Africa/Casablanca] generateXMLContent - Form data keys: education_degree, education_dates, education_university, education_field, education_details, experience_location, experience_dates, experience_company, experience_position, experience_description, project_name, project_link, project_description, skill_category, skill_items, language_name, language_level, certificate_name, certificate_date, certificate_issuer, certificate_location, certificate_description, editing_cv_id, existing_photo_path, primary_color, photo, nom, prenom, location, email, telephone, website, linkedin, github, profil_description, format
+[20-Jul-2025 20:47:30 Africa/Casablanca] generateXMLContent - XML generation completed, length: 1214
+[20-Jul-2025 20:47:30 Africa/Casablanca] generateXMLContent - XML preview: <?xml version="1.0" encoding="UTF-8"?>
+<cv>
+  <personalization>
+    <primaryColor>#667eea</primaryColor>
+  </personalization>
+
+  <personalInfo>
+    <firstname>Mouhcine</firstname>
+    <lastname>Zouga<...
+[20-Jul-2025 20:47:30 Africa/Casablanca] Live Preview XML structure check:
+[20-Jul-2025 20:47:30 Africa/Casablanca] Has certificates: YES
+[20-Jul-2025 20:47:30 Africa/Casablanca] Has projects: YES
+[20-Jul-2025 20:47:30 Africa/Casablanca] Has skills: YES
+[20-Jul-2025 20:47:30 Africa/Casablanca] Has languages: YES
+[20-Jul-2025 20:47:36 Africa/Casablanca] generateXMLContent - Starting XML generation
+[20-Jul-2025 20:47:36 Africa/Casablanca] generateXMLContent - Form data keys: education_degree, education_dates, education_university, education_field, education_details, experience_location, experience_dates, experience_company, experience_position, experience_description, project_name, project_link, project_description, skill_category, skill_items, language_name, language_level, certificate_name, certificate_date, certificate_issuer, certificate_location, certificate_description, editing_cv_id, existing_photo_path, primary_color, photo, nom, prenom, location, email, telephone, website, linkedin, github, profil_description, format
+[20-Jul-2025 20:47:36 Africa/Casablanca] generateXMLContent - XML generation completed, length: 1346
+[20-Jul-2025 20:47:36 Africa/Casablanca] generateXMLContent - XML preview: <?xml version="1.0" encoding="UTF-8"?>
+<cv>
+  <personalization>
+    <primaryColor>#667eea</primaryColor>
+  </personalization>
+
+  <personalInfo>
+    <firstname>Mouhcine</firstname>
+    <lastname>Zouga<...
+[20-Jul-2025 20:47:36 Africa/Casablanca] Live Preview XML structure check:
+[20-Jul-2025 20:47:36 Africa/Casablanca] Has certificates: YES
+[20-Jul-2025 20:47:36 Africa/Casablanca] Has projects: YES
+[20-Jul-2025 20:47:36 Africa/Casablanca] Has skills: YES
+[20-Jul-2025 20:47:36 Africa/Casablanca] Has languages: YES
+[20-Jul-2025 20:47:42 Africa/Casablanca] generateXMLContent - Starting XML generation
+[20-Jul-2025 20:47:42 Africa/Casablanca] generateXMLContent - Form data keys: education_degree, education_dates, education_university, education_field, education_details, experience_location, experience_dates, experience_company, experience_position, experience_description, project_name, project_link, project_description, skill_category, skill_items, language_name, language_level, certificate_name, certificate_date, certificate_issuer, certificate_location, certificate_description, editing_cv_id, existing_photo_path, primary_color, photo, nom, prenom, location, email, telephone, website, linkedin, github, profil_description, format
+[20-Jul-2025 20:47:42 Africa/Casablanca] generateXMLContent - XML generation completed, length: 1344
+[20-Jul-2025 20:47:42 Africa/Casablanca] generateXMLContent - XML preview: <?xml version="1.0" encoding="UTF-8"?>
+<cv>
+  <personalization>
+    <primaryColor>#667eea</primaryColor>
+  </personalization>
+
+  <personalInfo>
+    <firstname>Mouhcine</firstname>
+    <lastname>Zouga<...
+[20-Jul-2025 20:47:42 Africa/Casablanca] Live Preview XML structure check:
+[20-Jul-2025 20:47:42 Africa/Casablanca] Has certificates: YES
+[20-Jul-2025 20:47:42 Africa/Casablanca] Has projects: YES
+[20-Jul-2025 20:47:42 Africa/Casablanca] Has skills: YES
+[20-Jul-2025 20:47:42 Africa/Casablanca] Has languages: YES
+[20-Jul-2025 20:47:49 Africa/Casablanca] generateXMLContent - Starting XML generation
+[20-Jul-2025 20:47:49 Africa/Casablanca] generateXMLContent - Form data keys: education_degree, education_dates, education_university, education_field, education_details, experience_location, experience_dates, experience_company, experience_position, experience_description, project_name, project_link, project_description, skill_category, skill_items, language_name, language_level, certificate_name, certificate_date, certificate_issuer, certificate_location, certificate_description, editing_cv_id, existing_photo_path, primary_color, photo, nom, prenom, location, email, telephone, website, linkedin, github, profil_description, format
+[20-Jul-2025 20:47:49 Africa/Casablanca] generateXMLContent - XML generation completed, length: 1386
+[20-Jul-2025 20:47:49 Africa/Casablanca] generateXMLContent - XML preview: <?xml version="1.0" encoding="UTF-8"?>
+<cv>
+  <personalization>
+    <primaryColor>#667eea</primaryColor>
+  </personalization>
+
+  <personalInfo>
+    <firstname>Mouhcine</firstname>
+    <lastname>Zouga<...
+[20-Jul-2025 20:47:49 Africa/Casablanca] Live Preview XML structure check:
+[20-Jul-2025 20:47:49 Africa/Casablanca] Has certificates: YES
+[20-Jul-2025 20:47:49 Africa/Casablanca] Has projects: YES
+[20-Jul-2025 20:47:49 Africa/Casablanca] Has skills: YES
+[20-Jul-2025 20:47:49 Africa/Casablanca] Has languages: YES
+[20-Jul-2025 20:47:56 Africa/Casablanca] generateXMLContent - Starting XML generation
+[20-Jul-2025 20:47:56 Africa/Casablanca] generateXMLContent - Form data keys: education_degree, education_dates, education_university, education_field, education_details, experience_location, experience_dates, experience_company, experience_position, experience_description, project_name, project_link, project_description, skill_category, skill_items, language_name, language_level, certificate_name, certificate_date, certificate_issuer, certificate_location, certificate_description, editing_cv_id, existing_photo_path, primary_color, photo, nom, prenom, location, email, telephone, website, linkedin, github, profil_description, format
+[20-Jul-2025 20:47:56 Africa/Casablanca] generateXMLContent - XML generation completed, length: 1386
+[20-Jul-2025 20:47:56 Africa/Casablanca] generateXMLContent - XML preview: <?xml version="1.0" encoding="UTF-8"?>
+<cv>
+  <personalization>
+    <primaryColor>#667eea</primaryColor>
+  </personalization>
+
+  <personalInfo>
+    <firstname>Mouhcine</firstname>
+    <lastname>Zouga<...
+[20-Jul-2025 20:47:56 Africa/Casablanca] Live Preview XML structure check:
+[20-Jul-2025 20:47:56 Africa/Casablanca] Has certificates: YES
+[20-Jul-2025 20:47:56 Africa/Casablanca] Has projects: YES
+[20-Jul-2025 20:47:56 Africa/Casablanca] Has skills: YES
+[20-Jul-2025 20:47:56 Africa/Casablanca] Has languages: YES
+[20-Jul-2025 20:48:03 Africa/Casablanca] generateXMLContent - Starting XML generation
+[20-Jul-2025 20:48:03 Africa/Casablanca] generateXMLContent - Form data keys: education_degree, education_dates, education_university, education_field, education_details, experience_location, experience_dates, experience_company, experience_position, experience_description, project_name, project_link, project_description, skill_category, skill_items, language_name, language_level, certificate_name, certificate_date, certificate_issuer, certificate_location, certificate_description, editing_cv_id, existing_photo_path, primary_color, photo, nom, prenom, location, email, telephone, website, linkedin, github, profil_description, format
+[20-Jul-2025 20:48:03 Africa/Casablanca] generateXMLContent - XML generation completed, length: 1516
+[20-Jul-2025 20:48:03 Africa/Casablanca] generateXMLContent - XML preview: <?xml version="1.0" encoding="UTF-8"?>
+<cv>
+  <personalization>
+    <primaryColor>#667eea</primaryColor>
+  </personalization>
+
+  <personalInfo>
+    <firstname>Mouhcine</firstname>
+    <lastname>Zouga<...
+[20-Jul-2025 20:48:03 Africa/Casablanca] Live Preview XML structure check:
+[20-Jul-2025 20:48:03 Africa/Casablanca] Has certificates: YES
+[20-Jul-2025 20:48:03 Africa/Casablanca] Has projects: YES
+[20-Jul-2025 20:48:03 Africa/Casablanca] Has skills: YES
+[20-Jul-2025 20:48:03 Africa/Casablanca] Has languages: YES
+[20-Jul-2025 20:48:11 Africa/Casablanca] generateXMLContent - Starting XML generation
+[20-Jul-2025 20:48:11 Africa/Casablanca] generateXMLContent - Form data keys: education_degree, education_dates, education_university, education_field, education_details, experience_location, experience_dates, experience_company, experience_position, experience_description, project_name, project_link, project_description, skill_category, skill_items, language_name, language_level, certificate_name, certificate_date, certificate_issuer, certificate_location, certificate_description, editing_cv_id, existing_photo_path, primary_color, photo, nom, prenom, location, email, telephone, website, linkedin, github, profil_description, format
+[20-Jul-2025 20:48:11 Africa/Casablanca] generateXMLContent - XML generation completed, length: 1524
+[20-Jul-2025 20:48:11 Africa/Casablanca] generateXMLContent - XML preview: <?xml version="1.0" encoding="UTF-8"?>
+<cv>
+  <personalization>
+    <primaryColor>#667eea</primaryColor>
+  </personalization>
+
+  <personalInfo>
+    <firstname>Mouhcine</firstname>
+    <lastname>Zouga<...
+[20-Jul-2025 20:48:11 Africa/Casablanca] Live Preview XML structure check:
+[20-Jul-2025 20:48:11 Africa/Casablanca] Has certificates: YES
+[20-Jul-2025 20:48:11 Africa/Casablanca] Has projects: YES
+[20-Jul-2025 20:48:11 Africa/Casablanca] Has skills: YES
+[20-Jul-2025 20:48:11 Africa/Casablanca] Has languages: YES
+[20-Jul-2025 20:48:51 Africa/Casablanca] generateXMLContent - Starting XML generation
+[20-Jul-2025 20:48:51 Africa/Casablanca] generateXMLContent - Form data keys: education_degree, education_dates, education_university, education_field, education_details, experience_location, experience_dates, experience_company, experience_position, experience_description, project_name, project_link, project_description, skill_category, skill_items, language_name, language_level, certificate_name, certificate_date, certificate_issuer, certificate_location, certificate_description, editing_cv_id, existing_photo_path, primary_color, photo, nom, prenom, location, email, telephone, website, linkedin, github, profil_description, format
+[20-Jul-2025 20:48:51 Africa/Casablanca] generateXMLContent - XML generation completed, length: 1532
+[20-Jul-2025 20:48:51 Africa/Casablanca] generateXMLContent - XML preview: <?xml version="1.0" encoding="UTF-8"?>
+<cv>
+  <personalization>
+    <primaryColor>#667eea</primaryColor>
+  </personalization>
+
+  <personalInfo>
+    <firstname>Mouhcine</firstname>
+    <lastname>Zouga<...
+[20-Jul-2025 20:48:51 Africa/Casablanca] Live Preview XML structure check:
+[20-Jul-2025 20:48:51 Africa/Casablanca] Has certificates: YES
+[20-Jul-2025 20:48:51 Africa/Casablanca] Has projects: YES
+[20-Jul-2025 20:48:51 Africa/Casablanca] Has skills: YES
+[20-Jul-2025 20:48:51 Africa/Casablanca] Has languages: YES
+[20-Jul-2025 20:48:59 Africa/Casablanca] generateXMLContent - Starting XML generation
+[20-Jul-2025 20:48:59 Africa/Casablanca] generateXMLContent - Form data keys: education_degree, education_dates, education_university, education_field, education_details, experience_location, experience_dates, experience_company, experience_position, experience_description, project_name, project_link, project_description, skill_category, skill_items, language_name, language_level, certificate_name, certificate_date, certificate_issuer, certificate_location, certificate_description, editing_cv_id, existing_photo_path, primary_color, photo, nom, prenom, location, email, telephone, website, linkedin, github, profil_description, format
+[20-Jul-2025 20:48:59 Africa/Casablanca] generateXMLContent - XML generation completed, length: 1547
+[20-Jul-2025 20:48:59 Africa/Casablanca] generateXMLContent - XML preview: <?xml version="1.0" encoding="UTF-8"?>
+<cv>
+  <personalization>
+    <primaryColor>#667eea</primaryColor>
+  </personalization>
+
+  <personalInfo>
+    <firstname>Mouhcine</firstname>
+    <lastname>Zouga<...
+[20-Jul-2025 20:48:59 Africa/Casablanca] Live Preview XML structure check:
+[20-Jul-2025 20:48:59 Africa/Casablanca] Has certificates: YES
+[20-Jul-2025 20:48:59 Africa/Casablanca] Has projects: YES
+[20-Jul-2025 20:48:59 Africa/Casablanca] Has skills: YES
+[20-Jul-2025 20:48:59 Africa/Casablanca] Has languages: YES
+[20-Jul-2025 20:49:07 Africa/Casablanca] generateXMLContent - Starting XML generation
+[20-Jul-2025 20:49:07 Africa/Casablanca] generateXMLContent - Form data keys: education_degree, education_dates, education_university, education_field, education_details, experience_location, experience_dates, experience_company, experience_position, experience_description, project_name, project_link, project_description, skill_category, skill_items, language_name, language_level, certificate_name, certificate_date, certificate_issuer, certificate_location, certificate_description, editing_cv_id, existing_photo_path, primary_color, photo, nom, prenom, location, email, telephone, website, linkedin, github, profil_description, format
+[20-Jul-2025 20:49:07 Africa/Casablanca] generateXMLContent - XML generation completed, length: 1693
+[20-Jul-2025 20:49:07 Africa/Casablanca] generateXMLContent - XML preview: <?xml version="1.0" encoding="UTF-8"?>
+<cv>
+  <personalization>
+    <primaryColor>#667eea</primaryColor>
+  </personalization>
+
+  <personalInfo>
+    <firstname>Mouhcine</firstname>
+    <lastname>Zouga<...
+[20-Jul-2025 20:49:07 Africa/Casablanca] Live Preview XML structure check:
+[20-Jul-2025 20:49:07 Africa/Casablanca] Has certificates: YES
+[20-Jul-2025 20:49:07 Africa/Casablanca] Has projects: YES
+[20-Jul-2025 20:49:07 Africa/Casablanca] Has skills: YES
+[20-Jul-2025 20:49:07 Africa/Casablanca] Has languages: YES
+[20-Jul-2025 20:49:13 Africa/Casablanca] generateXMLContent - Starting XML generation
+[20-Jul-2025 20:49:13 Africa/Casablanca] generateXMLContent - Form data keys: education_degree, education_dates, education_university, education_field, education_details, experience_location, experience_dates, experience_company, experience_position, experience_description, project_name, project_link, project_description, skill_category, skill_items, language_name, language_level, certificate_name, certificate_date, certificate_issuer, certificate_location, certificate_description, editing_cv_id, existing_photo_path, primary_color, photo, nom, prenom, location, email, telephone, website, linkedin, github, profil_description, format
+[20-Jul-2025 20:49:13 Africa/Casablanca] generateXMLContent - XML generation completed, length: 1700
+[20-Jul-2025 20:49:13 Africa/Casablanca] generateXMLContent - XML preview: <?xml version="1.0" encoding="UTF-8"?>
+<cv>
+  <personalization>
+    <primaryColor>#667eea</primaryColor>
+  </personalization>
+
+  <personalInfo>
+    <firstname>Mouhcine</firstname>
+    <lastname>Zouga<...
+[20-Jul-2025 20:49:13 Africa/Casablanca] Live Preview XML structure check:
+[20-Jul-2025 20:49:13 Africa/Casablanca] Has certificates: YES
+[20-Jul-2025 20:49:13 Africa/Casablanca] Has projects: YES
+[20-Jul-2025 20:49:13 Africa/Casablanca] Has skills: YES
+[20-Jul-2025 20:49:13 Africa/Casablanca] Has languages: YES
+[20-Jul-2025 20:49:25 Africa/Casablanca] generateXMLContent - Starting XML generation
+[20-Jul-2025 20:49:25 Africa/Casablanca] generateXMLContent - Form data keys: education_degree, education_dates, education_university, education_field, education_details, experience_location, experience_dates, experience_company, experience_position, experience_description, project_name, project_link, project_description, skill_category, skill_items, language_name, language_level, certificate_name, certificate_date, certificate_issuer, certificate_location, certificate_description, editing_cv_id, existing_photo_path, primary_color, photo, nom, prenom, location, email, telephone, website, linkedin, github, profil_description, format
+[20-Jul-2025 20:49:25 Africa/Casablanca] generateXMLContent - XML generation completed, length: 1712
+[20-Jul-2025 20:49:25 Africa/Casablanca] generateXMLContent - XML preview: <?xml version="1.0" encoding="UTF-8"?>
+<cv>
+  <personalization>
+    <primaryColor>#667eea</primaryColor>
+  </personalization>
+
+  <personalInfo>
+    <firstname>Mouhcine</firstname>
+    <lastname>Zouga<...
+[20-Jul-2025 20:49:25 Africa/Casablanca] Live Preview XML structure check:
+[20-Jul-2025 20:49:25 Africa/Casablanca] Has certificates: YES
+[20-Jul-2025 20:49:25 Africa/Casablanca] Has projects: YES
+[20-Jul-2025 20:49:25 Africa/Casablanca] Has skills: YES
+[20-Jul-2025 20:49:25 Africa/Casablanca] Has languages: YES
+[20-Jul-2025 20:49:34 Africa/Casablanca] generateXMLContent - Starting XML generation
+[20-Jul-2025 20:49:34 Africa/Casablanca] generateXMLContent - Form data keys: education_degree, education_dates, education_university, education_field, education_details, experience_location, experience_dates, experience_company, experience_position, experience_description, project_name, project_link, project_description, skill_category, skill_items, language_name, language_level, certificate_name, certificate_date, certificate_issuer, certificate_location, certificate_description, editing_cv_id, existing_photo_path, primary_color, photo, nom, prenom, location, email, telephone, website, linkedin, github, profil_description, format
+[20-Jul-2025 20:49:34 Africa/Casablanca] generateXMLContent - XML generation completed, length: 1712
+[20-Jul-2025 20:49:34 Africa/Casablanca] generateXMLContent - XML preview: <?xml version="1.0" encoding="UTF-8"?>
+<cv>
+  <personalization>
+    <primaryColor>#667eea</primaryColor>
+  </personalization>
+
+  <personalInfo>
+    <firstname>Mouhcine</firstname>
+    <lastname>Zouga<...
+[20-Jul-2025 20:49:34 Africa/Casablanca] Live Preview XML structure check:
+[20-Jul-2025 20:49:34 Africa/Casablanca] Has certificates: YES
+[20-Jul-2025 20:49:34 Africa/Casablanca] Has projects: YES
+[20-Jul-2025 20:49:34 Africa/Casablanca] Has skills: YES
+[20-Jul-2025 20:49:34 Africa/Casablanca] Has languages: YES
+[20-Jul-2025 20:49:41 Africa/Casablanca] generateXMLContent - Starting XML generation
+[20-Jul-2025 20:49:41 Africa/Casablanca] generateXMLContent - Form data keys: education_degree, education_dates, education_university, education_field, education_details, experience_location, experience_dates, experience_company, experience_position, experience_description, project_name, project_link, project_description, skill_category, skill_items, language_name, language_level, certificate_name, certificate_date, certificate_issuer, certificate_location, certificate_description, editing_cv_id, existing_photo_path, primary_color, photo, nom, prenom, location, email, telephone, website, linkedin, github, profil_description, format
+[20-Jul-2025 20:49:41 Africa/Casablanca] generateXMLContent - XML generation completed, length: 1797
+[20-Jul-2025 20:49:41 Africa/Casablanca] generateXMLContent - XML preview: <?xml version="1.0" encoding="UTF-8"?>
+<cv>
+  <personalization>
+    <primaryColor>#667eea</primaryColor>
+  </personalization>
+
+  <personalInfo>
+    <firstname>Mouhcine</firstname>
+    <lastname>Zouga<...
+[20-Jul-2025 20:49:41 Africa/Casablanca] Live Preview XML structure check:
+[20-Jul-2025 20:49:41 Africa/Casablanca] Has certificates: YES
+[20-Jul-2025 20:49:41 Africa/Casablanca] Has projects: YES
+[20-Jul-2025 20:49:41 Africa/Casablanca] Has skills: YES
+[20-Jul-2025 20:49:41 Africa/Casablanca] Has languages: YES
+[20-Jul-2025 20:49:48 Africa/Casablanca] generateXMLContent - Starting XML generation
+[20-Jul-2025 20:49:48 Africa/Casablanca] generateXMLContent - Form data keys: education_degree, education_dates, education_university, education_field, education_details, experience_location, experience_dates, experience_company, experience_position, experience_description, project_name, project_link, project_description, skill_category, skill_items, language_name, language_level, certificate_name, certificate_date, certificate_issuer, certificate_location, certificate_description, editing_cv_id, existing_photo_path, primary_color, photo, nom, prenom, location, email, telephone, website, linkedin, github, profil_description, format
+[20-Jul-2025 20:49:48 Africa/Casablanca] generateXMLContent - XML generation completed, length: 1808
+[20-Jul-2025 20:49:48 Africa/Casablanca] generateXMLContent - XML preview: <?xml version="1.0" encoding="UTF-8"?>
+<cv>
+  <personalization>
+    <primaryColor>#667eea</primaryColor>
+  </personalization>
+
+  <personalInfo>
+    <firstname>Mouhcine</firstname>
+    <lastname>Zouga<...
+[20-Jul-2025 20:49:48 Africa/Casablanca] Live Preview XML structure check:
+[20-Jul-2025 20:49:48 Africa/Casablanca] Has certificates: YES
+[20-Jul-2025 20:49:48 Africa/Casablanca] Has projects: YES
+[20-Jul-2025 20:49:48 Africa/Casablanca] Has skills: YES
+[20-Jul-2025 20:49:48 Africa/Casablanca] Has languages: YES
+[20-Jul-2025 20:49:55 Africa/Casablanca] generateXMLContent - Starting XML generation
+[20-Jul-2025 20:49:55 Africa/Casablanca] generateXMLContent - Form data keys: education_degree, education_dates, education_university, education_field, education_details, experience_location, experience_dates, experience_company, experience_position, experience_description, project_name, project_link, project_description, skill_category, skill_items, language_name, language_level, certificate_name, certificate_date, certificate_issuer, certificate_location, certificate_description, editing_cv_id, existing_photo_path, primary_color, photo, nom, prenom, location, email, telephone, website, linkedin, github, profil_description, format
+[20-Jul-2025 20:49:55 Africa/Casablanca] generateXMLContent - XML generation completed, length: 1811
+[20-Jul-2025 20:49:55 Africa/Casablanca] generateXMLContent - XML preview: <?xml version="1.0" encoding="UTF-8"?>
+<cv>
+  <personalization>
+    <primaryColor>#667eea</primaryColor>
+  </personalization>
+
+  <personalInfo>
+    <firstname>Mouhcine</firstname>
+    <lastname>Zouga<...
+[20-Jul-2025 20:49:55 Africa/Casablanca] Live Preview XML structure check:
+[20-Jul-2025 20:49:55 Africa/Casablanca] Has certificates: YES
+[20-Jul-2025 20:49:55 Africa/Casablanca] Has projects: YES
+[20-Jul-2025 20:49:55 Africa/Casablanca] Has skills: YES
+[20-Jul-2025 20:49:55 Africa/Casablanca] Has languages: YES
+[20-Jul-2025 20:50:02 Africa/Casablanca] generateXMLContent - Starting XML generation
+[20-Jul-2025 20:50:02 Africa/Casablanca] generateXMLContent - Form data keys: education_degree, education_dates, education_university, education_field, education_details, experience_location, experience_dates, experience_company, experience_position, experience_description, project_name, project_link, project_description, skill_category, skill_items, language_name, language_level, certificate_name, certificate_date, certificate_issuer, certificate_location, certificate_description, editing_cv_id, existing_photo_path, primary_color, photo, nom, prenom, location, email, telephone, website, linkedin, github, profil_description, format
+[20-Jul-2025 20:50:02 Africa/Casablanca] generateXMLContent - XML generation completed, length: 1820
+[20-Jul-2025 20:50:02 Africa/Casablanca] generateXMLContent - XML preview: <?xml version="1.0" encoding="UTF-8"?>
+<cv>
+  <personalization>
+    <primaryColor>#667eea</primaryColor>
+  </personalization>
+
+  <personalInfo>
+    <firstname>Mouhcine</firstname>
+    <lastname>Zouga<...
+[20-Jul-2025 20:50:02 Africa/Casablanca] Live Preview XML structure check:
+[20-Jul-2025 20:50:02 Africa/Casablanca] Has certificates: YES
+[20-Jul-2025 20:50:02 Africa/Casablanca] Has projects: YES
+[20-Jul-2025 20:50:02 Africa/Casablanca] Has skills: YES
+[20-Jul-2025 20:50:02 Africa/Casablanca] Has languages: YES
+[20-Jul-2025 20:50:09 Africa/Casablanca] generateXMLContent - Starting XML generation
+[20-Jul-2025 20:50:09 Africa/Casablanca] generateXMLContent - Form data keys: education_degree, education_dates, education_university, education_field, education_details, experience_location, experience_dates, experience_company, experience_position, experience_description, project_name, project_link, project_description, skill_category, skill_items, language_name, language_level, certificate_name, certificate_date, certificate_issuer, certificate_location, certificate_description, editing_cv_id, existing_photo_path, primary_color, photo, nom, prenom, location, email, telephone, website, linkedin, github, profil_description, format
+[20-Jul-2025 20:50:09 Africa/Casablanca] generateXMLContent - XML generation completed, length: 1827
+[20-Jul-2025 20:50:09 Africa/Casablanca] generateXMLContent - XML preview: <?xml version="1.0" encoding="UTF-8"?>
+<cv>
+  <personalization>
+    <primaryColor>#667eea</primaryColor>
+  </personalization>
+
+  <personalInfo>
+    <firstname>Mouhcine</firstname>
+    <lastname>Zouga<...
+[20-Jul-2025 20:50:09 Africa/Casablanca] Live Preview XML structure check:
+[20-Jul-2025 20:50:09 Africa/Casablanca] Has certificates: YES
+[20-Jul-2025 20:50:09 Africa/Casablanca] Has projects: YES
+[20-Jul-2025 20:50:09 Africa/Casablanca] Has skills: YES
+[20-Jul-2025 20:50:09 Africa/Casablanca] Has languages: YES
+[20-Jul-2025 20:50:17 Africa/Casablanca] generateXMLContent - Starting XML generation
+[20-Jul-2025 20:50:17 Africa/Casablanca] generateXMLContent - Form data keys: education_degree, education_dates, education_university, education_field, education_details, experience_location, experience_dates, experience_company, experience_position, experience_description, project_name, project_link, project_description, skill_category, skill_items, language_name, language_level, certificate_name, certificate_date, certificate_issuer, certificate_location, certificate_description, editing_cv_id, existing_photo_path, primary_color, photo, nom, prenom, location, email, telephone, website, linkedin, github, profil_description, format
+[20-Jul-2025 20:50:17 Africa/Casablanca] generateXMLContent - XML generation completed, length: 1911
+[20-Jul-2025 20:50:17 Africa/Casablanca] generateXMLContent - XML preview: <?xml version="1.0" encoding="UTF-8"?>
+<cv>
+  <personalization>
+    <primaryColor>#667eea</primaryColor>
+  </personalization>
+
+  <personalInfo>
+    <firstname>Mouhcine</firstname>
+    <lastname>Zouga<...
+[20-Jul-2025 20:50:17 Africa/Casablanca] Live Preview XML structure check:
+[20-Jul-2025 20:50:17 Africa/Casablanca] Has certificates: YES
+[20-Jul-2025 20:50:17 Africa/Casablanca] Has projects: YES
+[20-Jul-2025 20:50:17 Africa/Casablanca] Has skills: YES
+[20-Jul-2025 20:50:17 Africa/Casablanca] Has languages: YES
+[20-Jul-2025 20:50:24 Africa/Casablanca] generateXMLContent - Starting XML generation
+[20-Jul-2025 20:50:24 Africa/Casablanca] generateXMLContent - Form data keys: education_degree, education_dates, education_university, education_field, education_details, experience_location, experience_dates, experience_company, experience_position, experience_description, project_name, project_link, project_description, skill_category, skill_items, language_name, language_level, certificate_name, certificate_date, certificate_issuer, certificate_location, certificate_description, editing_cv_id, existing_photo_path, primary_color, photo, nom, prenom, location, email, telephone, website, linkedin, github, profil_description, format
+[20-Jul-2025 20:50:24 Africa/Casablanca] generateXMLContent - XML generation completed, length: 1993
+[20-Jul-2025 20:50:24 Africa/Casablanca] generateXMLContent - XML preview: <?xml version="1.0" encoding="UTF-8"?>
+<cv>
+  <personalization>
+    <primaryColor>#667eea</primaryColor>
+  </personalization>
+
+  <personalInfo>
+    <firstname>Mouhcine</firstname>
+    <lastname>Zouga<...
+[20-Jul-2025 20:50:24 Africa/Casablanca] Live Preview XML structure check:
+[20-Jul-2025 20:50:24 Africa/Casablanca] Has certificates: YES
+[20-Jul-2025 20:50:24 Africa/Casablanca] Has projects: YES
+[20-Jul-2025 20:50:24 Africa/Casablanca] Has skills: YES
+[20-Jul-2025 20:50:24 Africa/Casablanca] Has languages: YES
+[20-Jul-2025 20:50:58 Africa/Casablanca] generateXMLContent - Starting XML generation
+[20-Jul-2025 20:50:58 Africa/Casablanca] generateXMLContent - Form data keys: education_degree, education_dates, education_university, education_field, education_details, experience_location, experience_dates, experience_company, experience_position, experience_description, project_name, project_link, project_description, skill_category, skill_items, language_name, language_level, certificate_name, certificate_date, certificate_issuer, certificate_location, certificate_description, editing_cv_id, existing_photo_path, primary_color, photo, nom, prenom, location, email, telephone, website, linkedin, github, profil_description, format
+[20-Jul-2025 20:50:58 Africa/Casablanca] generateXMLContent - XML generation completed, length: 1993
+[20-Jul-2025 20:50:58 Africa/Casablanca] generateXMLContent - XML preview: <?xml version="1.0" encoding="UTF-8"?>
+<cv>
+  <personalization>
+    <primaryColor>#667eea</primaryColor>
+  </personalization>
+
+  <personalInfo>
+    <firstname>Mouhcine</firstname>
+    <lastname>Zouga<...
+[20-Jul-2025 20:50:58 Africa/Casablanca] Live Preview XML structure check:
+[20-Jul-2025 20:50:58 Africa/Casablanca] Has certificates: YES
+[20-Jul-2025 20:50:58 Africa/Casablanca] Has projects: YES
+[20-Jul-2025 20:50:58 Africa/Casablanca] Has skills: YES
+[20-Jul-2025 20:50:58 Africa/Casablanca] Has languages: YES
+[20-Jul-2025 20:51:08 Africa/Casablanca] generateXMLContent - Starting XML generation
+[20-Jul-2025 20:51:08 Africa/Casablanca] generateXMLContent - Form data keys: education_degree, education_dates, education_university, education_field, education_details, experience_location, experience_dates, experience_company, experience_position, experience_description, project_name, project_link, project_description, skill_category, skill_items, language_name, language_level, certificate_name, certificate_date, certificate_issuer, certificate_location, certificate_description, editing_cv_id, existing_photo_path, primary_color, photo, nom, prenom, location, email, telephone, website, linkedin, github, profil_description, format
+[20-Jul-2025 20:51:08 Africa/Casablanca] generateXMLContent - XML generation completed, length: 1993
+[20-Jul-2025 20:51:08 Africa/Casablanca] generateXMLContent - XML preview: <?xml version="1.0" encoding="UTF-8"?>
+<cv>
+  <personalization>
+    <primaryColor>#667eea</primaryColor>
+  </personalization>
+
+  <personalInfo>
+    <firstname>Mouhcine</firstname>
+    <lastname>Zouga<...
+[20-Jul-2025 20:51:08 Africa/Casablanca] Live Preview XML structure check:
+[20-Jul-2025 20:51:08 Africa/Casablanca] Has certificates: YES
+[20-Jul-2025 20:51:08 Africa/Casablanca] Has projects: YES
+[20-Jul-2025 20:51:08 Africa/Casablanca] Has skills: YES
+[20-Jul-2025 20:51:08 Africa/Casablanca] Has languages: YES
+[20-Jul-2025 20:52:02 Africa/Casablanca] generateXMLContent - Starting XML generation
+[20-Jul-2025 20:52:02 Africa/Casablanca] generateXMLContent - Form data keys: education_degree, education_dates, education_university, education_field, education_details, experience_location, experience_dates, experience_company, experience_position, experience_description, project_name, project_link, project_description, skill_category, skill_items, language_name, language_level, certificate_name, certificate_date, certificate_issuer, certificate_location, certificate_description, editing_cv_id, existing_photo_path, primary_color, photo, nom, prenom, location, email, telephone, website, linkedin, github, profil_description, format
+[20-Jul-2025 20:52:02 Africa/Casablanca] generateXMLContent - XML generation completed, length: 1993
+[20-Jul-2025 20:52:02 Africa/Casablanca] generateXMLContent - XML preview: <?xml version="1.0" encoding="UTF-8"?>
+<cv>
+  <personalization>
+    <primaryColor>#667eea</primaryColor>
+  </personalization>
+
+  <personalInfo>
+    <firstname>Mouhcine</firstname>
+    <lastname>Zouga<...
+[20-Jul-2025 20:52:02 Africa/Casablanca] Live Preview XML structure check:
+[20-Jul-2025 20:52:02 Africa/Casablanca] Has certificates: YES
+[20-Jul-2025 20:52:02 Africa/Casablanca] Has projects: YES
+[20-Jul-2025 20:52:02 Africa/Casablanca] Has skills: YES
+[20-Jul-2025 20:52:02 Africa/Casablanca] Has languages: YES

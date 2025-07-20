@@ -117,6 +117,36 @@
             box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
         }
 
+        /* Search Help Styles */
+        .search-help {
+            background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+            border: 1px solid #bbdefb;
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 15px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .search-help p {
+            margin: 0 0 8px 0;
+            color: #1565c0;
+        }
+
+        .search-help p:last-child {
+            margin-bottom: 0;
+        }
+
+        .search-help code {
+            background: #ffffff;
+            border: 1px solid #e1bee7;
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-family: 'Courier New', monospace;
+            color: #6a1b9a;
+            font-weight: 600;
+        }
+
         /* Filters Responsive */
         .filters {
             display: grid;
@@ -1165,9 +1195,15 @@
         <div class="main-content">
             <div class="search-section">
                 <form id="searchForm" class="search-form">
-                    <input type="text" id="searchKeyword" class="search-input" placeholder="Rechercher par mot-clé (ex: Java, Python, Designer...)" required>
+                    <input type="text" id="searchKeyword" class="search-input" placeholder='Recherche multi-mots-clés (ex: "java" "machine learning" "mysql")' required>
                     <button type="submit" class="search-btn">🔍 Rechercher</button>
                 </form>
+                
+                <div class="search-help">
+                    <p><strong>💡 Conseil :</strong> Utilisez des guillemets pour rechercher plusieurs mots-clés séparément. 
+                    Exemple : <code>"java"</code> <code>"machine learning"</code> <code>"mysql"</code></p>
+                    <p><strong>📝 Format supporté :</strong> "mot-clé 1" "mot-clé 2" ou un seul terme sans guillemets</p>
+                </div>
 
                 <div class="filters">
                     <div class="filter-group">
@@ -1263,8 +1299,24 @@
             const limit = document.getElementById('limit').value;
 
             if (!keyword || keyword.length < 2) {
-                showError('Veuillez saisir un mot-clé d\'au moins 2 caractères');
+                showError('Veuillez saisir au moins 2 caractères pour la recherche');
                 return;
+            }
+
+            // Guidance pour l'utilisateur sur l'utilisation des guillemets
+            const hasQuotes = keyword.includes('"') || keyword.includes("'");
+            const hasMultipleWords = keyword.split(' ').length > 1;
+            
+            if (!hasQuotes && hasMultipleWords) {
+                const suggestion = keyword.split(' ')
+                    .filter(word => word.length > 0)
+                    .map(word => `"${word}"`)
+                    .join(' ');
+                
+                if (confirm(`💡 Suggestion : Pour une recherche plus précise avec plusieurs mots-clés, utilisez des guillemets :\n\n${suggestion}\n\nVoulez-vous utiliser cette suggestion ?`)) {
+                    document.getElementById('searchKeyword').value = suggestion;
+                    return; // L'utilisateur peut relancer la recherche avec la suggestion
+                }
             }
 
             currentKeyword = keyword;
@@ -1286,19 +1338,33 @@
             if (ville) requestData.filters.ville = ville;
             if (competences) requestData.filters.competences_requises = competences.split(',').map(c => c.trim());
 
-            fetch('cv_search_system.php', {
+            fetch('search_handler_mvc.php?action=search', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify(requestData)
             })
-            .then(response => response.json())
-            .then(data => {
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.text();
+            })
+            .then(responseText => {
+                console.log('Raw response:', responseText);
+                let data;
+                try {
+                    data = JSON.parse(responseText);
+                } catch (jsonError) {
+                    throw new Error(`Invalid JSON response: ${jsonError.message}`);
+                }
+                
                 if (data.success) {
-                    displayResults(data.results, data.statistics, data.execution_time, keyword);
+                    const keywords = data.keywords || data.search_query || keyword;
+                    displayResults(data.results, data.statistics, data.execution_time, keywords);
                 } else {
-                    showError(data.error || 'Erreur lors de la recherche');
+                    showError(data.message || data.error || 'Erreur lors de la recherche');
                 }
             })
             .catch(error => {
@@ -1310,7 +1376,7 @@
             });
         }
 
-        function displayResults(results, statistics, searchTime, keyword) {
+        function displayResults(results, statistics, searchTime, keywords) {
             document.getElementById('loading').classList.add('hidden');
             document.getElementById('error').classList.add('hidden');
 
@@ -1321,20 +1387,23 @@
             document.getElementById('searchTime').textContent = searchTime.toFixed(3) + 's';
 
             const resultsContainer = document.getElementById('results');
+            
+            // Créer l'affichage des mots-clés recherchés
+            const keywordsDisplay = Array.isArray(keywords) ? keywords.map(k => `"${k}"`).join(', ') : keywords;
 
             if (results.length === 0) {
                 resultsContainer.innerHTML = `
                     <div class="no-results">
                         <h3>Aucun CV trouvé</h3>
-                        <p>Aucun CV ne contient le mot-clé "<strong>${keyword}</strong>"</p>
-                        <p>Essayez avec un autre mot-clé ou modifiez vos filtres.</p>
+                        <p>Aucun CV ne contient les mots-clés recherchés : <strong>${keywordsDisplay}</strong></p>
+                        <p>Essayez avec d'autres mots-clés ou modifiez vos filtres.</p>
                     </div>
                 `;
                 return;
             }
 
             let html = `<div class="results-section">
-                <h3>Résultats pour "<strong>${keyword}</strong>" (${results.length} CV trouvés)</h3>
+                <h3>Résultats pour ${keywordsDisplay} (${results.length} CV trouvés)</h3>
                 <div class="results-list">`;
 
             results.forEach(cv => {

@@ -142,3 +142,39 @@ Le système inclut maintenant une fonctionnalité de réinitialisation de mot de
 - **Sécurité** : Supprime le compte permettant une réinscription
 - **Session** : Déconnecte automatiquement l'utilisateur si c'est son propre compte
 - **Endpoint MVC** : `password_manager_mvc.php`
+
+## Système de Recherche CV Avancé
+
+### Recherche Multi-Mots-Clés
+
+Le système de recherche CV a été amélioré avec une fonctionnalité de recherche multi-mots-clés :
+
+- ✅ **Recherche entre guillemets** : `"java" "mysql" "spring"`
+- ✅ **Expressions multi-mots** : `"machine learning" "data science"`
+- ✅ **Compatibilité ascendante** : Recherche classique toujours supportée
+- ✅ **Architecture MVC** : Intégration complète avec le système MVC
+- ✅ **Performance optimisée** : Recherche rapide dans toutes les sections CV
+
+### Fonctionnalités
+
+- **Recherche intelligente** : Parse automatiquement les mots-clés entre guillemets
+- **Score de pertinence** : Classement par fréquence d'occurrence
+- **Filtres avancés** : Localisation, compétences, expérience
+- **Interface responsive** : Optimisée pour mobile et desktop
+- **API RESTful** : Endpoints clairs pour intégration
+
+### Utilisation
+
+```javascript
+// Exemple de recherche
+"java" "spring boot" "microservices"
+"web development" "react" "nodejs"
+"machine learning" "python" "tensorflow"
+```
+
+### Points d'accès
+
+- **Interface principale** : `/cv_search_system/cv_search_interface.html`
+- **Page de test** : `/cv_search_system/test_multi_keywords.html`
+- **API Handler** : `/cv_search_system/search_handler_mvc.php`
+- **Documentation** : `/cv_search_system/README_MULTI_KEYWORDS.md`

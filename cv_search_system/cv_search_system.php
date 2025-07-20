@@ -29,25 +29,33 @@ class CVSearchSystemAdapted {
     }
     
     /**
-     * Recherche des CVs par mot-clé avec calcul de fréquence
-     * @param string $keyword Le mot-clé à rechercher
+     * Recherche des CVs par mot-clé(s) avec calcul de fréquence
+     * Supporte la recherche avec plusieurs mots-clés entre guillemets
+     * Exemple: "java" "machine learning" "php"
+     * @param string $keywords Le(s) mot(s)-clé(s) à rechercher
      * @param int $limit Nombre maximum de résultats
      * @param array $filters Filtres supplémentaires
      * @return array Résultats de la recherche
      */
-    public function searchByKeyword($keyword, $limit = 25, $filters = []) {
-        if (empty($keyword) || strlen($keyword) < MIN_KEYWORD_LENGTH) {
-            throw new Exception("Le mot-clé doit contenir au moins " . MIN_KEYWORD_LENGTH . " caractères");
+    public function searchByKeyword($keywords, $limit = 25, $filters = []) {
+        if (empty($keywords) || strlen(trim($keywords)) < MIN_KEYWORD_LENGTH) {
+            throw new Exception("La recherche doit contenir au moins " . MIN_KEYWORD_LENGTH . " caractères");
         }
         
-        if (strlen($keyword) > MAX_KEYWORD_LENGTH) {
-            throw new Exception("Le mot-clé ne peut pas dépasser " . MAX_KEYWORD_LENGTH . " caractères");
+        if (strlen($keywords) > MAX_KEYWORD_LENGTH) {
+            throw new Exception("La recherche ne peut pas dépasser " . MAX_KEYWORD_LENGTH . " caractères");
         }
         
         $start_time = microtime(true);
         
+        // Extraction des mots-clés entre guillemets
+        $parsed_keywords = $this->parseKeywords($keywords);
+        if (empty($parsed_keywords)) {
+            throw new Exception("Aucun mot-clé valide trouvé. Utilisez des guillemets pour entourer chaque terme: \"java\" \"php\"");
+        }
+        
         // Recherche dans toutes les sections du CV
-        $cvs_with_frequency = $this->searchInAllSections($keyword, $filters);
+        $cvs_with_frequency = $this->searchInAllSections($parsed_keywords, $filters);
         
         // Tri par fréquence décroissante
         usort($cvs_with_frequency, function($a, $b) {
@@ -70,14 +78,15 @@ class CVSearchSystemAdapted {
         $execution_time = $end_time - $start_time;
         
         if ($this->debug_mode) {
-            error_log("Recherche de '$keyword' - " . count($results) . " résultats en " . number_format($execution_time, 3) . "s");
+            error_log("Recherche de '" . implode(' ', $parsed_keywords) . "' - " . count($results) . " résultats en " . number_format($execution_time, 3) . "s");
         }
         
         return [
             'results' => $results,
             'statistics' => $this->calculateStatistics($results),
             'execution_time' => $execution_time,
-            'keyword' => $keyword
+            'keywords' => $parsed_keywords,
+            'search_query' => $keywords
         ];
     }
     
@@ -145,6 +154,60 @@ class CVSearchSystemAdapted {
     }
 
     /**
+     * Calcule le score total pour une liste de mots-clés dans un texte
+     * @param string $text Le texte à analyser
+     * @param array $keywords Liste des mots-clés à rechercher
+     * @return int Score total (somme des occurrences de tous les mots-clés)
+     */
+    private function calculateKeywordsScore($text, $keywords) {
+        $total_score = 0;
+        
+        foreach ($keywords as $keyword) {
+            $keyword_lower = strtolower($keyword);
+            $occurrences = $this->countWordOccurrences($text, $keyword_lower);
+            $total_score += $occurrences;
+        }
+        
+        return $total_score;
+    }
+
+    /**
+     * Parse les mots-clés entre guillemets
+     * Exemple: "java" "machine learning" "php" -> ['java', 'machine learning', 'php']
+     * @param string $input La chaîne contenant les mots-clés entre guillemets
+     * @return array Liste des mots-clés extraits
+     */
+    private function parseKeywords($input) {
+        $keywords = [];
+        
+        // Pattern pour capturer les mots-clés entre guillemets (simples ou doubles)
+        $pattern = '/["\'](.*?)["\']|(\S+)/';
+        
+        if (preg_match_all($pattern, $input, $matches)) {
+            foreach ($matches[0] as $match) {
+                // Nettoyer le mot-clé (enlever les guillemets)
+                $keyword = trim($match, '"\'');
+                $keyword = trim($keyword);
+                
+                // Vérifier que le mot-clé n'est pas vide et respecte les contraintes
+                if (!empty($keyword) && strlen($keyword) >= MIN_KEYWORD_LENGTH) {
+                    $keywords[] = $keyword;
+                }
+            }
+        }
+        
+        // Si aucun mot-clé entre guillemets n'est trouvé, traiter comme un seul mot-clé
+        if (empty($keywords)) {
+            $keyword = trim($input);
+            if (!empty($keyword) && strlen($keyword) >= MIN_KEYWORD_LENGTH) {
+                $keywords[] = $keyword;
+            }
+        }
+        
+        return array_unique($keywords);
+    }
+
+    /**
      * Compte les occurrences d'un mot entier dans un texte
      */
     private function countWordOccurrences($text, $keyword) {
@@ -155,10 +218,10 @@ class CVSearchSystemAdapted {
 
     /**
      * Recherche dans toutes les sections du CV avec calcul précis des occurrences
+     * Supporte maintenant la recherche avec plusieurs mots-clés
      */
-    private function searchInAllSections($keyword, $filters = []) {
+    private function searchInAllSections($keywords, $filters = []) {
         $cvs_frequency = [];
-        $keyword_lower = strtolower($keyword);
         
         // Recherche dans les informations personnelles
         $sql = "SELECT ip.id_cv, 
@@ -177,9 +240,11 @@ class CVSearchSystemAdapted {
         foreach ($results as $result) {
             $cv_id = $result['id_cv'];
             $text = strtolower($result['text_content']);
-            $occurrences = $this->countWordOccurrences($text, $keyword_lower);
-            if ($occurrences > 0) {
-                $cvs_frequency[$cv_id] = ($cvs_frequency[$cv_id] ?? 0) + $occurrences;
+            
+            // Calculer le score total pour tous les mots-clés
+            $total_score = $this->calculateKeywordsScore($text, $keywords);
+            if ($total_score > 0) {
+                $cvs_frequency[$cv_id] = ($cvs_frequency[$cv_id] ?? 0) + $total_score;
             }
         }
         
@@ -197,9 +262,9 @@ class CVSearchSystemAdapted {
         foreach ($results as $result) {
             $cv_id = $result['id_cv'];
             $text = strtolower($result['text_content']);
-            $occurrences = $this->countWordOccurrences($text, $keyword_lower);
-            if ($occurrences > 0) {
-                $cvs_frequency[$cv_id] = ($cvs_frequency[$cv_id] ?? 0) + $occurrences;
+            $total_score = $this->calculateKeywordsScore($text, $keywords);
+            if ($total_score > 0) {
+                $cvs_frequency[$cv_id] = ($cvs_frequency[$cv_id] ?? 0) + $total_score;
             }
         }
         
@@ -218,9 +283,9 @@ class CVSearchSystemAdapted {
         foreach ($results as $result) {
             $cv_id = $result['id_cv'];
             $text = strtolower($result['text_content']);
-            $occurrences = $this->countWordOccurrences($text, $keyword_lower);
-            if ($occurrences > 0) {
-                $cvs_frequency[$cv_id] = ($cvs_frequency[$cv_id] ?? 0) + $occurrences;
+            $total_score = $this->calculateKeywordsScore($text, $keywords);
+            if ($total_score > 0) {
+                $cvs_frequency[$cv_id] = ($cvs_frequency[$cv_id] ?? 0) + $total_score;
             }
         }
         
@@ -239,9 +304,9 @@ class CVSearchSystemAdapted {
         foreach ($results as $result) {
             $cv_id = $result['id_cv'];
             $text = strtolower($result['text_content']);
-            $occurrences = $this->countWordOccurrences($text, $keyword_lower);
-            if ($occurrences > 0) {
-                $cvs_frequency[$cv_id] = ($cvs_frequency[$cv_id] ?? 0) + $occurrences;
+            $total_score = $this->calculateKeywordsScore($text, $keywords);
+            if ($total_score > 0) {
+                $cvs_frequency[$cv_id] = ($cvs_frequency[$cv_id] ?? 0) + $total_score;
             }
         }
         
@@ -260,9 +325,9 @@ class CVSearchSystemAdapted {
         foreach ($results as $result) {
             $cv_id = $result['id_cv'];
             $text = strtolower($result['text_content']);
-            $occurrences = $this->countWordOccurrences($text, $keyword_lower);
-            if ($occurrences > 0) {
-                $cvs_frequency[$cv_id] = ($cvs_frequency[$cv_id] ?? 0) + $occurrences;
+            $total_score = $this->calculateKeywordsScore($text, $keywords);
+            if ($total_score > 0) {
+                $cvs_frequency[$cv_id] = ($cvs_frequency[$cv_id] ?? 0) + $total_score;
             }
         }
         
@@ -281,9 +346,9 @@ class CVSearchSystemAdapted {
         foreach ($results as $result) {
             $cv_id = $result['id_cv'];
             $text = strtolower($result['text_content']);
-            $occurrences = $this->countWordOccurrences($text, $keyword_lower);
-            if ($occurrences > 0) {
-                $cvs_frequency[$cv_id] = ($cvs_frequency[$cv_id] ?? 0) + $occurrences;
+            $total_score = $this->calculateKeywordsScore($text, $keywords);
+            if ($total_score > 0) {
+                $cvs_frequency[$cv_id] = ($cvs_frequency[$cv_id] ?? 0) + $total_score;
             }
         }
         
@@ -301,9 +366,9 @@ class CVSearchSystemAdapted {
         foreach ($results as $result) {
             $cv_id = $result['id_cv'];
             $text = strtolower($result['text_content']);
-            $occurrences = $this->countWordOccurrences($text, $keyword_lower);
-            if ($occurrences > 0) {
-                $cvs_frequency[$cv_id] = ($cvs_frequency[$cv_id] ?? 0) + $occurrences;
+            $total_score = $this->calculateKeywordsScore($text, $keywords);
+            if ($total_score > 0) {
+                $cvs_frequency[$cv_id] = ($cvs_frequency[$cv_id] ?? 0) + $total_score;
             }
         }
         
@@ -321,9 +386,9 @@ class CVSearchSystemAdapted {
         foreach ($results as $result) {
             $cv_id = $result['id_cv'];
             $text = strtolower($result['text_content']);
-            $occurrences = $this->countWordOccurrences($text, $keyword_lower);
-            if ($occurrences > 0) {
-                $cvs_frequency[$cv_id] = ($cvs_frequency[$cv_id] ?? 0) + $occurrences;
+            $total_score = $this->calculateKeywordsScore($text, $keywords);
+            if ($total_score > 0) {
+                $cvs_frequency[$cv_id] = ($cvs_frequency[$cv_id] ?? 0) + $total_score;
             }
         }
         
