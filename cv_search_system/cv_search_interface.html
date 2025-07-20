@@ -764,6 +764,40 @@
             100% { box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3), 0 2px 8px rgba(0, 0, 0, 0.1); }
         }
 
+        /* Keyword Breakdown Styles */
+        .keyword-breakdown {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 12px 0;
+            padding: 12px;
+            background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .keyword-tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .keyword-tag:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .cv-card-simple:hover .keyword-tag {
+            background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+        }
+
         /* Loading et Error States */
         .loading, .error {
             text-align: center;
@@ -1407,6 +1441,34 @@
                 <div class="results-list">`;
 
             results.forEach(cv => {
+                // Créer l'affichage des détails des mots-clés pour le header
+                let frequencyDisplay = '';
+                if (cv.keyword_details && Object.keys(cv.keyword_details).length > 0) {
+                    const details = [];
+                    for (const [keyword, count] of Object.entries(cv.keyword_details)) {
+                        if (count > 0) {
+                            details.push(`"${keyword}": ${count}`);
+                        }
+                    }
+                    frequencyDisplay = details.length > 0 ? details.join(', ') : `${cv.frequency} occurrence${cv.frequency > 1 ? 's' : ''}`;
+                } else {
+                    frequencyDisplay = `${cv.frequency} occurrence${cv.frequency > 1 ? 's' : ''}`;
+                }
+
+                // Créer l'affichage des détails des mots-clés en section séparée (optionnel pour plus de détails)
+                let keywordDetailsHtml = '';
+                if (cv.keyword_details && Object.keys(cv.keyword_details).length > 0) {
+                    keywordDetailsHtml = '<div class="keyword-breakdown">';
+                    for (const [keyword, count] of Object.entries(cv.keyword_details)) {
+                        if (count > 0) {
+                            keywordDetailsHtml += `
+                                <span class="keyword-tag">"${keyword}": ${count}</span>
+                            `;
+                        }
+                    }
+                    keywordDetailsHtml += '</div>';
+                }
+
                 html += `
                     <div class="cv-card-simple" onclick="viewCVPreview(${cv.cv_id})">
                         <div class="cv-match-indicator" title="Correspondance trouvée"></div>
@@ -1416,8 +1478,10 @@
                                 <div class="cv-author">${cv.nom_complet}</div>
                                 <div class="cv-email">${cv.email}</div>
                             </div>
-                            <div class="cv-frequency">${cv.frequency} occurrence${cv.frequency > 1 ? 's' : ''}</div>
+                            <div class="cv-frequency">${frequencyDisplay}</div>
                         </div>
+                        
+                        ${keywordDetailsHtml}
                         
                         <div class="cv-info-simple">
                             <div class="cv-info-item">

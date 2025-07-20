@@ -46,7 +46,7 @@ class CVSearchModel extends Model {
         // Enrichissement des données - Informations essentielles seulement
         $results = [];
         foreach ($cvs_with_frequency as $cv_data) {
-            $basic_cv = $this->getBasicCVInfo($cv_data['cv_id'], $cv_data['frequency']);
+            $basic_cv = $this->getBasicCVInfo($cv_data['cv_id'], $cv_data['frequency'], $cv_data['keyword_details'] ?? []);
             if ($basic_cv) {
                 $results[] = $basic_cv;
             }
@@ -117,6 +117,22 @@ class CVSearchModel extends Model {
     }
     
     /**
+     * Calcule les occurrences détaillées pour chaque mot-clé dans un texte
+     * Retourne un tableau associatif [mot-clé => nombre d'occurrences]
+     */
+    private function calculateKeywordsDetailedScore($text, $keywords) {
+        $detailed_scores = [];
+        
+        foreach ($keywords as $keyword) {
+            $keyword_lower = strtolower($keyword);
+            $occurrences = $this->countWordOccurrences($text, $keyword_lower);
+            $detailed_scores[$keyword] = $occurrences;
+        }
+        
+        return $detailed_scores;
+    }
+    
+    /**
      * Compte les occurrences d'un mot entier dans un texte
      */
     private function countWordOccurrences($text, $keyword) {
@@ -128,7 +144,7 @@ class CVSearchModel extends Model {
      * Recherche dans toutes les sections du CV
      */
     private function searchInAllSections($keywords, $filters = []) {
-        $cvs_frequency = [];
+        $cvs_data = []; // Stocker les données détaillées par CV
         
         // Liste des sections à rechercher
         $sections = [
@@ -195,22 +211,48 @@ class CVSearchModel extends Model {
             foreach ($results as $result) {
                 $cv_id = $result['id_cv'];
                 $text = strtolower($result['text_content']);
-                $total_score = $this->calculateKeywordsScore($text, $keywords);
-                if ($total_score > 0) {
-                    $cvs_frequency[$cv_id] = ($cvs_frequency[$cv_id] ?? 0) + $total_score;
+                
+                // Calcul des scores détaillés pour chaque mot-clé
+                $detailed_scores = $this->calculateKeywordsDetailedScore($text, $keywords);
+                
+                // Initialiser les données du CV si nécessaire
+                if (!isset($cvs_data[$cv_id])) {
+                    $cvs_data[$cv_id] = [
+                        'frequency' => 0,
+                        'keyword_details' => []
+                    ];
+                    // Initialiser chaque mot-clé à 0
+                    foreach ($keywords as $keyword) {
+                        $cvs_data[$cv_id]['keyword_details'][$keyword] = 0;
+                    }
+                }
+                
+                // Ajouter les scores détaillés
+                foreach ($detailed_scores as $keyword => $score) {
+                    if ($score > 0) {
+                        $cvs_data[$cv_id]['keyword_details'][$keyword] += $score;
+                        $cvs_data[$cv_id]['frequency'] += $score;
+                    }
                 }
             }
         }
         
-        // Application des filtres
+        // Application des filtres (adapter pour la nouvelle structure)
+        $cvs_frequency = [];
+        foreach ($cvs_data as $cv_id => $data) {
+            if ($data['frequency'] > 0) {
+                $cvs_frequency[$cv_id] = $data['frequency'];
+            }
+        }
         $cvs_frequency = $this->applyFilters($cvs_frequency, $filters);
         
-        // Conversion en tableau avec structure appropriée
+        // Conversion en tableau avec structure appropriée incluant les détails
         $result = [];
         foreach ($cvs_frequency as $cv_id => $frequency) {
             $result[] = [
                 'cv_id' => $cv_id,
-                'frequency' => round($frequency, 0)
+                'frequency' => round($frequency, 0),
+                'keyword_details' => $cvs_data[$cv_id]['keyword_details'] ?? []
             ];
         }
         
@@ -269,7 +311,7 @@ class CVSearchModel extends Model {
     /**
      * Obtient les informations essentielles d'un CV
      */
-    private function getBasicCVInfo($cv_id, $frequency) {
+    private function getBasicCVInfo($cv_id, $frequency, $keyword_details = []) {
         try {
             // Informations personnelles essentielles
             $stmt = $this->db->prepare("SELECT nom, prenom, email, localisation FROM informations_personnelles WHERE id_cv = ?");
@@ -294,7 +336,8 @@ class CVSearchModel extends Model {
                 'email' => $personal_info['email'] ?? '',
                 'localisation' => $personal_info['localisation'] ?? '',
                 'date_creation' => $cv_info['date_creation'] ?? '',
-                'competence_principale' => $competence['competences'] ?? ''
+                'competence_principale' => $competence['competences'] ?? '',
+                'keyword_details' => $keyword_details
             ];
         } catch (Exception $e) {
             if ($this->debug_mode) {
