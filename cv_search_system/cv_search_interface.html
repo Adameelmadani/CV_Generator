@@ -1539,13 +1539,13 @@
             modal.style.display = 'block';
             modalContent.innerHTML = '<div class="loading">Chargement des détails...</div>';
             
-            fetch(`cv_search_system.php?action=cv_details&cv_id=${cvId}`)
+            fetch(`search_handler_mvc.php?action=details&cv_id=${cvId}`)
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
                         displayCVDetails(data.cv_details);
                     } else {
-                        modalContent.innerHTML = `<div class="error">Erreur: ${data.error}</div>`;
+                        modalContent.innerHTML = `<div class="error">Erreur: ${data.error || data.message}</div>`;
                     }
                 })
                 .catch(error => {
@@ -1667,7 +1667,7 @@
         }
 
         function loadGeneralStats() {
-            fetch('cv_search_system.php?action=stats')
+            fetch('search_handler_mvc.php?action=stats')
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {

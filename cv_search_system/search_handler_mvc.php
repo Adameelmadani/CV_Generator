@@ -8,6 +8,9 @@
 ini_set('display_errors', 0);
 error_reporting(E_ALL);
 
+// Démarrer la capture de sortie pour éviter les caractères parasites
+ob_start();
+
 // Headers pour CORS si nécessaire
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
@@ -21,6 +24,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 try {
+    // Nettoyer la sortie précédente
+    ob_clean();
+    
     require_once __DIR__ . '/../core/bootstrap.php';
     require_once __DIR__ . '/../app/Controllers/SearchController.php';
     
@@ -52,13 +58,23 @@ try {
     }
     
 } catch (Throwable $e) {
-    error_log("Erreur dans search_handler_mvc.php: " . $e->getMessage());
+    // Nettoyer toute sortie précédente
+    ob_clean();
+    
+    // Logger l'erreur
+    error_log("Erreur dans search_handler_mvc.php: " . $e->getMessage() . " dans " . $e->getFile() . " ligne " . $e->getLine());
+    
+    // Retourner une réponse JSON d'erreur
     echo json_encode([
         'success' => false,
         'message' => 'Erreur interne du serveur',
         'error' => $e->getMessage(),
         'file' => $e->getFile(),
-        'line' => $e->getLine()
+        'line' => $e->getLine(),
+        'trace' => $e->getTraceAsString()
     ]);
+} finally {
+    // Arrêter la capture de sortie
+    ob_end_flush();
 }
 ?>
