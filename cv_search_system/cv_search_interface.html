@@ -184,6 +184,117 @@
             background: white;
         }
 
+        /* Weighting Section Styles */
+        .weighting-section {
+            background: linear-gradient(135deg, #f8f9ff 0%, #e8f2ff 100%);
+            border: 2px solid #667eea;
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 25px;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
+        }
+
+        .weighting-section h3 {
+            color: #667eea;
+            font-size: clamp(1.2rem, 3vw, 1.5rem);
+            margin-bottom: 10px;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .weighting-help {
+            text-align: center;
+            color: #4a5568;
+            font-size: 0.95rem;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+
+        .weighting-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .weight-item {
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+
+        .weight-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.1);
+            border-color: #667eea;
+        }
+
+        .weight-item label {
+            display: block;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .weight-input {
+            width: 80px;
+            padding: 8px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .weight-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .weight-multiplier {
+            display: inline-block;
+            margin-left: 10px;
+            font-weight: 700;
+            color: #667eea;
+            font-size: 1.1rem;
+            min-width: 50px;
+        }
+
+        .weighting-presets {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .preset-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 25px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .preset-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+            background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+        }
+
         /* Stats Section Responsive */
         .stats-section {
             background: white;
@@ -1258,6 +1369,68 @@
                         </select>
                     </div>
                 </div>
+
+                <!-- Section de pondération des sections CV -->
+                <div class="weighting-section">
+                    <h3>🎯 Pondération des sections du CV</h3>
+                    <p class="weighting-help">Attribuez un poids à chaque section pour prioriser vos critères de recherche</p>
+                    
+                    <div class="weighting-grid">
+                        <div class="weight-item">
+                            <label for="weight-experience">💼 Expérience professionnelle</label>
+                            <input type="number" id="weight-experience" min="0" max="10" step="0.1" value="3.0" class="weight-input">
+                            <span class="weight-multiplier">×3.0</span>
+                        </div>
+                        
+                        <div class="weight-item">
+                            <label for="weight-education">🎓 Formation</label>
+                            <input type="number" id="weight-education" min="0" max="10" step="0.1" value="2.0" class="weight-input">
+                            <span class="weight-multiplier">×2.0</span>
+                        </div>
+                        
+                        <div class="weight-item">
+                            <label for="weight-skills">🛠️ Compétences</label>
+                            <input type="number" id="weight-skills" min="0" max="10" step="0.1" value="4.0" class="weight-input">
+                            <span class="weight-multiplier">×4.0</span>
+                        </div>
+                        
+                        <div class="weight-item">
+                            <label for="weight-projects">🚀 Projets</label>
+                            <input type="number" id="weight-projects" min="0" max="10" step="0.1" value="2.5" class="weight-input">
+                            <span class="weight-multiplier">×2.5</span>
+                        </div>
+                        
+                        <div class="weight-item">
+                            <label for="weight-certificates">🏆 Certificats</label>
+                            <input type="number" id="weight-certificates" min="0" max="10" step="0.1" value="1.5" class="weight-input">
+                            <span class="weight-multiplier">×1.5</span>
+                        </div>
+                        
+                        <div class="weight-item">
+                            <label for="weight-languages">🗣️ Langues</label>
+                            <input type="number" id="weight-languages" min="0" max="10" step="0.1" value="1.0" class="weight-input">
+                            <span class="weight-multiplier">×1.0</span>
+                        </div>
+                        <div class="weight-item">
+                            <label for="weight-profils">👤 Profil/Résumé</label>
+                            <input type="number" id="weight-profils" min="0" max="10" step="0.1" value="2.0" class="weight-input">
+                            <span class="weight-multiplier">×2.0</span>
+                        </div>
+                        <div class="weight-item">
+                            <label for="weight-informations_personnelles">📧 Informations personnelles</label>
+                            <input type="number" id="weight-informations_personnelles" min="0" max="10" step="0.1" value="1.0" class="weight-input">
+                            <span class="weight-multiplier">×1.0</span>
+                        </div>
+                    </div>
+                    
+                    <div class="weighting-presets">
+                        <button type="button" class="preset-btn" onclick="applyPreset('technical')">🔧 Profil Technique</button>
+                        <button type="button" class="preset-btn" onclick="applyPreset('management')">👔 Management</button>
+                        <button type="button" class="preset-btn" onclick="applyPreset('junior')">🌱 Junior</button>
+                        <button type="button" class="preset-btn" onclick="applyPreset('balanced')">⚖️ Équilibré</button>
+                        <button type="button" class="preset-btn" onclick="resetWeights()">🔄 Reset</button>
+                    </div>
+                </div>
             </div>
 
             <div class="stats-section">
@@ -1309,6 +1482,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             loadGeneralStats();
             setupEventListeners();
+            setupWeightingInputs();
         });
 
         function setupEventListeners() {
@@ -1324,6 +1498,98 @@
                     performSearch();
                 }
             });
+        }
+
+        function setupWeightingInputs() {
+            // Mise à jour des multiplicateurs en temps réel
+            const weightInputs = document.querySelectorAll('.weight-input');
+            weightInputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    const multiplier = this.parentElement.querySelector('.weight-multiplier');
+                    multiplier.textContent = `×${parseFloat(this.value).toFixed(1)}`;
+                });
+            });
+        }
+
+        // Presets de pondération
+        function applyPreset(presetType) {
+            const presets = {
+                'technical': {
+                    experience: 4.0,
+                    education: 1.5,
+                    skills: 5.0,
+                    projects: 3.5,
+                    certificates: 2.5,
+                    languages: 1.0,
+                    profils: 2.5,
+                    informations_personnelles: 0.5
+                },
+                'management': {
+                    experience: 5.0,
+                    education: 2.5,
+                    skills: 2.0,
+                    projects: 3.0,
+                    certificates: 2.0,
+                    languages: 1.5,
+                    profils: 3.5,
+                    informations_personnelles: 1.0
+                },
+                'junior': {
+                    experience: 2.0,
+                    education: 4.0,
+                    skills: 3.5,
+                    projects: 4.5,
+                    certificates: 3.0,
+                    languages: 1.5,
+                    profils: 3.0,
+                    informations_personnelles: 1.0
+                },
+                'balanced': {
+                    experience: 3.0,
+                    education: 2.0,
+                    skills: 4.0,
+                    projects: 2.5,
+                    certificates: 1.5,
+                    languages: 1.0,
+                    profils: 2.0,
+                    informations_personnelles: 1.0
+                }
+            };
+
+            const preset = presets[presetType];
+            if (!preset) return;
+
+            Object.keys(preset).forEach(section => {
+                const input = document.getElementById(`weight-${section}`);
+                const multiplier = input.parentElement.querySelector('.weight-multiplier');
+                input.value = preset[section];
+                multiplier.textContent = `×${preset[section].toFixed(1)}`;
+            });
+
+            // Animation visuelle
+            document.querySelectorAll('.weight-item').forEach(item => {
+                item.style.transform = 'scale(1.05)';
+                setTimeout(() => {
+                    item.style.transform = 'scale(1)';
+                }, 200);
+            });
+        }
+
+        function resetWeights() {
+            applyPreset('balanced');
+        }
+
+        function getWeightingConfig() {
+            return {
+                experience: parseFloat(document.getElementById('weight-experience').value) || 3.0,
+                education: parseFloat(document.getElementById('weight-education').value) || 2.0,
+                skills: parseFloat(document.getElementById('weight-skills').value) || 4.0,
+                projects: parseFloat(document.getElementById('weight-projects').value) || 2.5,
+                certificates: parseFloat(document.getElementById('weight-certificates').value) || 1.5,
+                languages: parseFloat(document.getElementById('weight-languages').value) || 1.0,
+                profils: parseFloat(document.getElementById('weight-profils').value) || 2.0,
+                informations_personnelles: parseFloat(document.getElementById('weight-informations_personnelles').value) || 1.0
+            };
         }
 
         function performSearch() {
@@ -1366,7 +1632,8 @@
             const requestData = {
                 keyword: keyword,
                 limit: parseInt(limit),
-                filters: {}
+                filters: {},
+                weighting: getWeightingConfig()
             };
 
             if (ville) requestData.filters.ville = ville;

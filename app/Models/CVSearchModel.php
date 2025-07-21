@@ -12,10 +12,9 @@ class CVSearchModel extends Model {
     }
     
     /**
-     * Recherche des CVs par mot-clé(s) avec calcul de fréquence
-     * Supporte la recherche avec plusieurs mots-clés entre guillemets
+     * Recherche des CVs par mot-clé(s) avec calcul de fréquence et pondération des sections
      */
-    public function searchByKeywords($keywords, $limit = 25, $filters = []) {
+    public function searchByKeywordsWithWeighting($keywords, $limit = 25, $filters = [], $weighting = []) {
         if (empty($keywords) || strlen(trim($keywords)) < MIN_KEYWORD_LENGTH) {
             throw new Exception("La recherche doit contenir au moins " . MIN_KEYWORD_LENGTH . " caractères");
         }
@@ -32,21 +31,21 @@ class CVSearchModel extends Model {
             throw new Exception("Aucun mot-clé valide trouvé. Utilisez des guillemets pour entourer chaque terme: \"java\" \"php\"");
         }
         
-        // Recherche dans toutes les sections du CV
-        $cvs_with_frequency = $this->searchInAllSections($parsed_keywords, $filters);
+        // Recherche dans toutes les sections du CV avec pondération
+        $cvs_with_weighted_score = $this->searchInAllSectionsWithWeighting($parsed_keywords, $filters, $weighting);
         
-        // Tri par fréquence décroissante
-        usort($cvs_with_frequency, function($a, $b) {
-            return $b['frequency'] - $a['frequency'];
+        // Tri par score pondéré décroissant
+        usort($cvs_with_weighted_score, function($a, $b) {
+            return $b['weighted_score'] - $a['weighted_score'];
         });
         
         // Limitation des résultats
-        $cvs_with_frequency = array_slice($cvs_with_frequency, 0, $limit);
+        $cvs_with_weighted_score = array_slice($cvs_with_weighted_score, 0, $limit);
         
         // Enrichissement des données - Informations essentielles seulement
         $results = [];
-        foreach ($cvs_with_frequency as $cv_data) {
-            $basic_cv = $this->getBasicCVInfo($cv_data['cv_id'], $cv_data['frequency'], $cv_data['keyword_details'] ?? []);
+        foreach ($cvs_with_weighted_score as $cv_data) {
+            $basic_cv = $this->getBasicCVInfoWithWeighting($cv_data['cv_id'], $cv_data['weighted_score'], $cv_data['section_scores'] ?? [], $cv_data['keyword_details'] ?? []);
             if ($basic_cv) {
                 $results[] = $basic_cv;
             }
@@ -56,16 +55,36 @@ class CVSearchModel extends Model {
         $execution_time = $end_time - $start_time;
         
         if ($this->debug_mode) {
-            error_log("Recherche de '" . implode(' ', $parsed_keywords) . "' - " . count($results) . " résultats en " . number_format($execution_time, 3) . "s");
+            error_log("Recherche pondérée de '" . implode(' ', $parsed_keywords) . "' - " . count($results) . " résultats en " . number_format($execution_time, 3) . "s");
         }
         
         return [
             'results' => $results,
-            'statistics' => $this->calculateStatistics($results),
+            'statistics' => $this->calculateWeightedStatistics($results),
             'execution_time' => $execution_time,
             'keywords' => $parsed_keywords,
-            'search_query' => $keywords
+            'search_query' => $keywords,
+            'weighting_applied' => $weighting
         ];
+    }
+
+    /**
+     * Recherche des CVs par mot-clé(s) avec calcul de fréquence (méthode originale maintenue pour compatibilité)
+     */
+    public function searchByKeywords($keywords, $limit = 25, $filters = []) {
+        // Utiliser la nouvelle méthode avec pondération par défaut
+        $defaultWeighting = [
+            'experience' => 3.0,
+            'education' => 2.0,
+            'skills' => 4.0,
+            'projects' => 2.5,
+            'certificates' => 1.5,
+            'languages' => 1.0,
+            'profils' => 2.0,
+            'informations_personnelles' => 1.0
+        ];
+        
+        return $this->searchByKeywordsWithWeighting($keywords, $limit, $filters, $defaultWeighting);
     }
     
     /**
@@ -458,5 +477,233 @@ class CVSearchModel extends Model {
             error_log("Erreur lors des statistiques: " . $e->getMessage());
             return ['total_published_cvs' => 0, 'last_updated' => date('Y-m-d H:i:s')];
         }
+    }
+
+    /**
+     * Recherche dans toutes les sections du CV avec pondération
+     */
+    private function searchInAllSectionsWithWeighting($keywords, $filters = [], $weighting = []) {
+        $cvs_data = []; // Stocker les données détaillées par CV
+        
+        // Pondération par défaut si non fournie
+        $defaultWeighting = [
+            'informations_personnelles' => 1.0,
+            'skills' => 4.0,
+            'experience' => 3.0,
+            'education' => 2.0,
+            'projects' => 2.5,
+            'certificates' => 1.5,
+            'profils' => 2.0,
+            'languages' => 1.0
+        ];
+        
+        $weighting = array_merge($defaultWeighting, $weighting);
+        
+        // Liste des sections à rechercher avec leurs pondérations
+        $sections = [
+            'informations_personnelles' => [
+                'table' => 'informations_personnelles',
+                'alias' => 'ip',
+                'fields' => "CONCAT(COALESCE(ip.nom, ''), ' ', COALESCE(ip.prenom, ''), ' ', 
+                            COALESCE(ip.localisation, ''), ' ', COALESCE(ip.email, ''), ' ', 
+                            COALESCE(ip.site_web, ''), ' ', COALESCE(ip.linkedin, ''), ' ', 
+                            COALESCE(ip.github, ''))",
+                'weight' => $weighting['informations_personnelles'] ?? 1.0
+            ],
+            'skills' => [
+                'table' => 'competences',
+                'alias' => 'comp',
+                'fields' => "CONCAT(COALESCE(comp.categorie, ''), ' ', COALESCE(comp.competences, ''))",
+                'weight' => $weighting['skills'] ?? 4.0
+            ],
+            'experience' => [
+                'table' => 'experiences',
+                'alias' => 'exp',
+                'fields' => "CONCAT(COALESCE(exp.lieu, ''), ' ', COALESCE(exp.entreprise, ''), ' ', 
+                            COALESCE(exp.poste, ''), ' ', COALESCE(exp.description, ''))",
+                'weight' => $weighting['experience'] ?? 3.0
+            ],
+            'education' => [
+                'table' => 'formations',
+                'alias' => 'form',
+                'fields' => "CONCAT(COALESCE(form.diplome, ''), ' ', COALESCE(form.universite, ''), ' ', 
+                            COALESCE(form.specialite, ''), ' ', COALESCE(form.description, ''))",
+                'weight' => $weighting['education'] ?? 2.0
+            ],
+            'projects' => [
+                'table' => 'projets',
+                'alias' => 'proj',
+                'fields' => "CONCAT(COALESCE(proj.nom_projet, ''), ' ', COALESCE(proj.lien_projet, ''), ' ', 
+                            COALESCE(proj.description, ''))",
+                'weight' => $weighting['projects'] ?? 2.5
+            ],
+            'certificates' => [
+                'table' => 'certificats',
+                'alias' => 'cert',
+                'fields' => "CONCAT(COALESCE(cert.nom_certificat, ''), ' ', COALESCE(cert.organisme, ''), ' ', 
+                            COALESCE(cert.lieu, ''), ' ', COALESCE(cert.description, ''))",
+                'weight' => $weighting['certificates'] ?? 1.5
+            ],
+            'profils' => [
+                'table' => 'profils',
+                'alias' => 'prof',
+                'fields' => "COALESCE(prof.description, '')",
+                'weight' => $weighting['profils'] ?? 2.0
+            ],
+            'languages' => [
+                'table' => 'langues',
+                'alias' => 'lang',
+                'fields' => "CONCAT(COALESCE(lang.nom_langue, ''), ' ', COALESCE(lang.niveau, ''))",
+                'weight' => $weighting['languages'] ?? 1.0
+            ]
+        ];
+        
+        foreach ($sections as $section_name => $section_config) {
+            $sql = "SELECT {$section_config['alias']}.id_cv, 
+                           {$section_config['fields']} as text_content
+                    FROM {$section_config['table']} {$section_config['alias']}
+                    JOIN cvs c ON {$section_config['alias']}.id_cv = c.id
+                    WHERE c.est_publie = 1";
+            
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute();
+            $results = $stmt->fetchAll();
+            
+            foreach ($results as $result) {
+                $cv_id = $result['id_cv'];
+                $text = strtolower($result['text_content']);
+                
+                // Calcul des scores détaillés pour chaque mot-clé
+                $detailed_scores = $this->calculateKeywordsDetailedScore($text, $keywords);
+                
+                // Initialiser les données du CV si nécessaire
+                if (!isset($cvs_data[$cv_id])) {
+                    $cvs_data[$cv_id] = [
+                        'weighted_score' => 0,
+                        'section_scores' => [],
+                        'keyword_details' => []
+                    ];
+                    // Initialiser chaque mot-clé à 0
+                    foreach ($keywords as $keyword) {
+                        $cvs_data[$cv_id]['keyword_details'][$keyword] = 0;
+                    }
+                }
+                
+                // Initialiser le score de la section si nécessaire
+                if (!isset($cvs_data[$cv_id]['section_scores'][$section_name])) {
+                    $cvs_data[$cv_id]['section_scores'][$section_name] = 0;
+                }
+                
+                // Ajouter les scores détaillés avec pondération
+                foreach ($detailed_scores as $keyword => $score) {
+                    if ($score > 0) {
+                        $weighted_score = $score * $section_config['weight'];
+                        $cvs_data[$cv_id]['keyword_details'][$keyword] += $weighted_score;
+                        $cvs_data[$cv_id]['weighted_score'] += $weighted_score;
+                        $cvs_data[$cv_id]['section_scores'][$section_name] += $weighted_score;
+                    }
+                }
+            }
+        }
+        
+        // Application des filtres (adapter pour la nouvelle structure)
+        $cvs_frequency = [];
+        foreach ($cvs_data as $cv_id => $data) {
+            if ($data['weighted_score'] > 0) {
+                $cvs_frequency[$cv_id] = $data['weighted_score'];
+            }
+        }
+        $cvs_frequency = $this->applyFilters($cvs_frequency, $filters);
+        
+        // Conversion en tableau avec structure appropriée incluant les détails
+        $result = [];
+        foreach ($cvs_frequency as $cv_id => $weighted_score) {
+            $result[] = [
+                'cv_id' => $cv_id,
+                'weighted_score' => round($weighted_score, 2),
+                'section_scores' => $cvs_data[$cv_id]['section_scores'] ?? [],
+                'keyword_details' => $cvs_data[$cv_id]['keyword_details'] ?? []
+            ];
+        }
+        
+        return $result;
+    }
+
+    /**
+     * Obtenir les informations basiques du CV avec score pondéré
+     */
+    private function getBasicCVInfoWithWeighting($cv_id, $weighted_score, $section_scores = [], $keyword_details = []) {
+        try {
+            // Informations personnelles essentielles
+            $stmt = $this->db->prepare("SELECT nom, prenom, email, localisation FROM informations_personnelles WHERE id_cv = ?");
+            $stmt->execute([$cv_id]);
+            $personal_info = $stmt->fetch() ?: [];
+            
+            // Informations du CV
+            $stmt = $this->db->prepare("SELECT cv_name, date_creation FROM cvs WHERE id = ?");
+            $stmt->execute([$cv_id]);
+            $cv_info = $stmt->fetch() ?: [];
+            
+            // Première compétence principale
+            $stmt = $this->db->prepare("SELECT competences FROM competences WHERE id_cv = ? LIMIT 1");
+            $stmt->execute([$cv_id]);
+            $competence = $stmt->fetch();
+            
+            return [
+                'cv_id' => $cv_id,
+                'weighted_score' => $weighted_score,
+                'nom_cv' => $cv_info['cv_name'] ?? 'CV Sans Nom',
+                'nom_complet' => trim(($personal_info['nom'] ?? '') . ' ' . ($personal_info['prenom'] ?? '')),
+                'email' => $personal_info['email'] ?? '',
+                'localisation' => $personal_info['localisation'] ?? '',
+                'date_creation' => $cv_info['date_creation'] ?? '',
+                'competence_principale' => $competence['competences'] ?? '',
+                'section_scores' => $section_scores,
+                'keyword_details' => $keyword_details
+            ];
+        } catch (Exception $e) {
+            if ($this->debug_mode) {
+                error_log("Erreur lors de l'obtention des infos basiques du CV $cv_id: " . $e->getMessage());
+            }
+            return null;
+        }
+    }
+
+    /**
+     * Calcul des statistiques pondérées
+     */
+    private function calculateWeightedStatistics($results) {
+        if (empty($results)) {
+            return [
+                'total_cvs' => 0,
+                'avg_weighted_score' => 0,
+                'max_weighted_score' => 0,
+                'min_weighted_score' => 0,
+                'section_performance' => []
+            ];
+        }
+        
+        $weighted_scores = array_column($results, 'weighted_score');
+        $section_totals = [];
+        
+        // Calculer les performances par section
+        foreach ($results as $result) {
+            if (isset($result['section_scores'])) {
+                foreach ($result['section_scores'] as $section => $score) {
+                    if (!isset($section_totals[$section])) {
+                        $section_totals[$section] = 0;
+                    }
+                    $section_totals[$section] += $score;
+                }
+            }
+        }
+        
+        return [
+            'total_cvs' => count($results),
+            'avg_weighted_score' => round(array_sum($weighted_scores) / count($weighted_scores), 2),
+            'max_weighted_score' => max($weighted_scores),
+            'min_weighted_score' => min($weighted_scores),
+            'section_performance' => $section_totals
+        ];
     }
 }

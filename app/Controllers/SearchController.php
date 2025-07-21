@@ -31,7 +31,7 @@ class SearchController extends Controller {
     }
     
     /**
-     * Recherche de CV avec support multi-mots-clés
+     * Recherche de CV avec support multi-mots-clés et pondération
      */
     public function search() {
         try {
@@ -44,13 +44,32 @@ class SearchController extends Controller {
             $keywords = trim($input['keyword']);
             $limit = isset($input['limit']) ? intval($input['limit']) : 25;
             $filters = isset($input['filters']) ? $input['filters'] : [];
+            $weighting = isset($input['weighting']) ? $input['weighting'] : [];
             
             // Validation des limites
             if ($limit > 100) {
                 $limit = 100;
             }
             
-            $results = $this->searchModel->searchByKeywords($keywords, $limit, $filters);
+            // Validation et normalisation de la pondération
+            $defaultWeights = [
+                'experience' => 3.0,
+                'education' => 2.0,
+                'skills' => 4.0,
+                'projects' => 2.5,
+                'certificates' => 1.5,
+                'languages' => 1.0,
+                'profils' => 2.0,
+                'informations_personnelles' => 1.0
+            ];
+            
+            $weighting = array_merge($defaultWeights, $weighting);
+            
+            // Debug: Log des pondérations reçues et appliquées
+            error_log("Pondération reçue: " . json_encode($input['weighting'] ?? []));
+            error_log("Pondération finale appliquée: " . json_encode($weighting));
+            
+            $results = $this->searchModel->searchByKeywordsWithWeighting($keywords, $limit, $filters, $weighting);
             
             return $this->createJsonResponse(true, 'Recherche effectuée avec succès', $results);
             
