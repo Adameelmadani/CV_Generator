@@ -1302,6 +1302,105 @@
         .hidden { display: none !important; }
         .visible { display: block !important; }
         
+        /* Styles pour les nouveaux modals */
+        .weight-profile-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin: 10px 0;
+            background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .weight-profile-item:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .weight-profile-info h4 {
+            margin: 0 0 5px 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .weight-profile-info p {
+            margin: 0;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .weight-profile-date {
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+
+        .search-history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin: 10px 0;
+            background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .search-history-item:hover {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(72, 187, 120, 0.3);
+        }
+
+        .search-history-info h4 {
+            margin: 0 0 5px 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .search-history-info p {
+            margin: 0;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .search-history-meta {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+
+        .filter-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+
+        .empty-state h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
         /* Amélioration de l'accessibilité */
         .search-btn:focus,
         .btn-view-details:focus,
@@ -1328,12 +1427,39 @@
         .modal-content::-webkit-scrollbar-thumb:hover {
             background: #764ba2;
         }
+
+        /* Animations pour les messages de succès */
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
+        .success-message {
+            animation: slideIn 0.3s ease;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>🔍 Recherche de CV</h1>
+            <h1> Recherche de CV</h1>
             <p>Trouvez rapidement les profils qui correspondent à vos besoins</p>
         </div>
 
@@ -1341,13 +1467,13 @@
             <div class="search-section">
                 <form id="searchForm" class="search-form">
                     <input type="text" id="searchKeyword" class="search-input" placeholder='Recherche multi-mots-clés (ex: "java" "machine learning" "mysql")' required>
-                    <button type="submit" class="search-btn">🔍 Rechercher</button>
+                    <button type="submit" class="search-btn"> Rechercher</button>
                 </form>
                 
                 <div class="search-help">
-                    <p><strong>💡 Conseil :</strong> Utilisez des guillemets pour rechercher plusieurs mots-clés séparément. 
+                    <p><strong> Conseil :</strong> Utilisez des guillemets pour rechercher plusieurs mots-clés séparément. 
                     Exemple : <code>"java"</code> <code>"machine learning"</code> <code>"mysql"</code></p>
-                    <p><strong>📝 Format supporté :</strong> "mot-clé 1" "mot-clé 2" ou un seul terme sans guillemets</p>
+                    <p><strong> Format supporté :</strong> "mot-clé 1" "mot-clé 2" ou un seul terme sans guillemets</p>
                 </div>
 
                 <div class="filters">
@@ -1372,69 +1498,67 @@
 
                 <!-- Section de pondération des sections CV -->
                 <div class="weighting-section">
-                    <h3>🎯 Pondération des sections du CV</h3>
+                    <h3> Pondération des sections du CV</h3>
                     <p class="weighting-help">Attribuez un poids à chaque section pour prioriser vos critères de recherche</p>
                     
                     <div class="weighting-grid">
                         <div class="weight-item">
-                            <label for="weight-experience">💼 Expérience professionnelle</label>
+                            <label for="weight-experience"> Expérience professionnelle</label>
                             <input type="number" id="weight-experience" min="0" max="10" step="0.1" value="3.0" class="weight-input">
                             <span class="weight-multiplier">×3.0</span>
                         </div>
                         
                         <div class="weight-item">
-                            <label for="weight-education">🎓 Formation</label>
+                            <label for="weight-education"> Formation</label>
                             <input type="number" id="weight-education" min="0" max="10" step="0.1" value="2.0" class="weight-input">
                             <span class="weight-multiplier">×2.0</span>
                         </div>
                         
                         <div class="weight-item">
-                            <label for="weight-skills">🛠️ Compétences</label>
+                            <label for="weight-skills"> Compétences</label>
                             <input type="number" id="weight-skills" min="0" max="10" step="0.1" value="4.0" class="weight-input">
                             <span class="weight-multiplier">×4.0</span>
                         </div>
                         
                         <div class="weight-item">
-                            <label for="weight-projects">🚀 Projets</label>
+                            <label for="weight-projects"> Projets</label>
                             <input type="number" id="weight-projects" min="0" max="10" step="0.1" value="2.5" class="weight-input">
                             <span class="weight-multiplier">×2.5</span>
                         </div>
                         
                         <div class="weight-item">
-                            <label for="weight-certificates">🏆 Certificats</label>
+                            <label for="weight-certificates"> Certificats</label>
                             <input type="number" id="weight-certificates" min="0" max="10" step="0.1" value="1.5" class="weight-input">
                             <span class="weight-multiplier">×1.5</span>
                         </div>
                         
                         <div class="weight-item">
-                            <label for="weight-languages">🗣️ Langues</label>
+                            <label for="weight-languages"> Langues</label>
                             <input type="number" id="weight-languages" min="0" max="10" step="0.1" value="1.0" class="weight-input">
                             <span class="weight-multiplier">×1.0</span>
                         </div>
                         <div class="weight-item">
-                            <label for="weight-profils">👤 Profil/Résumé</label>
+                            <label for="weight-profils"> Profil/Résumé</label>
                             <input type="number" id="weight-profils" min="0" max="10" step="0.1" value="2.0" class="weight-input">
                             <span class="weight-multiplier">×2.0</span>
                         </div>
                         <div class="weight-item">
-                            <label for="weight-informations_personnelles">📧 Informations personnelles</label>
+                            <label for="weight-informations_personnelles"> Informations personnelles</label>
                             <input type="number" id="weight-informations_personnelles" min="0" max="10" step="0.1" value="1.0" class="weight-input">
                             <span class="weight-multiplier">×1.0</span>
                         </div>
                     </div>
                     
                     <div class="weighting-presets">
-                        <button type="button" class="preset-btn" onclick="applyPreset('technical')">🔧 Profil Technique</button>
-                        <button type="button" class="preset-btn" onclick="applyPreset('management')">👔 Management</button>
-                        <button type="button" class="preset-btn" onclick="applyPreset('junior')">🌱 Junior</button>
-                        <button type="button" class="preset-btn" onclick="applyPreset('balanced')">⚖️ Équilibré</button>
-                        <button type="button" class="preset-btn" onclick="resetWeights()">🔄 Reset</button>
+                        <button type="button" class="preset-btn" onclick="openWeightManager()"> Gérer pondération</button>
+                        <button type="button" class="preset-btn" onclick="openSaveWeightModal()"> Sauvegarder pondération</button>
+                        <button type="button" class="preset-btn" onclick="openSearchHistory()"> Historique des recherches</button>
                     </div>
                 </div>
             </div>
 
             <div class="stats-section">
-                <h2>📊 Statistiques</h2>
+                <h2> Statistiques</h2>
                 <div class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-value" id="totalCvs">0</div>
@@ -1456,7 +1580,7 @@
             </div>
 
             <div id="loading" class="loading hidden">
-                <h3>🔄 Recherche en cours...</h3>
+                <h3> Recherche en cours...</h3>
                 <p>Veuillez patienter pendant que nous analysons les CVs</p>
             </div>
 
@@ -1469,6 +1593,62 @@
         <div id="cv-details-modal" class="modal">
             <div class="modal-content">
                 <div id="cv-details-content"></div>
+            </div>
+        </div>
+
+        <!-- Modal pour gérer les pondérations -->
+        <div id="weight-manager-modal" class="modal">
+            <div class="modal-content">
+                <div class="cv-details-header">
+                    <h2>⚙️ Gérer les pondérations</h2>
+                    <button class="close-modal" onclick="closeWeightManager()">&times;</button>
+                </div>
+                <div class="cv-details-body">
+                    <div id="weight-profiles-list">
+                        <div class="loading">Chargement des pondérations...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal pour sauvegarder une pondération -->
+        <div id="save-weight-modal" class="modal">
+            <div class="modal-content">
+                <div class="cv-details-header">
+                    <h2>💾 Sauvegarder la pondération</h2>
+                    <button class="close-modal" onclick="closeSaveWeightModal()">&times;</button>
+                </div>
+                <div class="cv-details-body">
+                    <form id="save-weight-form">
+                        <div class="filter-group">
+                            <label for="weight-profile-name">Nom du profil de pondération</label>
+                            <input type="text" id="weight-profile-name" placeholder="Ex: Profil Développeur Senior" required>
+                        </div>
+                        <div class="filter-group">
+                            <label for="weight-profile-description">Description (optionnelle)</label>
+                            <textarea id="weight-profile-description" placeholder="Description du profil de pondération..." rows="3"></textarea>
+                        </div>
+                        <div class="cv-actions">
+                            <button type="button" class="btn-view-details" onclick="closeSaveWeightModal()">Annuler</button>
+                            <button type="submit" class="btn-view-data">💾 Sauvegarder</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal pour l'historique des recherches -->
+        <div id="search-history-modal" class="modal">
+            <div class="modal-content">
+                <div class="cv-details-header">
+                    <h2>🕑 Historique des recherches</h2>
+                    <button class="close-modal" onclick="closeSearchHistory()">&times;</button>
+                </div>
+                <div class="cv-details-body">
+                    <div id="search-history-list">
+                        <div class="loading">Chargement de l'historique...</div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -1664,6 +1844,9 @@
                 if (data.success) {
                     const keywords = data.keywords || data.search_query || keyword;
                     displayResults(data.results, data.statistics, data.execution_time, keywords);
+                    
+                    // Sauvegarder automatiquement dans l'historique
+                    saveToSearchHistory(keyword, currentFilters, getWeightingConfig(), data.results.length);
                 } else {
                     showError(data.message || data.error || 'Erreur lors de la recherche');
                 }
@@ -1778,10 +1961,10 @@
                         
                         <div class="cv-actions">
                             <button class="btn-view-details" onclick="event.stopPropagation(); viewCVPreview(${cv.cv_id})">
-                                👁️ Aperçu
+                                 Aperçu
                             </button>
                             <button class="btn-view-data" onclick="event.stopPropagation(); showCVDetails(${cv.cv_id})" title="Voir les données brutes">
-                                📋 Données
+                                 Données
                             </button>
                         </div>
                     </div>
@@ -1979,6 +2162,463 @@
             const modal = document.getElementById('cv-details-modal');
             if (modal.style.display === 'block') {
                 // Réajustement automatique grâce au CSS responsive
+            }
+        });
+
+        // --- Nouveaux boutons ---
+        function openWeightManager() {
+            const modal = document.getElementById('weight-manager-modal');
+            const listContainer = document.getElementById('weight-profiles-list');
+            
+            modal.style.display = 'block';
+            listContainer.innerHTML = '<div class="loading">Chargement des pondérations...</div>';
+            
+            // Récupérer les pondérations sauvegardées
+            fetch('weight_manager.php?action=list')
+                .then(response => {
+                    // Vérifier si la réponse est OK
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    // Essayer de parser le JSON
+                    return response.text().then(text => {
+                        try {
+                            return JSON.parse(text);
+                        } catch (e) {
+                            // Si ce n'est pas du JSON, afficher le texte pour debug
+                            console.error('Réponse reçue (non-JSON):', text);
+                            throw new Error('Réponse du serveur invalide. Les tables de base de données existent-elles ?');
+                        }
+                    });
+                })
+                .then(data => {
+                    if (data.success) {
+                        displayWeightProfiles(data.profiles || []);
+                    } else {
+                        listContainer.innerHTML = `<div class="error">Erreur: ${data.message || 'Erreur inconnue'}</div>`;
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur complète:', error);
+                    listContainer.innerHTML = `
+                        <div class="error">
+                            <strong>Erreur lors du chargement des pondérations</strong><br>
+                            ${error.message}<br><br>
+                            <button onclick="installTables()" style="
+                                background: #4CAF50; 
+                                color: white; 
+                                padding: 10px 20px; 
+                                border: none; 
+                                border-radius: 5px; 
+                                cursor: pointer;
+                                margin-right: 10px;
+                            ">
+                                🔧 Installer les tables automatiquement
+                            </button>
+                            <a href="install_tables.php" target="_blank" style="
+                                color: #2196F3; 
+                                text-decoration: underline;
+                            ">
+                                📋 Ou ouvrir l'installateur
+                            </a>
+                        </div>
+                    `;
+                });
+        }
+
+        // Fonction pour installer les tables automatiquement
+        function installTables() {
+            const listContainer = document.getElementById('weight-profiles-list');
+            listContainer.innerHTML = '<div class="loading">🔧 Installation des tables en cours...</div>';
+            
+            fetch('quick_install.php')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        listContainer.innerHTML = `
+                            <div class="success" style="background: #d4edda; padding: 15px; border-radius: 5px; margin: 10px 0;">
+                                <strong>✅ Installation réussie !</strong><br>
+                                ${data.message}<br>
+                                Requêtes exécutées: ${data.queries_executed}<br><br>
+                                <button onclick="openWeightManager()" style="
+                                    background: #4CAF50; 
+                                    color: white; 
+                                    padding: 8px 16px; 
+                                    border: none; 
+                                    border-radius: 4px; 
+                                    cursor: pointer;
+                                ">
+                                    🔄 Recharger les pondérations
+                                </button>
+                            </div>
+                        `;
+                        
+                        // Recharger automatiquement après 1 seconde
+                        setTimeout(() => {
+                            openWeightManager();
+                        }, 1000);
+                        
+                    } else {
+                        listContainer.innerHTML = `
+                            <div class="error">
+                                ❌ Erreur lors de l'installation: ${data.message}<br><br>
+                                <a href="install_tables.php" target="_blank" style="
+                                    background: #2196F3; 
+                                    color: white; 
+                                    padding: 8px 16px; 
+                                    text-decoration: none; 
+                                    border-radius: 4px;
+                                ">
+                                    📋 Essayer l'installation manuelle
+                                </a>
+                            </div>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    listContainer.innerHTML = `
+                        <div class="error">
+                            ❌ Erreur lors de l'installation: ${error.message}<br><br>
+                            <a href="install_tables.php" target="_blank" style="
+                                background: #2196F3; 
+                                color: white; 
+                                padding: 8px 16px; 
+                                text-decoration: none; 
+                                border-radius: 4px;
+                            ">
+                                📋 Essayer l'installation manuelle
+                            </a>
+                        </div>
+                    `;
+                });
+        }
+
+        function openSaveWeightModal() {
+            const modal = document.getElementById('save-weight-modal');
+            modal.style.display = 'block';
+            
+            // Reset du formulaire
+            document.getElementById('save-weight-form').reset();
+        }
+
+        function openSearchHistory() {
+            // TODO: Afficher un modal avec l’historique des recherches (AJAX)
+            alert('Historique des recherches : à implémenter');
+        }
+    </script>
+
+    <script>
+        // Fonctions supplémentaires pour les nouvelles fonctionnalités
+        
+        function displayWeightProfiles(profiles) {
+            const listContainer = document.getElementById('weight-profiles-list');
+            
+            if (profiles.length === 0) {
+                listContainer.innerHTML = `
+                    <div class="empty-state">
+                        <h3>Aucune pondération sauvegardée</h3>
+                        <p>Commencez par sauvegarder une pondération pour la réutiliser plus tard.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = '';
+            profiles.forEach(profile => {
+                html += `
+                    <div class="weight-profile-item" onclick="applyWeightProfile(${profile.id})">
+                        <div class="weight-profile-info">
+                            <h4>${profile.profile_name}</h4>
+                            <p>${profile.description || 'Aucune description'}</p>
+                        </div>
+                        <div class="weight-profile-date">
+                            ${new Date(profile.created_at).toLocaleDateString()}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            listContainer.innerHTML = html;
+        }
+
+        function applyWeightProfile(profileId) {
+            fetch(`weight_manager.php?action=get&id=${profileId}`)
+                .then(response => {
+                    // Vérifier si la réponse est OK
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    // Lire le texte complet d'abord
+                    return response.text().then(text => {
+                        console.log('Réponse brute du serveur:', text);
+                        
+                        // Vérifier si le texte est vide
+                        if (!text.trim()) {
+                            throw new Error('Réponse vide du serveur');
+                        }
+                        
+                        try {
+                            return JSON.parse(text);
+                        } catch (e) {
+                            console.error('Erreur de parsing JSON:', e);
+                            console.error('Texte reçu:', text);
+                            throw new Error('Réponse du serveur invalide (pas de JSON valide)');
+                        }
+                    });
+                })
+                .then(data => {
+                    if (data.success) {
+                        const weights = data.weights;
+                        
+                        Object.keys(weights).forEach(section => {
+                            const input = document.getElementById(`weight-${section}`);
+                            if (input) {
+                                input.value = weights[section];
+                                const multiplier = input.parentElement.querySelector('.weight-multiplier');
+                                if (multiplier) {
+                                    multiplier.textContent = `×${parseFloat(weights[section]).toFixed(1)}`;
+                                }
+                            }
+                        });
+                        
+                        document.querySelectorAll('.weight-item').forEach(item => {
+                            item.style.transform = 'scale(1.05)';
+                            setTimeout(() => {
+                                item.style.transform = 'scale(1)';
+                            }, 200);
+                        });
+                        
+                        closeWeightManager();
+                        showSuccessMessage('Pondération appliquée avec succès !');
+                    } else {
+                        alert(`Erreur: ${data.message || 'Erreur inconnue'}`);
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur complète:', error);
+                    alert(`Erreur lors de l'application de la pondération: ${error.message}`);
+                });
+        }
+
+        function closeWeightManager() {
+            document.getElementById('weight-manager-modal').style.display = 'none';
+        }
+
+        function closeSaveWeightModal() {
+            document.getElementById('save-weight-modal').style.display = 'none';
+        }
+
+        function displaySearchHistory(history) {
+            const listContainer = document.getElementById('search-history-list');
+            
+            if (history.length === 0) {
+                listContainer.innerHTML = `
+                    <div class="empty-state">
+                        <h3>Aucune recherche dans l'historique</h3>
+                        <p>Effectuez une recherche pour commencer à construire votre historique.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = '';
+            history.forEach(search => {
+                html += `
+                    <div class="search-history-item" onclick="loadSearchFromHistory(${search.id})">
+                        <div class="search-history-info">
+                            <h4>${search.search_keywords}</h4>
+                            <p>Pondération: ${search.weight_profile_name || 'Personnalisée'}</p>
+                            <p>Résultats: ${search.results_count} CV trouvés</p>
+                        </div>
+                        <div class="search-history-meta">
+                            <div>${new Date(search.search_date).toLocaleDateString()}</div>
+                            <div>${new Date(search.search_date).toLocaleTimeString()}</div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            listContainer.innerHTML = html;
+        }
+
+        function loadSearchFromHistory(historyId) {
+            fetch(`search_history_manager.php?action=get&id=${historyId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const search = data.search;
+                        
+                        document.getElementById('searchKeyword').value = search.search_keywords;
+                        
+                        if (search.filters) {
+                            const filters = JSON.parse(search.filters);
+                            if (filters.ville) document.getElementById('ville').value = filters.ville;
+                            if (filters.competences_requises) document.getElementById('competences').value = filters.competences_requises.join(', ');
+                            if (filters.limit) document.getElementById('limit').value = filters.limit;
+                        }
+                        
+                        if (search.weights) {
+                            const weights = JSON.parse(search.weights);
+                            Object.keys(weights).forEach(section => {
+                                const input = document.getElementById(`weight-${section}`);
+                                if (input) {
+                                    input.value = weights[section];
+                                    const multiplier = input.parentElement.querySelector('.weight-multiplier');
+                                    if (multiplier) {
+                                        multiplier.textContent = `×${parseFloat(weights[section]).toFixed(1)}`;
+                                    }
+                                }
+                            });
+                        }
+                        
+                        closeSearchHistory();
+                        showSuccessMessage('Recherche chargée depuis l\'historique !');
+                        
+                    } else {
+                        alert(`Erreur: ${data.message}`);
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    alert('Erreur lors du chargement de la recherche');
+                });
+        }
+
+        function closeSearchHistory() {
+            document.getElementById('search-history-modal').style.display = 'none';
+        }
+
+        function showSuccessMessage(message) {
+            const successDiv = document.createElement('div');
+            successDiv.className = 'success-message';
+            successDiv.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: linear-gradient(135deg, #48bb78, #38a169);
+                color: white;
+                padding: 15px 20px;
+                border-radius: 10px;
+                box-shadow: 0 5px 15px rgba(72, 187, 120, 0.3);
+                z-index: 10000;
+                font-weight: 600;
+            `;
+            successDiv.textContent = message;
+            
+            document.body.appendChild(successDiv);
+            
+            setTimeout(() => {
+                document.body.removeChild(successDiv);
+            }, 3000);
+        }
+
+        // Fonction pour sauvegarder automatiquement dans l'historique
+        function saveToSearchHistory(searchKeywords, filters, weights, resultsCount) {
+            const historyData = {
+                search_keywords: searchKeywords,
+                filters: filters,
+                weights: weights,
+                results_count: resultsCount
+            };
+            
+            fetch('search_history_manager.php?action=save', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(historyData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (!data.success) {
+                    console.warn('Erreur lors de la sauvegarde dans l\'historique:', data.message);
+                }
+            })
+            .catch(error => {
+                console.warn('Erreur lors de la sauvegarde dans l\'historique:', error);
+            });
+        }
+
+        // Gestion du formulaire de sauvegarde et des événements
+        document.addEventListener('DOMContentLoaded', function() {
+            const saveWeightForm = document.getElementById('save-weight-form');
+            if (saveWeightForm) {
+                saveWeightForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const profileName = document.getElementById('weight-profile-name').value.trim();
+                    const description = document.getElementById('weight-profile-description').value.trim();
+                    
+                    if (!profileName) {
+                        alert('Veuillez saisir un nom pour le profil de pondération');
+                        return;
+                    }
+                    
+                    const currentWeights = getWeightingConfig();
+                    
+                    const requestData = {
+                        profile_name: profileName,
+                        description: description,
+                        weights: currentWeights
+                    };
+                    
+                    fetch('weight_manager.php?action=save', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(requestData)
+                    })
+                    .then(response => {
+                        // Vérifier si la réponse est OK
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        
+                        // Lire le texte complet d'abord
+                        return response.text().then(text => {
+                            console.log('Réponse brute du serveur (sauvegarde):', text);
+                            
+                            // Vérifier si le texte est vide
+                            if (!text.trim()) {
+                                throw new Error('Réponse vide du serveur');
+                            }
+                            
+                            try {
+                                return JSON.parse(text);
+                            } catch (e) {
+                                console.error('Erreur de parsing JSON (sauvegarde):', e);
+                                console.error('Texte reçu:', text);
+                                throw new Error('Réponse du serveur invalide (pas de JSON valide)');
+                            }
+                        });
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            closeSaveWeightModal();
+                            showSuccessMessage('Pondération sauvegardée avec succès !');
+                        } else {
+                            alert(`Erreur: ${data.message || 'Erreur inconnue'}`);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Erreur complète (sauvegarde):', error);
+                        alert(`Erreur lors de la sauvegarde: ${error.message}`);
+                    });
+                });
+            }
+
+            // Fermer les modals en cliquant à l'extérieur
+            window.onclick = function(event) {
+                const modals = ['cv-details-modal', 'weight-manager-modal', 'save-weight-modal', 'search-history-modal'];
+                modals.forEach(modalId => {
+                    const modal = document.getElementById(modalId);
+                    if (event.target === modal) {
+                        modal.style.display = 'none';
+                    }
+                });
             }
         });
     </script>
