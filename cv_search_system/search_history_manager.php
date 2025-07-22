@@ -1,11 +1,13 @@
 <?php
 /**
  * Gestionnaire de l'historique des recherches
+ * Compatible avec la structure de base de données existante
  */
 
-// Supprimer les erreurs pour éviter les problèmes JSON
+// Désactiver l'affichage des erreurs pour éviter les problèmes JSON
 error_reporting(0);
 ini_set('display_errors', 0);
+ini_set('log_errors', 1);
 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
@@ -17,12 +19,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit(0);
 }
 
+// Vérifier si le fichier de configuration existe
+if (!file_exists('cv_search_config.php')) {
+    echo json_encode([
+        'success' => false,
+        'message' => 'Fichier de configuration cv_search_config.php non trouvé'
+    ]);
+    exit;
+}
+
 try {
     require_once 'cv_search_config.php';
+    
+    // Créer la connexion PDO avec les constantes définies
+    $dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=" . DB_CHARSET;
+    $pdo = new PDO($dsn, DB_USER, DB_PASS);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+    
 } catch (Exception $e) {
     echo json_encode([
         'success' => false,
-        'message' => 'Erreur de configuration: ' . $e->getMessage()
+        'message' => 'Erreur de connexion à la base de données: ' . $e->getMessage()
     ]);
     exit;
 }
@@ -35,6 +53,10 @@ try {
             listSearchHistory();
             break;
             
+        case 'recent':
+            getRecentSearches();
+            break;
+            
         case 'get':
             getSearchHistory();
             break;
@@ -45,6 +67,10 @@ try {
             
         case 'delete':
             deleteSearchHistory();
+            break;
+            
+        case 'clear_all':
+            clearAllSearchHistory();
             break;
             
         default:
@@ -88,6 +114,38 @@ function listSearchHistory() {
         echo json_encode([
             'success' => false,
             'message' => 'Erreur lors de la récupération de l\'historique: ' . $e->getMessage()
+        ]);
+    }
+}
+
+function getRecentSearches() {
+    global $pdo;
+    
+    try {
+        $stmt = $pdo->prepare("
+            SELECT 
+                sh.*,
+                wp.profile_name as weight_profile_name,
+                r.username as recruiter_name
+            FROM search_history sh
+            LEFT JOIN weight_profiles wp ON sh.weight_profile_id = wp.id
+            LEFT JOIN recruiters r ON sh.recruiter_id = r.id
+            WHERE sh.created_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR)
+            ORDER BY sh.created_at DESC
+            LIMIT 5
+        ");
+        $stmt->execute();
+        $recentSearches = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        echo json_encode([
+            'success' => true,
+            'recent_searches' => $recentSearches
+        ]);
+        
+    } catch (PDOException $e) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Erreur lors de la récupération des recherches récentes: ' . $e->getMessage()
         ]);
     }
 }
@@ -168,6 +226,17 @@ function saveSearchHistory() {
     }
     
     try {
+        // Vérifier si le recruteur par défaut existe
+        $stmt = $pdo->prepare("SELECT id FROM recruiters WHERE id = 1");
+        $stmt->execute();
+        $recruiter = $stmt->fetch();
+        
+        if (!$recruiter) {
+            // Créer le recruteur par défaut s'il n'existe pas
+            $stmt = $pdo->prepare("INSERT IGNORE INTO recruiters (id, username, email) VALUES (1, 'admin', 'admin@cv-search.com')");
+            $stmt->execute();
+        }
+        
         $stmt = $pdo->prepare("
             INSERT INTO search_history (
                 recruiter_id, 
@@ -181,7 +250,7 @@ function saveSearchHistory() {
         ");
         
         $stmt->execute([
-            1, // ID du recruteur (à adapter selon votre système d'authentification)
+            1, // ID du recruteur par défaut
             $searchKeywords,
             $filters ? json_encode($filters) : null,
             $weights ? json_encode($weights) : null,
@@ -231,6 +300,28 @@ function deleteSearchHistory() {
         echo json_encode([
             'success' => false,
             'message' => 'Erreur lors de la suppression: ' . $e->getMessage()
+        ]);
+    }
+}
+
+function clearAllSearchHistory() {
+    global $pdo;
+    
+    try {
+        $stmt = $pdo->prepare("DELETE FROM search_history");
+        $stmt->execute();
+        
+        $deletedCount = $stmt->rowCount();
+        
+        echo json_encode([
+            'success' => true,
+            'message' => "Historique entièrement supprimé ($deletedCount recherches supprimées)"
+        ]);
+        
+    } catch (PDOException $e) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Erreur lors de la suppression de l\'historique: ' . $e->getMessage()
         ]);
     }
 }

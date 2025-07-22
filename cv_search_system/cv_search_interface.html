@@ -1451,9 +1451,44 @@
             }
         }
 
+        @keyframes slideDown {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
         .success-message {
             animation: slideIn 0.3s ease;
         }
+
+        /* Amélioration des éléments d'historique */
+        .search-history-item {
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        .search-history-item:hover {
+            background: linear-gradient(135deg, #f0f4ff 0%, #e8f2ff 100%) !important;
+            transform: translateX(5px);
+            border-left-width: 6px !important;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
+        }
+
+        /* Animation pour les éléments chargés */
+        .search-history-item {
+            animation: fadeInUp 0.4s ease forwards;
+            opacity: 0;
+        }
+
+        .search-history-item:nth-child(1) { animation-delay: 0.1s; }
+        .search-history-item:nth-child(2) { animation-delay: 0.2s; }
+        .search-history-item:nth-child(3) { animation-delay: 0.3s; }
+        .search-history-item:nth-child(4) { animation-delay: 0.4s; }
+        .search-history-item:nth-child(5) { animation-delay: 0.5s; }
     </style>
 </head>
 <body>
@@ -1663,7 +1698,88 @@
             loadGeneralStats();
             setupEventListeners();
             setupWeightingInputs();
+            checkRecentSearches();
         });
+
+        function checkRecentSearches() {
+            // Vérifier s'il y a des recherches récentes (dernières 24h)
+            fetch('search_history_manager.php?action=recent')
+                .then(response => {
+                    if (!response.ok) {
+                        console.log('Réponse non OK pour les recherches récentes:', response.status);
+                        return null;
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data && data.success && data.recent_searches && data.recent_searches.length > 0) {
+                        showRecentSearchesBanner(data.recent_searches);
+                    } else {
+                        console.log('Aucune recherche récente ou erreur:', data ? data.message : 'Pas de données');
+                    }
+                })
+                .catch(error => {
+                    console.log('Pas de recherches récentes disponibles:', error.message);
+                });
+        }
+
+        function showRecentSearchesBanner(recentSearches) {
+            const banner = document.createElement('div');
+            banner.style.cssText = `
+                background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+                border: 2px solid #667eea;
+                border-radius: 12px;
+                padding: 15px;
+                margin: 10px 0 20px 0;
+                text-align: center;
+                animation: slideDown 0.5s ease;
+            `;
+            
+            const latestSearch = recentSearches[0];
+            const searchDate = new Date(latestSearch.search_date);
+            const timeAgo = getTimeAgo(searchDate);
+            
+            banner.innerHTML = `
+                <div style="margin-bottom: 10px;">
+                    <strong style="color: #667eea;">🔍 Recherche récente trouvée !</strong>
+                </div>
+                <div style="font-size: 0.9rem; color: #4a5568; margin-bottom: 15px;">
+                    Dernière recherche : <strong>"${latestSearch.search_keywords}"</strong><br>
+                    <em>${timeAgo} • ${latestSearch.results_count} résultats trouvés</em>
+                </div>
+                <div>
+                    <button onclick="loadSearchFromHistory(${latestSearch.id}); this.parentElement.parentElement.remove();" 
+                            style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; padding: 10px 20px; border-radius: 20px; margin: 0 10px; cursor: pointer; font-weight: 600;">
+                        🔄 Continuer cette recherche
+                    </button>
+                    <button onclick="openSearchHistory(); this.parentElement.parentElement.remove();" 
+                            style="background: linear-gradient(135deg, #48bb78, #38a169); color: white; border: none; padding: 10px 20px; border-radius: 20px; margin: 0 10px; cursor: pointer; font-weight: 600;">
+                        📂 Voir tout l'historique
+                    </button>
+                    <button onclick="this.parentElement.parentElement.remove();" 
+                            style="background: #e2e8f0; color: #4a5568; border: none; padding: 10px 20px; border-radius: 20px; margin: 0 10px; cursor: pointer;">
+                        ✕ Fermer
+                    </button>
+                </div>
+            `;
+            
+            const searchSection = document.querySelector('.search-section');
+            searchSection.insertBefore(banner, searchSection.firstChild);
+        }
+
+        function getTimeAgo(date) {
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMs / 3600000);
+            const diffDays = Math.floor(diffMs / 86400000);
+            
+            if (diffMins < 1) return 'À l\'instant';
+            if (diffMins < 60) return `Il y a ${diffMins} minute${diffMins > 1 ? 's' : ''}`;
+            if (diffHours < 24) return `Il y a ${diffHours} heure${diffHours > 1 ? 's' : ''}`;
+            if (diffDays < 7) return `Il y a ${diffDays} jour${diffDays > 1 ? 's' : ''}`;
+            return `Le ${date.toLocaleDateString('fr-FR')}`;
+        }
 
         function setupEventListeners() {
             // Gestion du formulaire de recherche
@@ -2406,6 +2522,31 @@
             document.getElementById('weight-manager-modal').style.display = 'none';
         }
 
+        function openSaveWeightModal() {
+            const modal = document.getElementById('save-weight-modal');
+            modal.style.display = 'block';
+            
+            // Pré-remplir avec un nom suggéré basé sur les pondérations actuelles
+            const weights = getWeightingConfig();
+            let suggestedName = '';
+            
+            // Analyser les pondérations pour suggérer un nom
+            if (weights.skills >= 4 && weights.experience >= 3) {
+                suggestedName = 'Profil Technique Senior';
+            } else if (weights.experience >= 4) {
+                suggestedName = 'Profil Expérience Premium';
+            } else if (weights.education >= 3) {
+                suggestedName = 'Profil Académique';
+            } else if (weights.projects >= 3) {
+                suggestedName = 'Profil Orienté Projets';
+            } else {
+                suggestedName = 'Profil Personnalisé';
+            }
+            
+            document.getElementById('weight-profile-name').value = suggestedName;
+            document.getElementById('weight-profile-description').value = '';
+        }
+
         function closeSaveWeightModal() {
             document.getElementById('save-weight-modal').style.display = 'none';
         }
@@ -2416,29 +2557,97 @@
             if (history.length === 0) {
                 listContainer.innerHTML = `
                     <div class="empty-state">
-                        <h3>Aucune recherche dans l'historique</h3>
-                        <p>Effectuez une recherche pour commencer à construire votre historique.</p>
+                        <h3>📂 Aucune recherche dans l'historique</h3>
+                        <p>Effectuez une recherche pour commencer à construire votre historique de recrutement.</p>
+                        <p><em>Les recherches seront automatiquement sauvegardées ici pour faciliter le suivi de votre processus de recrutement.</em></p>
                     </div>
                 `;
                 return;
             }
             
-            let html = '';
-            history.forEach(search => {
+            let html = '<div style="margin-bottom: 20px; text-align: center; color: #667eea; font-weight: 600;">📊 Historique des ' + history.length + ' dernières recherches</div>';
+            
+            history.forEach((search, index) => {
+                const searchDate = new Date(search.search_date);
+                const formattedDate = searchDate.toLocaleDateString('fr-FR', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+                const formattedTime = searchDate.toLocaleTimeString('fr-FR', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                // Analyser les filtres s'ils existent
+                let filtersInfo = '';
+                if (search.filters) {
+                    try {
+                        const filters = JSON.parse(search.filters);
+                        const filterParts = [];
+                        if (filters.ville) filterParts.push(`📍 ${filters.ville}`);
+                        if (filters.competences_requises && filters.competences_requises.length > 0) {
+                            filterParts.push(`🛠️ ${filters.competences_requises.join(', ')}`);
+                        }
+                        if (filters.limit) filterParts.push(`📋 Limite: ${filters.limit}`);
+                        
+                        if (filterParts.length > 0) {
+                            filtersInfo = `<div style="font-size: 0.85rem; color: #666; margin-top: 5px;">${filterParts.join(' • ')}</div>`;
+                        }
+                    } catch (e) {
+                        console.warn('Erreur lors du parsing des filtres:', e);
+                    }
+                }
+                
+                // Statut des résultats
+                let resultsStatus = '';
+                if (search.results_count === 0) {
+                    resultsStatus = '<span style="color: #e53e3e;">❌ Aucun résultat</span>';
+                } else if (search.results_count <= 5) {
+                    resultsStatus = `<span style="color: #f6ad55;">⚠️ ${search.results_count} résultat${search.results_count > 1 ? 's' : ''}</span>`;
+                } else {
+                    resultsStatus = `<span style="color: #48bb78;">✅ ${search.results_count} résultat${search.results_count > 1 ? 's' : ''}</span>`;
+                }
+                
                 html += `
-                    <div class="search-history-item" onclick="loadSearchFromHistory(${search.id})">
-                        <div class="search-history-info">
-                            <h4>${search.search_keywords}</h4>
-                            <p>Pondération: ${search.weight_profile_name || 'Personnalisée'}</p>
-                            <p>Résultats: ${search.results_count} CV trouvés</p>
+                    <div class="search-history-item" style="position: relative; border-left: 4px solid ${index < 3 ? '#667eea' : '#e2e8f0'};">
+                        <div class="search-history-info" onclick="loadSearchFromHistory(${search.id})" style="cursor: pointer; flex: 1;">
+                            <h4 style="display: flex; align-items: center; gap: 10px;">
+                                🔍 "${search.search_keywords}"
+                                ${index === 0 ? '<span style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.7rem; font-weight: 600;">RÉCENT</span>' : ''}
+                            </h4>
+                            <p>
+                                <strong>Pondération:</strong> ${search.weight_profile_name ? `📋 ${search.weight_profile_name}` : '⚙️ Configuration personnalisée'}<br>
+                                <strong>Résultats:</strong> ${resultsStatus}
+                            </p>
+                            ${filtersInfo}
                         </div>
-                        <div class="search-history-meta">
-                            <div>${new Date(search.search_date).toLocaleDateString()}</div>
-                            <div>${new Date(search.search_date).toLocaleTimeString()}</div>
+                        <div class="search-history-meta" style="display: flex; flex-direction: column; align-items: flex-end; gap: 5px;">
+                            <div style="font-size: 0.9rem; font-weight: 600; color: #667eea;">${formattedDate}</div>
+                            <div style="font-size: 0.8rem; color: #666;">${formattedTime}</div>
+                            <button onclick="event.stopPropagation(); deleteSearchFromHistory(${search.id})" 
+                                    style="background: #e53e3e; color: white; border: none; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; cursor: pointer; transition: all 0.3s ease;"
+                                    onmouseover="this.style.background='#c53030'" 
+                                    onmouseout="this.style.background='#e53e3e'"
+                                    title="Supprimer cette recherche">
+                                🗑️ Suppr.
+                            </button>
                         </div>
                     </div>
                 `;
             });
+            
+            // Ajouter un bouton pour nettoyer tout l'historique
+            html += `
+                <div style="text-align: center; margin-top: 20px; padding-top: 20px; border-top: 2px solid #e2e8f0;">
+                    <button onclick="clearAllSearchHistory()" 
+                            style="background: linear-gradient(135deg, #e53e3e, #c53030); color: white; border: none; padding: 12px 24px; border-radius: 25px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;"
+                            onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 20px rgba(229, 62, 62, 0.3)'" 
+                            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                        🗑️ Vider tout l'historique
+                    </button>
+                </div>
+            `;
             
             listContainer.innerHTML = html;
         }
@@ -2450,39 +2659,208 @@
                     if (data.success) {
                         const search = data.search;
                         
+                        // Charger les mots-clés
                         document.getElementById('searchKeyword').value = search.search_keywords;
                         
+                        // Charger les filtres si ils existent
                         if (search.filters) {
-                            const filters = JSON.parse(search.filters);
-                            if (filters.ville) document.getElementById('ville').value = filters.ville;
-                            if (filters.competences_requises) document.getElementById('competences').value = filters.competences_requises.join(', ');
-                            if (filters.limit) document.getElementById('limit').value = filters.limit;
+                            try {
+                                const filters = JSON.parse(search.filters);
+                                if (filters.ville) document.getElementById('ville').value = filters.ville;
+                                if (filters.competences_requises) {
+                                    const competences = Array.isArray(filters.competences_requises) 
+                                        ? filters.competences_requises.join(', ') 
+                                        : filters.competences_requises;
+                                    document.getElementById('competences').value = competences;
+                                }
+                                if (filters.limit) document.getElementById('limit').value = filters.limit;
+                            } catch (e) {
+                                console.warn('Erreur lors du chargement des filtres:', e);
+                            }
                         }
                         
+                        // Charger les pondérations si elles existent
                         if (search.weights) {
-                            const weights = JSON.parse(search.weights);
-                            Object.keys(weights).forEach(section => {
-                                const input = document.getElementById(`weight-${section}`);
-                                if (input) {
-                                    input.value = weights[section];
-                                    const multiplier = input.parentElement.querySelector('.weight-multiplier');
-                                    if (multiplier) {
-                                        multiplier.textContent = `×${parseFloat(weights[section]).toFixed(1)}`;
+                            try {
+                                const weights = JSON.parse(search.weights);
+                                Object.keys(weights).forEach(section => {
+                                    const input = document.getElementById(`weight-${section}`);
+                                    if (input) {
+                                        input.value = weights[section];
+                                        const multiplier = input.parentElement.querySelector('.weight-multiplier');
+                                        if (multiplier) {
+                                            multiplier.textContent = `×${parseFloat(weights[section]).toFixed(1)}`;
+                                        }
                                     }
-                                }
-                            });
+                                });
+                            } catch (e) {
+                                console.warn('Erreur lors du chargement des pondérations:', e);
+                            }
                         }
                         
                         closeSearchHistory();
-                        showSuccessMessage('Recherche chargée depuis l\'historique !');
+                        showSuccessMessage('🔄 Recherche chargée depuis l\'historique !');
+                        
+                        // Auto-déclencher la recherche
+                        setTimeout(() => {
+                            performSearch();
+                        }, 500);
                         
                     } else {
-                        alert(`Erreur: ${data.message}`);
+                        alert(`❌ Erreur: ${data.message}`);
                     }
                 })
                 .catch(error => {
                     console.error('Erreur:', error);
-                    alert('Erreur lors du chargement de la recherche');
+                    alert('❌ Erreur lors du chargement de la recherche');
+                });
+        }
+
+        function deleteSearchFromHistory(historyId) {
+            if (!confirm('🗑️ Êtes-vous sûr de vouloir supprimer cette recherche de l\'historique ?')) {
+                return;
+            }
+            
+            fetch(`search_history_manager.php?action=delete&id=${historyId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showSuccessMessage('🗑️ Recherche supprimée de l\'historique');
+                        // Recharger l'historique
+                        openSearchHistory();
+                    } else {
+                        alert(`❌ Erreur: ${data.message}`);
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    alert('❌ Erreur lors de la suppression');
+                });
+        }
+
+        function clearAllSearchHistory() {
+            if (!confirm('🗑️ Êtes-vous sûr de vouloir supprimer TOUT l\'historique des recherches ?\n\nCette action est irréversible et supprimera tout le suivi de votre processus de recrutement.')) {
+                return;
+            }
+            
+            fetch('search_history_manager.php?action=clear_all')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showSuccessMessage('🗑️ Historique entièrement supprimé');
+                        // Recharger l'historique (qui sera vide)
+                        openSearchHistory();
+                    } else {
+                        alert(`❌ Erreur: ${data.message}`);
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    alert('❌ Erreur lors de la suppression de l\'historique');
+                });
+        }
+
+        function openSearchHistory() {
+            const modal = document.getElementById('search-history-modal');
+            const listContainer = document.getElementById('search-history-list');
+            
+            modal.style.display = 'block';
+            listContainer.innerHTML = '<div class="loading">Chargement de l\'historique...</div>';
+            
+            fetch('search_history_manager.php?action=list')
+                .then(response => {
+                    console.log('Status de la réponse:', response.status);
+                    if (!response.ok) {
+                        throw new Error(`Erreur HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    return response.text();
+                })
+                .then(responseText => {
+                    console.log('Réponse brute de l\'historique:', responseText);
+                    
+                    // Vérifier si la réponse est vide
+                    if (!responseText.trim()) {
+                        throw new Error('Réponse vide du serveur');
+                    }
+                    
+                    let data;
+                    try {
+                        data = JSON.parse(responseText);
+                    } catch (jsonError) {
+                        console.error('Erreur de parsing JSON:', jsonError);
+                        console.error('Contenu reçu:', responseText);
+                        throw new Error(`Réponse invalide du serveur. Contenu: ${responseText.substring(0, 200)}...`);
+                    }
+                    
+                    if (data.success) {
+                        displaySearchHistory(data.history);
+                    } else {
+                        listContainer.innerHTML = `
+                            <div class="error">
+                                <h3>❌ Erreur lors du chargement</h3>
+                                <p><strong>Message:</strong> ${data.message}</p>
+                                <button onclick="createSearchHistoryTable()" style="margin-top: 10px; background: #667eea; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer;">
+                                    🔧 Créer la table d'historique
+                                </button>
+                            </div>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur lors du chargement de l\'historique:', error);
+                    listContainer.innerHTML = `
+                        <div class="error">
+                            <h3>❌ Erreur de connexion</h3>
+                            <p><strong>Détails:</strong> ${error.message}</p>
+                            <p><em>Vérifiez que le serveur PHP fonctionne et que la base de données est accessible.</em></p>
+                            <div style="margin-top: 15px;">
+                                <button onclick="openSearchHistory()" style="background: #48bb78; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; margin-right: 10px;">
+                                    🔄 Réessayer
+                                </button>
+                                <button onclick="createSearchHistoryTable()" style="background: #667eea; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer;">
+                                    🔧 Initialiser l'historique
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+        }
+
+        function createSearchHistoryTable() {
+            const listContainer = document.getElementById('search-history-list');
+            listContainer.innerHTML = '<div class="loading">🔧 Création de la table d\'historique...</div>';
+            
+            fetch('search_history_manager.php?action=create_table')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        listContainer.innerHTML = `
+                            <div style="background: #d4edda; color: #155724; padding: 15px; border-radius: 10px; text-align: center;">
+                                <h3>✅ Table créée avec succès !</h3>
+                                <p>L'historique des recherches est maintenant disponible.</p>
+                            </div>
+                        `;
+                        
+                        // Recharger l'historique après 1 seconde
+                        setTimeout(() => {
+                            openSearchHistory();
+                        }, 1500);
+                    } else {
+                        listContainer.innerHTML = `
+                            <div class="error">
+                                <h3>❌ Erreur lors de la création</h3>
+                                <p>${data.message}</p>
+                            </div>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    listContainer.innerHTML = `
+                        <div class="error">
+                            <h3>❌ Erreur de connexion</h3>
+                            <p>Impossible de créer la table: ${error.message}</p>
+                        </div>
+                    `;
                 });
         }
 
@@ -2532,13 +2910,55 @@
             })
             .then(response => response.json())
             .then(data => {
-                if (!data.success) {
-                    console.warn('Erreur lors de la sauvegarde dans l\'historique:', data.message);
+                if (data.success) {
+                    console.log('✅ Recherche sauvegardée dans l\'historique avec succès');
+                    // Optionnel : afficher une notification discrète
+                    showDiscreteNotification('💾 Recherche ajoutée à l\'historique');
+                } else {
+                    console.warn('⚠️ Erreur lors de la sauvegarde dans l\'historique:', data.message);
                 }
             })
             .catch(error => {
-                console.warn('Erreur lors de la sauvegarde dans l\'historique:', error);
+                console.warn('⚠️ Erreur lors de la sauvegarde dans l\'historique:', error);
             });
+        }
+
+        // Fonction pour afficher une notification discrète
+        function showDiscreteNotification(message) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                background: linear-gradient(135deg, #667eea, #764ba2);
+                color: white;
+                padding: 10px 15px;
+                border-radius: 8px;
+                font-size: 0.9rem;
+                font-weight: 500;
+                z-index: 9999;
+                opacity: 0;
+                transition: opacity 0.3s ease;
+                box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+            `;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            // Animation d'apparition
+            setTimeout(() => {
+                notification.style.opacity = '1';
+            }, 100);
+            
+            // Suppression automatique
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                setTimeout(() => {
+                    if (document.body.contains(notification)) {
+                        document.body.removeChild(notification);
+                    }
+                }, 300);
+            }, 2000);
         }
 
         // Gestion du formulaire de sauvegarde et des événements
