@@ -1,0 +1,60 @@
+# CV Generator — .gitignore
+
+# =====================
+# Python
+# =====================
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+.Python
+venv/
+env/
+.venv/
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# =====================
+# Runtime / Logs
+# =====================
+*.log
+*.log.*
+/tmp/
+/Cv_generator/uploads/
+
+# =====================
+# Environment / Secrets
+# =====================
+*.env
+!*.env.example
+.env.local
+.env.production
+
+# =====================
+# Generated / Output files
+# =====================
+output.xml
+*.pdf
+
+# =====================
+# IDE / Editor
+# =====================
+.vscode/
+.idea/
+*.suo
+*.user
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# =====================
+# Node / JS
+# =====================
+node_modules/
+npm-debug.log*
+yarn-error.log*

@@ -109,6 +109,10 @@ body {
   font-size: 1.1rem;
 }
 
+.weight-slider {
+  margin: 0.5rem;
+}
+
 /* Search Form */
 .search-form {
   padding: 2rem;
@@ -239,7 +243,7 @@ body {
 .select-tips {
   font-size: 0.8rem;
   color: #777;
-  margin-top: 0.3rem;
+  margin-top: 0.5rem;
   display: flex;
   align-items: center;
 }

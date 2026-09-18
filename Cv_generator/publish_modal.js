@@ -18,7 +18,7 @@ function hidePublishModal() {
 
 async function publishAndDownload() {
   if (!window.generatedCVData || !window.generatedCVData.cv_id) {
-    console.error('❌ No CV data available for publishing');
+    console.error(' No CV data available for publishing');
     alert('Erreur: Aucune donnée de CV disponible pour la publication');
     return;
   }
@@ -62,7 +62,7 @@ async function publishAndDownload() {
       }, 1000);
       
     } else {
-      console.error('❌ Publish error:', result.message);
+      console.error(' Publish error:', result.message);
       alert('Erreur lors de la publication: ' + (result.message || 'Erreur inconnue'));
       
       // Reset button
@@ -72,7 +72,7 @@ async function publishAndDownload() {
     }
     
   } catch (error) {
-    console.error('❌ Publish error:', error);
+    console.error(' Publish error:', error);
     alert('Erreur lors de la publication: ' + error.message);
     
     // Reset button
@@ -91,7 +91,7 @@ function skipPublish() {
 
 function triggerDownload() {
   if (!window.generatedCVData) {
-    console.error('❌ No CV data available for download');
+    console.error(' No CV data available for download');
     alert('Erreur: Aucune donnée de CV disponible pour le téléchargement');
     return;
   }

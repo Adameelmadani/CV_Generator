@@ -53,7 +53,7 @@ function setupNameValidation() {
           this.style.borderColor = "#28a745";
           if (helpText) {
             helpText.style.color = "#28a745";
-            helpText.textContent = "Nom valide ✓";
+            helpText.textContent = "Nom valide ";
           }
         }
       } else {
@@ -92,7 +92,7 @@ function setupNameValidation() {
           this.style.borderColor = "#28a745";
           if (helpText) {
             helpText.style.color = "#28a745";
-            helpText.textContent = "Prénom valide ✓";
+            helpText.textContent = "Prénom valide ";
           }
         }
       } else {

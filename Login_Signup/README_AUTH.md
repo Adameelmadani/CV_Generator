@@ -29,7 +29,7 @@ RH_EMAIL=rh@gmail.com
 RH_PASSWORD=motdepasse123
 ```
 
-⚠️ **Important** : Changez ces credentials en production !
+<i class="fas fa-exclamation-triangle"></i> **Important** : Changez ces credentials en production !
 
 ### Test des Credentials
 Pour tester la configuration RH :

@@ -64,7 +64,7 @@ def test_parse_cv():
         print(f"Extracted text preview: {text[:200]}...")
         
         if text.strip():
-            print("✅ Text extraction successful")
+            print("Text extraction successful")
             
             # Test info extraction
             print("Testing info extraction...")
@@ -79,17 +79,17 @@ def test_parse_cv():
             
             # Check if XML was created
             if os.path.exists(temp_xml_path) and os.path.getsize(temp_xml_path) > 0:
-                print("✅ XML generation successful")
+                print("XML generation successful")
                 with open(temp_xml_path, 'r', encoding='utf-8') as f:
                     xml_content = f.read()
                 print(f"Generated XML preview:\n{xml_content[:500]}...")
             else:
-                print("❌ XML generation failed")
+                print("XML generation failed")
         else:
-            print("❌ Text extraction failed")
+            print("Text extraction failed")
             
     except Exception as e:
-        print(f"❌ Error during testing: {e}")
+        print(f"Error during testing: {e}")
         import traceback
         traceback.print_exc()
     finally:

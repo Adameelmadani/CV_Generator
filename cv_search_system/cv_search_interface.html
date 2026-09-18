@@ -495,7 +495,7 @@
         }
 
         .cv-author::before {
-            content: '👤';
+            content: '<i class="fas fa-user"></i>';
             font-size: 1.1em;
             padding: 4px;
             background: linear-gradient(135deg, #667eea, #764ba2);
@@ -520,7 +520,7 @@
         }
 
         .cv-email::before {
-            content: '📧';
+            content: '<i class="fas fa-envelope"></i>';
             font-size: 1em;
             padding: 4px;
             background: linear-gradient(135deg, #48bb78, #38a169);
@@ -1635,7 +1635,7 @@
         <div id="weight-manager-modal" class="modal">
             <div class="modal-content">
                 <div class="cv-details-header">
-                    <h2>⚙️ Gérer les pondérations</h2>
+                    <h2><i class="fas fa-cog"></i>️ Gérer les pondérations</h2>
                     <button class="close-modal" onclick="closeWeightManager()">&times;</button>
                 </div>
                 <div class="cv-details-body">
@@ -1650,7 +1650,7 @@
         <div id="save-weight-modal" class="modal">
             <div class="modal-content">
                 <div class="cv-details-header">
-                    <h2>💾 Sauvegarder la pondération</h2>
+                    <h2><i class="fas fa-save"></i> Sauvegarder la pondération</h2>
                     <button class="close-modal" onclick="closeSaveWeightModal()">&times;</button>
                 </div>
                 <div class="cv-details-body">
@@ -1665,7 +1665,7 @@
                         </div>
                         <div class="cv-actions">
                             <button type="button" class="btn-view-details" onclick="closeSaveWeightModal()">Annuler</button>
-                            <button type="submit" class="btn-view-data">💾 Sauvegarder</button>
+                            <button type="submit" class="btn-view-data"><i class="fas fa-save"></i> Sauvegarder</button>
                         </div>
                     </form>
                 </div>
@@ -1676,7 +1676,7 @@
         <div id="search-history-modal" class="modal">
             <div class="modal-content">
                 <div class="cv-details-header">
-                    <h2>🕑 Historique des recherches</h2>
+                    <h2><i class="fas fa-clock"></i> Historique des recherches</h2>
                     <button class="close-modal" onclick="closeSearchHistory()">&times;</button>
                 </div>
                 <div class="cv-details-body">
@@ -1741,7 +1741,7 @@
             
             banner.innerHTML = `
                 <div style="margin-bottom: 10px;">
-                    <strong style="color: #667eea;">🔍 Recherche récente trouvée !</strong>
+                    <strong style="color: #667eea;"><i class="fas fa-search"></i> Recherche récente trouvée !</strong>
                 </div>
                 <div style="font-size: 0.9rem; color: #4a5568; margin-bottom: 15px;">
                     Dernière recherche : <strong>"${latestSearch.search_keywords}"</strong><br>
@@ -1750,15 +1750,15 @@
                 <div>
                     <button onclick="loadSearchFromHistory(${latestSearch.id}); this.parentElement.parentElement.remove();" 
                             style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; padding: 10px 20px; border-radius: 20px; margin: 0 10px; cursor: pointer; font-weight: 600;">
-                        🔄 Continuer cette recherche
+                        <i class="fas fa-sync-alt"></i> Continuer cette recherche
                     </button>
                     <button onclick="openSearchHistory(); this.parentElement.parentElement.remove();" 
                             style="background: linear-gradient(135deg, #48bb78, #38a169); color: white; border: none; padding: 10px 20px; border-radius: 20px; margin: 0 10px; cursor: pointer; font-weight: 600;">
-                        📂 Voir tout l'historique
+                        <i class="fas fa-folder-open"></i> Voir tout l'historique
                     </button>
                     <button onclick="this.parentElement.parentElement.remove();" 
                             style="background: #e2e8f0; color: #4a5568; border: none; padding: 10px 20px; border-radius: 20px; margin: 0 10px; cursor: pointer;">
-                        ✕ Fermer
+                        <i class="fas fa-times"></i> Fermer
                     </button>
                 </div>
             `;
@@ -1909,7 +1909,7 @@
                     .map(word => `"${word}"`)
                     .join(' ');
                 
-                if (confirm(`💡 Suggestion : Pour une recherche plus précise avec plusieurs mots-clés, utilisez des guillemets :\n\n${suggestion}\n\nVoulez-vous utiliser cette suggestion ?`)) {
+                if (confirm(`Suggestion : Pour une recherche plus précise avec plusieurs mots-clés, utilisez des guillemets :\n\n${suggestion}\n\nVoulez-vous utiliser cette suggestion ?`)) {
                     document.getElementById('searchKeyword').value = suggestion;
                     return; // L'utilisateur peut relancer la recherche avec la suggestion
                 }
@@ -2051,14 +2051,14 @@
                         
                         <div class="cv-info-simple">
                             <div class="cv-info-item">
-                                <div class="cv-info-icon">📍</div>
+                                <div class="cv-info-icon"><i class="fas fa-map-marker-alt"></i></div>
                                 <div class="cv-info-content">
                                     <div class="cv-info-label">Localisation</div>
                                     <div class="cv-location">${cv.localisation || 'Lieu non spécifié'}</div>
                                 </div>
                             </div>
                             <div class="cv-info-item">
-                                <div class="cv-info-icon">🛠️</div>
+                                <div class="cv-info-icon"><i class="fas fa-tools"></i>️</div>
                                 <div class="cv-info-content">
                                     <div class="cv-info-label">Compétence principale</div>
                                     <div class="cv-skill">${cv.competence_principale || 'Compétences variées'}
@@ -2067,7 +2067,7 @@
                                 </div>
                             </div>
                             <div class="cv-info-item">
-                                <div class="cv-info-icon">📅</div>
+                                <div class="cv-info-icon"><i class="fas fa-calendar-alt"></i></div>
                                 <div class="cv-info-content">
                                     <div class="cv-info-label">Date création</div>
                                     <div class="cv-date">${cv.date_creation ? new Date(cv.date_creation).toLocaleDateString() : 'Date non spécifiée'}</div>
@@ -2137,7 +2137,7 @@
                 
                 <div class="cv-details-body">
                     <div class="cv-section">
-                        <h3>📍 Informations personnelles</h3>
+                        <h3><i class="fas fa-map-marker-alt"></i> Informations personnelles</h3>
                         <ul>
                             <li><strong>Email:</strong> ${email}</li>
                             <li><strong>Localisation:</strong> ${localisation}</li>
@@ -2148,12 +2148,12 @@
                     </div>
                     
                     <div class="cv-section">
-                        <h3>👤 Profil</h3>
+                        <h3><i class="fas fa-user"></i> Profil</h3>
                         <p>${profil}</p>
                     </div>
                     
                     <div class="cv-section">
-                        <h3>🛠️ Compétences</h3>
+                        <h3><i class="fas fa-tools"></i>️ Compétences</h3>
                         <ul>
                             ${cv.competences.map(comp => 
                                 `<li><strong>${comp.categorie || 'Général'}:</strong> ${comp.competences}</li>`
@@ -2162,40 +2162,40 @@
                     </div>
                     
                     <div class="cv-section">
-                        <h3>💼 Expériences</h3>
+                        <h3><i class="fas fa-briefcase"></i> Expériences</h3>
                         <ul>
                             ${cv.experiences.map(exp => 
                                 `<li><strong>${exp.poste || 'Poste non spécifié'}</strong> chez ${exp.entreprise || 'Entreprise non spécifiée'}<br>
                                 ${exp.description ? `<em>${exp.description}</em><br>` : ''}
-                                ${exp.dates ? `<small>📅 ${exp.dates}</small>` : ''}</li>`
+                                ${exp.dates ? `<small><i class="fas fa-calendar-alt"></i> ${exp.dates}</small>` : ''}</li>`
                             ).join('')}
                         </ul>
                     </div>
                     
                     <div class="cv-section">
-                        <h3>🎓 Formations</h3>
+                        <h3><i class="fas fa-graduation-cap"></i> Formations</h3>
                         <ul>
                             ${cv.formations.map(form => 
                                 `<li><strong>${form.diplome || 'Diplôme non spécifié'}</strong> - ${form.universite || 'Université non spécifiée'}<br>
                                 ${form.specialite ? `<em>${form.specialite}</em><br>` : ''}
-                                ${form.dates ? `<small>📅 ${form.dates}</small>` : ''}</li>`
+                                ${form.dates ? `<small><i class="fas fa-calendar-alt"></i> ${form.dates}</small>` : ''}</li>`
                             ).join('')}
                         </ul>
                     </div>
                     
                     <div class="cv-section">
-                        <h3>🚀 Projets</h3>
+                        <h3><i class="fas fa-rocket"></i> Projets</h3>
                         <ul>
                             ${cv.projets.map(proj => 
                                 `<li><strong>${proj.nom_projet || 'Projet sans nom'}</strong><br>
                                 ${proj.description ? `<em>${proj.description}</em><br>` : ''}
-                                ${proj.lien_projet ? `<a href="${proj.lien_projet}" target="_blank">🔗 Voir le projet</a>` : ''}</li>`
+                                ${proj.lien_projet ? `<a href="${proj.lien_projet}" target="_blank"><i class="fas fa-link"></i> Voir le projet</a>` : ''}</li>`
                             ).join('')}
                         </ul>
                     </div>
                     
                     <div class="cv-section">
-                        <h3>🗣️ Langues</h3>
+                        <h3><i class="fas fa-comments"></i>️ Langues</h3>
                         <ul>
                             ${cv.langues.map(lang => 
                                 `<li><strong>${lang.nom_langue || 'Langue non spécifiée'}:</strong> ${lang.niveau || 'Niveau non spécifié'}</li>`
@@ -2204,12 +2204,12 @@
                     </div>
                     
                     <div class="cv-section">
-                        <h3>🏆 Certificats</h3>
+                        <h3><i class="fas fa-trophy"></i> Certificats</h3>
                         <ul>
                             ${cv.certificats.map(cert => 
                                 `<li><strong>${cert.nom_certificat || 'Certificat sans nom'}</strong> - ${cert.organisme || 'Organisme non spécifié'}<br>
                                 ${cert.description ? `<em>${cert.description}</em><br>` : ''}
-                                ${cert.lieu ? `<small>📍 ${cert.lieu}</small>` : ''}</li>`
+                                ${cert.lieu ? `<small><i class="fas fa-map-marker-alt"></i> ${cert.lieu}</small>` : ''}</li>`
                             ).join('')}
                         </ul>
                     </div>
@@ -2330,13 +2330,13 @@
                                 cursor: pointer;
                                 margin-right: 10px;
                             ">
-                                🔧 Installer les tables automatiquement
+                                <i class="fas fa-wrench"></i> Installer les tables automatiquement
                             </button>
                             <a href="install_tables.php" target="_blank" style="
                                 color: #2196F3; 
                                 text-decoration: underline;
                             ">
-                                📋 Ou ouvrir l'installateur
+                                <i class="fas fa-clipboard"></i> Ou ouvrir l'installateur
                             </a>
                         </div>
                     `;
@@ -2346,7 +2346,7 @@
         // Fonction pour installer les tables automatiquement
         function installTables() {
             const listContainer = document.getElementById('weight-profiles-list');
-            listContainer.innerHTML = '<div class="loading">🔧 Installation des tables en cours...</div>';
+            listContainer.innerHTML = '<div class="loading"><i class="fas fa-wrench"></i> Installation des tables en cours...</div>';
             
             fetch('quick_install.php')
                 .then(response => response.json())
@@ -2354,7 +2354,7 @@
                     if (data.success) {
                         listContainer.innerHTML = `
                             <div class="success" style="background: #d4edda; padding: 15px; border-radius: 5px; margin: 10px 0;">
-                                <strong>✅ Installation réussie !</strong><br>
+                                <strong><i class="fas fa-check-circle"></i> Installation réussie !</strong><br>
                                 ${data.message}<br>
                                 Requêtes exécutées: ${data.queries_executed}<br><br>
                                 <button onclick="openWeightManager()" style="
@@ -2365,7 +2365,7 @@
                                     border-radius: 4px; 
                                     cursor: pointer;
                                 ">
-                                    🔄 Recharger les pondérations
+                                    <i class="fas fa-sync-alt"></i> Recharger les pondérations
                                 </button>
                             </div>
                         `;
@@ -2378,7 +2378,7 @@
                     } else {
                         listContainer.innerHTML = `
                             <div class="error">
-                                ❌ Erreur lors de l'installation: ${data.message}<br><br>
+                                <i class="fas fa-times-circle"></i> Erreur lors de l'installation: ${data.message}<br><br>
                                 <a href="install_tables.php" target="_blank" style="
                                     background: #2196F3; 
                                     color: white; 
@@ -2386,7 +2386,7 @@
                                     text-decoration: none; 
                                     border-radius: 4px;
                                 ">
-                                    📋 Essayer l'installation manuelle
+                                    <i class="fas fa-clipboard"></i> Essayer l'installation manuelle
                                 </a>
                             </div>
                         `;
@@ -2395,7 +2395,7 @@
                 .catch(error => {
                     listContainer.innerHTML = `
                         <div class="error">
-                            ❌ Erreur lors de l'installation: ${error.message}<br><br>
+                            <i class="fas fa-times-circle"></i> Erreur lors de l'installation: ${error.message}<br><br>
                             <a href="install_tables.php" target="_blank" style="
                                 background: #2196F3; 
                                 color: white; 
@@ -2403,7 +2403,7 @@
                                 text-decoration: none; 
                                 border-radius: 4px;
                             ">
-                                📋 Essayer l'installation manuelle
+                                <i class="fas fa-clipboard"></i> Essayer l'installation manuelle
                             </a>
                         </div>
                     `;
@@ -2557,7 +2557,7 @@
             if (history.length === 0) {
                 listContainer.innerHTML = `
                     <div class="empty-state">
-                        <h3>📂 Aucune recherche dans l'historique</h3>
+                        <h3><i class="fas fa-folder-open"></i> Aucune recherche dans l'historique</h3>
                         <p>Effectuez une recherche pour commencer à construire votre historique de recrutement.</p>
                         <p><em>Les recherches seront automatiquement sauvegardées ici pour faciliter le suivi de votre processus de recrutement.</em></p>
                     </div>
@@ -2565,7 +2565,7 @@
                 return;
             }
             
-            let html = '<div style="margin-bottom: 20px; text-align: center; color: #667eea; font-weight: 600;">📊 Historique des ' + history.length + ' dernières recherches</div>';
+            let html = '<div style="margin-bottom: 20px; text-align: center; color: #667eea; font-weight: 600;"><i class="fas fa-chart-bar"></i> Historique des ' + history.length + ' dernières recherches</div>';
             
             history.forEach((search, index) => {
                 const searchDate = new Date(search.search_date);
@@ -2585,11 +2585,11 @@
                     try {
                         const filters = JSON.parse(search.filters);
                         const filterParts = [];
-                        if (filters.ville) filterParts.push(`📍 ${filters.ville}`);
+                        if (filters.ville) filterParts.push(`<i class="fas fa-map-marker-alt"></i> ${filters.ville}`);
                         if (filters.competences_requises && filters.competences_requises.length > 0) {
-                            filterParts.push(`🛠️ ${filters.competences_requises.join(', ')}`);
+                            filterParts.push(`<i class="fas fa-tools"></i>️ ${filters.competences_requises.join(', ')}`);
                         }
-                        if (filters.limit) filterParts.push(`📋 Limite: ${filters.limit}`);
+                        if (filters.limit) filterParts.push(`<i class="fas fa-clipboard"></i> Limite: ${filters.limit}`);
                         
                         if (filterParts.length > 0) {
                             filtersInfo = `<div style="font-size: 0.85rem; color: #666; margin-top: 5px;">${filterParts.join(' • ')}</div>`;
@@ -2602,22 +2602,22 @@
                 // Statut des résultats
                 let resultsStatus = '';
                 if (search.results_count === 0) {
-                    resultsStatus = '<span style="color: #e53e3e;">❌ Aucun résultat</span>';
+                    resultsStatus = '<span style="color: #e53e3e;"><i class="fas fa-times-circle"></i> Aucun résultat</span>';
                 } else if (search.results_count <= 5) {
-                    resultsStatus = `<span style="color: #f6ad55;">⚠️ ${search.results_count} résultat${search.results_count > 1 ? 's' : ''}</span>`;
+                    resultsStatus = `<span style="color: #f6ad55;"><i class="fas fa-exclamation-triangle"></i> ${search.results_count} résultat${search.results_count > 1 ? 's' : ''}</span>`;
                 } else {
-                    resultsStatus = `<span style="color: #48bb78;">✅ ${search.results_count} résultat${search.results_count > 1 ? 's' : ''}</span>`;
+                    resultsStatus = `<span style="color: #48bb78;"><i class="fas fa-check-circle"></i> ${search.results_count} résultat${search.results_count > 1 ? 's' : ''}</span>`;
                 }
                 
                 html += `
                     <div class="search-history-item" style="position: relative; border-left: 4px solid ${index < 3 ? '#667eea' : '#e2e8f0'};">
                         <div class="search-history-info" onclick="loadSearchFromHistory(${search.id})" style="cursor: pointer; flex: 1;">
                             <h4 style="display: flex; align-items: center; gap: 10px;">
-                                🔍 "${search.search_keywords}"
+                                <i class="fas fa-search"></i> "${search.search_keywords}"
                                 ${index === 0 ? '<span style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.7rem; font-weight: 600;">RÉCENT</span>' : ''}
                             </h4>
                             <p>
-                                <strong>Pondération:</strong> ${search.weight_profile_name ? `📋 ${search.weight_profile_name}` : '⚙️ Configuration personnalisée'}<br>
+                                <strong>Pondération:</strong> ${search.weight_profile_name ? `<i class="fas fa-clipboard"></i> ${search.weight_profile_name}` : '<i class="fas fa-cog"></i>️ Configuration personnalisée'}<br>
                                 <strong>Résultats:</strong> ${resultsStatus}
                             </p>
                             ${filtersInfo}
@@ -2630,7 +2630,7 @@
                                     onmouseover="this.style.background='#c53030'" 
                                     onmouseout="this.style.background='#e53e3e'"
                                     title="Supprimer cette recherche">
-                                🗑️ Suppr.
+                                <i class="fas fa-trash"></i>️ Suppr.
                             </button>
                         </div>
                     </div>
@@ -2644,7 +2644,7 @@
                             style="background: linear-gradient(135deg, #e53e3e, #c53030); color: white; border: none; padding: 12px 24px; border-radius: 25px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;"
                             onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 20px rgba(229, 62, 62, 0.3)'" 
                             onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
-                        🗑️ Vider tout l'historique
+                        <i class="fas fa-trash"></i>️ Vider tout l'historique
                     </button>
                 </div>
             `;
@@ -2699,7 +2699,7 @@
                         }
                         
                         closeSearchHistory();
-                        showSuccessMessage('🔄 Recherche chargée depuis l\'historique !');
+                        showSuccessMessage('<i class="fas fa-sync-alt"></i> Recherche chargée depuis l\'historique !');
                         
                         // Auto-déclencher la recherche
                         setTimeout(() => {
@@ -2707,17 +2707,17 @@
                         }, 500);
                         
                     } else {
-                        alert(`❌ Erreur: ${data.message}`);
+                        alert(`<i class="fas fa-times-circle"></i> Erreur: ${data.message}`);
                     }
                 })
                 .catch(error => {
                     console.error('Erreur:', error);
-                    alert('❌ Erreur lors du chargement de la recherche');
+                    alert('<i class="fas fa-times-circle"></i> Erreur lors du chargement de la recherche');
                 });
         }
 
         function deleteSearchFromHistory(historyId) {
-            if (!confirm('🗑️ Êtes-vous sûr de vouloir supprimer cette recherche de l\'historique ?')) {
+            if (!confirm('<i class="fas fa-trash"></i>️ Êtes-vous sûr de vouloir supprimer cette recherche de l\'historique ?')) {
                 return;
             }
             
@@ -2725,21 +2725,21 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        showSuccessMessage('🗑️ Recherche supprimée de l\'historique');
+                        showSuccessMessage('<i class="fas fa-trash"></i>️ Recherche supprimée de l\'historique');
                         // Recharger l'historique
                         openSearchHistory();
                     } else {
-                        alert(`❌ Erreur: ${data.message}`);
+                        alert(`<i class="fas fa-times-circle"></i> Erreur: ${data.message}`);
                     }
                 })
                 .catch(error => {
                     console.error('Erreur:', error);
-                    alert('❌ Erreur lors de la suppression');
+                    alert('<i class="fas fa-times-circle"></i> Erreur lors de la suppression');
                 });
         }
 
         function clearAllSearchHistory() {
-            if (!confirm('🗑️ Êtes-vous sûr de vouloir supprimer TOUT l\'historique des recherches ?\n\nCette action est irréversible et supprimera tout le suivi de votre processus de recrutement.')) {
+            if (!confirm('<i class="fas fa-trash"></i>️ Êtes-vous sûr de vouloir supprimer TOUT l\'historique des recherches ?\n\nCette action est irréversible et supprimera tout le suivi de votre processus de recrutement.')) {
                 return;
             }
             
@@ -2747,16 +2747,16 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        showSuccessMessage('🗑️ Historique entièrement supprimé');
+                        showSuccessMessage('<i class="fas fa-trash"></i>️ Historique entièrement supprimé');
                         // Recharger l'historique (qui sera vide)
                         openSearchHistory();
                     } else {
-                        alert(`❌ Erreur: ${data.message}`);
+                        alert(`<i class="fas fa-times-circle"></i> Erreur: ${data.message}`);
                     }
                 })
                 .catch(error => {
                     console.error('Erreur:', error);
-                    alert('❌ Erreur lors de la suppression de l\'historique');
+                    alert('<i class="fas fa-times-circle"></i> Erreur lors de la suppression de l\'historique');
                 });
         }
 
@@ -2797,10 +2797,10 @@
                     } else {
                         listContainer.innerHTML = `
                             <div class="error">
-                                <h3>❌ Erreur lors du chargement</h3>
+                                <h3><i class="fas fa-times-circle"></i> Erreur lors du chargement</h3>
                                 <p><strong>Message:</strong> ${data.message}</p>
                                 <button onclick="createSearchHistoryTable()" style="margin-top: 10px; background: #667eea; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer;">
-                                    🔧 Créer la table d'historique
+                                    <i class="fas fa-wrench"></i> Créer la table d'historique
                                 </button>
                             </div>
                         `;
@@ -2810,15 +2810,15 @@
                     console.error('Erreur lors du chargement de l\'historique:', error);
                     listContainer.innerHTML = `
                         <div class="error">
-                            <h3>❌ Erreur de connexion</h3>
+                            <h3><i class="fas fa-times-circle"></i> Erreur de connexion</h3>
                             <p><strong>Détails:</strong> ${error.message}</p>
                             <p><em>Vérifiez que le serveur PHP fonctionne et que la base de données est accessible.</em></p>
                             <div style="margin-top: 15px;">
                                 <button onclick="openSearchHistory()" style="background: #48bb78; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; margin-right: 10px;">
-                                    🔄 Réessayer
+                                    <i class="fas fa-sync-alt"></i> Réessayer
                                 </button>
                                 <button onclick="createSearchHistoryTable()" style="background: #667eea; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer;">
-                                    🔧 Initialiser l'historique
+                                    <i class="fas fa-wrench"></i> Initialiser l'historique
                                 </button>
                             </div>
                         </div>
@@ -2828,7 +2828,7 @@
 
         function createSearchHistoryTable() {
             const listContainer = document.getElementById('search-history-list');
-            listContainer.innerHTML = '<div class="loading">🔧 Création de la table d\'historique...</div>';
+            listContainer.innerHTML = '<div class="loading"><i class="fas fa-wrench"></i> Création de la table d\'historique...</div>';
             
             fetch('search_history_manager.php?action=create_table')
                 .then(response => response.json())
@@ -2836,7 +2836,7 @@
                     if (data.success) {
                         listContainer.innerHTML = `
                             <div style="background: #d4edda; color: #155724; padding: 15px; border-radius: 10px; text-align: center;">
-                                <h3>✅ Table créée avec succès !</h3>
+                                <h3><i class="fas fa-check-circle"></i> Table créée avec succès !</h3>
                                 <p>L'historique des recherches est maintenant disponible.</p>
                             </div>
                         `;
@@ -2848,7 +2848,7 @@
                     } else {
                         listContainer.innerHTML = `
                             <div class="error">
-                                <h3>❌ Erreur lors de la création</h3>
+                                <h3><i class="fas fa-times-circle"></i> Erreur lors de la création</h3>
                                 <p>${data.message}</p>
                             </div>
                         `;
@@ -2857,7 +2857,7 @@
                 .catch(error => {
                     listContainer.innerHTML = `
                         <div class="error">
-                            <h3>❌ Erreur de connexion</h3>
+                            <h3><i class="fas fa-times-circle"></i> Erreur de connexion</h3>
                             <p>Impossible de créer la table: ${error.message}</p>
                         </div>
                     `;
@@ -2911,15 +2911,15 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    console.log('✅ Recherche sauvegardée dans l\'historique avec succès');
+                    console.log('<i class="fas fa-check-circle"></i> Recherche sauvegardée dans l\'historique avec succès');
                     // Optionnel : afficher une notification discrète
-                    showDiscreteNotification('💾 Recherche ajoutée à l\'historique');
+                    showDiscreteNotification('<i class="fas fa-save"></i> Recherche ajoutée à l\'historique');
                 } else {
-                    console.warn('⚠️ Erreur lors de la sauvegarde dans l\'historique:', data.message);
+                    console.warn('<i class="fas fa-exclamation-triangle"></i> Erreur lors de la sauvegarde dans l\'historique:', data.message);
                 }
             })
             .catch(error => {
-                console.warn('⚠️ Erreur lors de la sauvegarde dans l\'historique:', error);
+                console.warn('<i class="fas fa-exclamation-triangle"></i> Erreur lors de la sauvegarde dans l\'historique:', error);
             });
         }
 

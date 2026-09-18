@@ -224,4 +224,4 @@ conn.commit()
 cursor.close()
 conn.close()
 
-print("✅ 20 CVs with fixed data inserted successfully.")
+print("20 CVs with fixed data inserted successfully.")

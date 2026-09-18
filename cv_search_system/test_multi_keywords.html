@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Multi-Mots-Clés — Système de Recherche CV</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+            color: #333;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 20px 60px rgba(0,0,0,.2);
+        }
+        h1 { color: #667eea; margin-bottom: .5rem; }
+        h2 { color: #555; font-size: 1.1rem; font-weight: 400; margin-bottom: 2rem; }
+        .section { margin-bottom: 2rem; }
+        .section h3 { color: #444; border-bottom: 2px solid #667eea; padding-bottom: .4rem; margin-bottom: 1rem; }
+        label { display: block; font-weight: 600; margin-bottom: .4rem; }
+        input[type="text"], textarea {
+            width: 100%; padding: .7rem 1rem;
+            border: 2px solid #ddd; border-radius: 8px;
+            font-size: 1rem; transition: border-color .2s;
+        }
+        input[type="text"]:focus, textarea:focus { outline: none; border-color: #667eea; }
+        textarea { height: 80px; resize: vertical; }
+        .examples { background: #f8f9ff; border-left: 4px solid #667eea; padding: 1rem; border-radius: 0 8px 8px 0; margin-top: .5rem; font-size: .9rem; color: #555; }
+        .examples code { background: #e8eaff; padding: 2px 6px; border-radius: 4px; font-size: .85rem; }
+        button {
+            background: #667eea; color: #fff; border: none;
+            padding: .8rem 2rem; border-radius: 8px;
+            font-size: 1rem; cursor: pointer; font-weight: 600;
+            transition: background .2s;
+        }
+        button:hover { background: #5566d4; }
+        button.secondary { background: #888; margin-left: .5rem; }
+        #results {
+            margin-top: 2rem; padding: 1rem;
+            background: #f5f5f5; border-radius: 8px;
+            min-height: 60px; white-space: pre-wrap;
+            font-family: monospace; font-size: .85rem;
+        }
+        .status-ok  { color: #2e7d32; font-weight: 700; }
+        .status-err { color: #c62828; font-weight: 700; }
+        .result-card {
+            background: #fff; border: 1px solid #ddd;
+            border-radius: 8px; padding: 1rem;
+            margin-bottom: .8rem;
+        }
+        .result-card .name { font-weight: 700; color: #333; }
+        .result-card .score { color: #667eea; font-weight: 600; font-size: .9rem; }
+        .result-card .skills { color: #666; font-size: .85rem; margin-top: .3rem; }
+        .back-link { display: inline-block; margin-bottom: 1.5rem; color: #667eea; text-decoration: none; font-weight: 600; }
+        .back-link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <a href="index.html" class="back-link">← Retour à l'index</a>
+    <h1><i class="fas fa-flask"></i> Test Multi-Mots-Clés</h1>
+    <h2>Testez la recherche avec plusieurs mots-clés entre guillemets</h2>
+
+    <div class="section">
+        <h3>Syntaxe de recherche</h3>
+        <div class="examples">
+            <p>Entourez chaque terme entre guillemets doubles pour la recherche multi-mots-clés :</p>
+            <br>
+            <p><code>"java" "spring boot" "microservices"</code></p>
+            <p><code>"python" "django" "machine learning"</code></p>
+            <p><code>"react" "typescript" "node.js"</code></p>
+            <br>
+            <p>La recherche classique (sans guillemets) reste supportée : <code>python developer</code></p>
+        </div>
+    </div>
+
+    <div class="section">
+        <h3>Lancer un test</h3>
+        <label for="searchQuery">Requête de recherche</label>
+        <input type="text" id="searchQuery"
+               placeholder='Exemple : "java" "spring" "microservices"'
+               value='"java" "spring boot"'>
+
+        <div style="margin-top:1rem;">
+            <label for="apiUrl">URL de l'API (search_handler_mvc.php)</label>
+            <input type="text" id="apiUrl"
+                   value="../cv_search_system/search_handler_mvc.php">
+        </div>
+
+        <div style="margin-top:1.2rem;">
+            <button onclick="runTest()"><i class="fas fa-rocket"></i> Lancer la recherche</button>
+            <button class="secondary" onclick="clearResults()"><i class="fas fa-trash"></i> Effacer</button>
+        </div>
+    </div>
+
+    <div class="section">
+        <h3>Résultats</h3>
+        <div id="results">Les résultats apparaîtront ici...</div>
+    </div>
+</div>
+
+<script>
+async function runTest() {
+    const query = document.getElementById('searchQuery').value.trim();
+    const apiUrl = document.getElementById('apiUrl').value.trim();
+    const resultsEl = document.getElementById('results');
+
+    if (!query) {
+        resultsEl.innerHTML = '<span class="status-err"><i class="fas fa-exclamation-triangle"></i> Veuillez entrer une requête.</span>';
+        return;
+    }
+
+    resultsEl.textContent = '<i class="fas fa-hourglass-half"></i> Recherche en cours...';
+
+    // Parse multi-keyword syntax: "keyword1" "keyword2"
+    const keywordsMatch = query.match(/"([^"]+)"/g);
+    const keywords = keywordsMatch
+        ? keywordsMatch.map(k => k.replace(/"/g, ''))
+        : [query];
+
+    const payload = {
+        query: query,
+        keywords: keywords,
+        limit: 10
+    };
+
+    try {
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        const text = await response.text();
+
+        // Try to parse as JSON
+        let data;
+        try {
+            data = JSON.parse(text);
+        } catch {
+            resultsEl.innerHTML =
+                `<span class="status-ok"><i class="fas fa-check-circle"></i> Réponse reçue (non-JSON)</span>\n\n${escapeHtml(text)}`;
+            return;
+        }
+
+        if (data.status === 'success' || Array.isArray(data.results)) {
+            const results = data.results || data.data || [];
+            let html = `<span class="status-ok"><i class="fas fa-check-circle"></i> ${results.length} résultat(s) trouvé(s)</span>`;
+            html += `\n<small>Mots-clés parsés : [${keywords.map(k => `"${k}"`).join(', ')}]</small>\n\n`;
+
+            if (results.length === 0) {
+                html += '<em>Aucun CV ne correspond à cette recherche.</em>';
+            } else {
+                results.forEach((cv, i) => {
+                    const name = [cv.prenom, cv.nom].filter(Boolean).join(' ') || cv.cv_name || `CV #${cv.id || i+1}`;
+                    const score = cv.score !== undefined ? `Score : ${parseFloat(cv.score).toFixed(3)}` : '';
+                    const skills = cv.competences || cv.skills || '';
+                    html += `<div class="result-card">
+                        <div class="name">${i+1}. ${escapeHtml(name)}</div>
+                        ${score ? `<div class="score">${score}</div>` : ''}
+                        ${skills ? `<div class="skills">Compétences : ${escapeHtml(skills)}</div>` : ''}
+                    </div>`;
+                });
+            }
+            resultsEl.innerHTML = html;
+        } else {
+            resultsEl.innerHTML =
+                `<span class="status-err"><i class="fas fa-times-circle"></i> Erreur API : ${escapeHtml(data.message || JSON.stringify(data))}</span>`;
+        }
+    } catch (err) {
+        resultsEl.innerHTML =
+            `<span class="status-err"><i class="fas fa-times-circle"></i> Erreur réseau : ${escapeHtml(err.message)}</span>\n\nVérifiez que le serveur PHP est démarré et que l'URL de l'API est correcte.`;
+    }
+}
+
+function clearResults() {
+    document.getElementById('results').textContent = 'Les résultats apparaîtront ici...';
+}
+
+function escapeHtml(str) {
+    return String(str)
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Allow Enter key to trigger search
+document.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && e.target.id === 'searchQuery') runTest();
+});
+</script>
+</body>
+</html>

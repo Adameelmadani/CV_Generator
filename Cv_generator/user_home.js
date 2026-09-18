@@ -199,7 +199,7 @@ function displayCVs() {
                     </button>
                 </div>
             </div>
-            <div class="cv-card-info">
+            <div class="cv-card-info" style="padding: 6px 10px;">
                 <div class="cv-card-date">Modifié le ${formatDate(cv.updated_at)}</div>
             </div>
         </div>`;
@@ -289,7 +289,7 @@ function createNewCV() {
         if (modal) {
             modal.classList.add('show');
         } else {
-            console.error('❌ Modal element not found!');
+            console.error(' Modal element not found!');
             return;
         }
         
@@ -300,7 +300,7 @@ function createNewCV() {
             cvNameInput.value = '';
             cvNameInput.focus();
         } else {
-            console.error('❌ Input element not found!');
+            console.error(' Input element not found!');
         }
         
         // Clear any previous error
@@ -315,10 +315,10 @@ function createNewCV() {
         if (createBtn) {
             createBtn.disabled = false;
         } else {
-            console.error('❌ Create button not found!');
+            console.error(' Create button not found!');
         }
     }).catch(error => {
-        console.error('❌ Error clearing CV session:', error);
+        console.error(' Error clearing CV session:', error);
         // Still proceed with the modal even if session clear fails
         const modal = document.getElementById('newCVModal');
         if (modal) {
@@ -1122,17 +1122,17 @@ function setupEventListeners() {
     
     // Gestion de l'import
     importBtn.addEventListener('click', async function() {
-        console.log('🔍 Import button clicked'); // Debug log
+        console.log(' Import button clicked'); // Debug log
         
         const file = fileInput.files[0];
         const importCVNameInput = document.getElementById('importCVNameInput');
         const importCVNameError = document.getElementById('importCVNameError');
         
-        console.log('🔍 File:', file); // Debug log
-        console.log('🔍 CV Name:', importCVNameInput ? importCVNameInput.value : 'input not found'); // Debug log
+        console.log(' File:', file); // Debug log
+        console.log(' CV Name:', importCVNameInput ? importCVNameInput.value : 'input not found'); // Debug log
         
         if (!file) {
-            console.log('❌ No file selected'); // Debug log
+            console.log(' No file selected'); // Debug log
             alert('Veuillez sélectionner un fichier à importer.');
             return;
         }
@@ -1140,7 +1140,7 @@ function setupEventListeners() {
         // Validation du nom du CV
         const cvName = importCVNameInput.value.trim();
         
-        console.log('🔍 CV Name trimmed:', cvName); // Debug log
+        console.log(' CV Name trimmed:', cvName); // Debug log
         
         // Clear previous errors
         importCVNameError.style.display = 'none';
@@ -1148,8 +1148,8 @@ function setupEventListeners() {
         
         // Validate CV name - plus strict pour forcer la saisie manuelle
         if (!cvName) {
-            console.log('❌ CV name is empty'); // Debug log
-            showImportCVNameError('❌ Vous devez obligatoirement saisir un nom pour votre CV');
+            console.log(' CV name is empty'); // Debug log
+            showImportCVNameError(' Vous devez obligatoirement saisir un nom pour votre CV');
             importCVNameInput.focus();
             return;
         }
@@ -1157,23 +1157,23 @@ function setupEventListeners() {
         // Vérifier que l'utilisateur n'a pas juste copié le placeholder
         const placeholder = 'Saisissez le nom de votre CV...';
         if (cvName === placeholder || cvName.toLowerCase() === placeholder.toLowerCase()) {
-            console.log('❌ CV name is placeholder'); // Debug log
-            showImportCVNameError('❌ Veuillez saisir votre propre nom, pas le texte d\'exemple');
+            console.log(' CV name is placeholder'); // Debug log
+            showImportCVNameError(' Veuillez saisir votre propre nom, pas le texte d\'exemple');
             importCVNameInput.focus();
             importCVNameInput.select(); // Sélectionner le texte pour faciliter la réécriture
             return;
         }
         
         if (cvName.length < 3) {
-            console.log('❌ CV name too short'); // Debug log
-            showImportCVNameError('❌ Le nom du CV doit contenir au moins 3 caractères que vous tapez');
+            console.log(' CV name too short'); // Debug log
+            showImportCVNameError(' Le nom du CV doit contenir au moins 3 caractères que vous tapez');
             importCVNameInput.focus();
             return;
         }
         
         if (cvName.length > 100) {
-            console.log('❌ CV name too long'); // Debug log
-            showImportCVNameError('❌ Le nom du CV ne peut pas dépasser 100 caractères');
+            console.log(' CV name too long'); // Debug log
+            showImportCVNameError(' Le nom du CV ne peut pas dépasser 100 caractères');
             importCVNameInput.focus();
             return;
         }
@@ -1181,13 +1181,13 @@ function setupEventListeners() {
         // Check for invalid characters
         const invalidChars = /[<>:"/\\|?*]/g;
         if (invalidChars.test(cvName)) {
-            console.log('❌ CV name has invalid characters'); // Debug log
-            showImportCVNameError('❌ Le nom ne peut pas contenir les caractères: < > : " / \\ | ? *');
+            console.log(' CV name has invalid characters'); // Debug log
+            showImportCVNameError(' Le nom ne peut pas contenir les caractères: < > : " / \\ | ? *');
             importCVNameInput.focus();
             return;
         }
         
-        console.log('✅ All validations passed, proceeding with import'); // Debug log
+        console.log(' All validations passed, proceeding with import'); // Debug log
         
         const formData = new FormData();
         // On garde le même champ pour compatibilité backend
@@ -1258,15 +1258,15 @@ async function clearCVSession() {
             if (result.status === 'success') {
                 return true;
             } else {
-                console.error('❌ Failed to clear CV session:', result.message);
+                console.error(' Failed to clear CV session:', result.message);
                 return false;
             }
         } else {
-            console.error('❌ Failed to clear CV session - HTTP', response.status);
+            console.error(' Failed to clear CV session - HTTP', response.status);
             return false;
         }
     } catch (error) {
-        console.error('❌ Error clearing CV session:', error);
+        console.error(' Error clearing CV session:', error);
         return false;
     }
 }
@@ -1278,7 +1278,7 @@ async function loadFilieres() {
     userFilieres = [];
     filieres = [];
     
-    console.log('✅ Filière loading skipped - direct publishing enabled');
+    console.log(' Filière loading skipped - direct publishing enabled');
 }
 
 // Get published status text for display
@@ -1290,7 +1290,7 @@ function getPublishedFilieresText(cv) {
 
 // Publier un CV
 async function publishCV(cvId) {
-    console.log('📤 Publishing CV ID:', cvId);
+    console.log('<i class="fas fa-upload"></i> Publishing CV ID:', cvId);
     
     if (!confirm('Êtes-vous sûr de vouloir publier ce CV ?')) {
         return;
@@ -1322,7 +1322,7 @@ async function publishCV(cvId) {
             showMessage(result.message || 'Erreur lors de la publication', 'error');
         }
     } catch (error) {
-        console.error('❌ Error publishing CV:', error);
+        console.error(' Error publishing CV:', error);
         showMessage('Erreur lors de la publication du CV', 'error');
     }
 }
@@ -1359,7 +1359,7 @@ async function unpublishCV(cvId) {
             showMessage(result.message || 'Erreur lors de la dépublication', 'error');
         }
     } catch (error) {
-        console.error('❌ Error unpublishing CV:', error);
+        console.error(' Error unpublishing CV:', error);
         showMessage('Erreur lors de la dépublication du CV', 'error');
     }
 }
@@ -1431,7 +1431,7 @@ function setupImportCVNameInputListeners() {
         importCVNameInput.addEventListener('focus', function() {
             const errorElement = document.getElementById('importCVNameError');
             if (this.value.trim() === '') {
-                errorElement.textContent = '💡 Tapez un nom unique pour identifier votre CV (ex: "Mon_CV_Professionnel", "CV_Marketing_2025")';
+                errorElement.textContent = 'Tapez un nom unique pour identifier votre CV (ex: "Mon_CV_Professionnel", "CV_Marketing_2025")';
                 errorElement.style.display = 'block';
                 errorElement.style.color = '#0066cc'; // Bleu pour l'info, pas rouge pour l'erreur
             }
@@ -1474,7 +1474,7 @@ function validateImportForm() {
     const hasFile = fileInput.files.length > 0;
     const cvName = importCVNameInput.value.trim();
     
-    console.log('🔍 validateImportForm - hasFile:', hasFile, 'cvName:', cvName); // Debug log
+    console.log(' validateImportForm - hasFile:', hasFile, 'cvName:', cvName); // Debug log
     
     // Validation du nom :
     // - Au moins 3 caractères
@@ -1484,12 +1484,12 @@ function validateImportForm() {
                         cvName.length <= 100 && 
                         !/[<>:"/\\|?*]/g.test(cvName);
     
-    console.log('🔍 validateImportForm - hasValidName:', hasValidName); // Debug log
+    console.log(' validateImportForm - hasValidName:', hasValidName); // Debug log
     
     if (importBtn) {
         const shouldEnable = hasFile && hasValidName;
         importBtn.disabled = !shouldEnable;
-        console.log('🔍 validateImportForm - button enabled:', shouldEnable); // Debug log
+        console.log(' validateImportForm - button enabled:', shouldEnable); // Debug log
         
         // Afficher un message d'aide si le nom n'est pas valide
         if (cvName.length > 0 && !hasValidName) {

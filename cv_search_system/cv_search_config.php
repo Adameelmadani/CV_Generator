@@ -170,26 +170,26 @@ define('UI_COLORS', [
 
 // Configuration des icônes
 define('ICONS', [
-    'search' => '🔍',
-    'user' => '👤',
-    'email' => '📧',
-    'phone' => '📞',
-    'location' => '📍',
-    'company' => '🏢',
-    'education' => '🎓',
-    'skills' => '🛠️',
-    'experience' => '💼',
-    'projects' => '🚀',
-    'languages' => '🗣️',
-    'certificates' => '📜',
-    'download' => '⬇️',
-    'export' => '📤',
-    'stats' => '📊',
-    'settings' => '⚙️',
-    'success' => '✅',
-    'error' => '❌',
-    'warning' => '⚠️',
-    'info' => 'ℹ️'
+    'search' => '<i class="fas fa-search"></i>',
+    'user' => '<i class="fas fa-user"></i>',
+    'email' => '<i class="fas fa-envelope"></i>',
+    'phone' => '<i class="fas fa-phone"></i>',
+    'location' => '<i class="fas fa-map-marker-alt"></i>',
+    'company' => '<i class="fas fa-building"></i>',
+    'education' => '<i class="fas fa-graduation-cap"></i>',
+    'skills' => '<i class="fas fa-tools"></i>️',
+    'experience' => '<i class="fas fa-briefcase"></i>',
+    'projects' => '<i class="fas fa-rocket"></i>',
+    'languages' => '<i class="fas fa-comments"></i>️',
+    'certificates' => '<i class="fas fa-file-alt"></i>',
+    'download' => '<i class="fas fa-file-download"></i>️',
+    'export' => '<i class="fas fa-upload"></i>',
+    'stats' => '<i class="fas fa-chart-bar"></i>',
+    'settings' => '<i class="fas fa-cog"></i>️',
+    'success' => '<i class="fas fa-check-circle"></i>',
+    'error' => '<i class="fas fa-times-circle"></i>',
+    'warning' => '<i class="fas fa-exclamation-triangle"></i>',
+    'info' => '<i class="fas fa-info-circle"></i>️'
 ]);
 
 // Configuration des formats de date

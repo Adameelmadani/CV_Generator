@@ -1,5 +1,7 @@
 @echo off
-echo Demarrage du serveur API Flask pour CV Generator - RH
+echo ======================================================
+echo  CV Generator - Demarrage de l'API Flask (cv_ranking)
+echo ======================================================
 echo.
 
 REM Verifier si Python est installe
@@ -11,28 +13,27 @@ if errorlevel 1 (
     exit /b 1
 )
 
-REM Installer les dependances si necessaire
-if not exist "venv\" (
-    echo Creation de l'environnement virtuel...
-    python -m venv venv
+REM Aller a la racine du projet (le dossier parent de rh/)
+cd /d "%~dp0.."
+
+REM Creer l'environnement virtuel si inexistant
+if not exist "cv_ranking\venv\" (
+    echo Creation de l'environnement virtuel dans cv_ranking\venv ...
+    python -m venv cv_ranking\venv
 )
 
 REM Activer l'environnement virtuel
-call venv\Scripts\activate.bat
+call cv_ranking\venv\Scripts\activate.bat
 
 REM Installer les dependances
-echo Installation des dependances...
-pip install -r requirements.txt
-
-REM Importer la base de donnees
-echo Importation de la base de donnees...
-mysql -u root -p cv_craft < db.sql
+echo Installation des dependances depuis cv_ranking\requirements.txt ...
+pip install -r cv_ranking\requirements.txt --quiet
 
 REM Demarrer l'API
 echo.
 echo Demarrage de l'API sur http://localhost:5000
 echo Appuyez sur Ctrl+C pour arreter le serveur
 echo.
-python api.py
+python cv_ranking\cv_api.py
 
 pause

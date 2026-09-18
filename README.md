@@ -11,16 +11,29 @@ Le projet CV Generator utilise maintenant une architecture MVC (Modèle-Vue-Cont
 ├── bootstrap.php       # Initialisation de l'application
 ├── Controller.php      # Classe de base pour les contrôleurs
 ├── Database.php        # Gestion de la base de données
-├── Model.php          # Classe de base pour les modèles
-└── Router.php         # Gestionnaire de routes
+├── Model.php           # Classe de base pour les modèles
+└── Router.php          # Gestionnaire de routes
 
 /app/
 ├── Controllers/
-│   ├── AuthController.php  # Contrôleur pour l'authentification
-│   └── CVController.php    # Contrôleur pour les CV
+│   ├── AuthController.php    # Contrôleur pour l'authentification
+│   ├── CVController.php      # Contrôleur pour les CV
+│   ├── FiliereController.php # Contrôleur pour les filières
+│   └── SearchController.php  # Contrôleur pour la recherche CV
 └── Models/
-    ├── User.php            # Modèle pour les utilisateurs
-    └── CV.php             # Modèle pour les CV
+    ├── User.php              # Modèle utilisateurs
+    ├── CV.php                # Modèle CV principal
+    ├── CVPersonalInfo.php    # Informations personnelles
+    ├── CVEducation.php       # Formations
+    ├── CVExperience.php      # Expériences
+    ├── CVSkills.php          # Compétences
+    ├── CVLanguages.php       # Langues
+    ├── CVProjects.php        # Projets
+    ├── CVCertificates.php    # Certificats
+    ├── CVProfile.php         # Profil/résumé
+    ├── CVSectionsManager.php # Gestionnaire de sections
+    ├── CVSearchModel.php     # Modèle de recherche
+    └── Filiere.php           # Modèle filières
 
 /Login_Signup/
 ├── signup_handler_mvc.php     # Point d'entrée MVC pour l'inscription
@@ -28,31 +41,34 @@ Le projet CV Generator utilise maintenant une architecture MVC (Modèle-Vue-Cont
 ├── check_session_mvc.php      # Point d'entrée MVC pour vérifier la session
 ├── logout_mvc.php             # Point d'entrée MVC pour la déconnexion
 ├── password_manager_mvc.php   # Point d'entrée MVC pour la réinitialisation de mot de passe
-├── signup_handler.php         # (Legacy) Redirige vers la version MVC
-├── login_handler.php          # (Legacy) Redirige vers la version MVC
-├── check_session.php          # (Legacy) Redirige vers la version MVC
-├── logout.php                 # (Legacy) Redirige vers la version MVC
-└── password_manager.php       # (Legacy) Redirige vers la version MVC
+└── rh_login_handler_mvc.php   # Point d'entrée MVC pour la connexion RH
+
+/scripts/
+└── seed_cvs.py                # Script de génération de données de test (20 CVs)
+
+/tests/
+├── test_parse_cv.py           # Tests du module de parsing
+└── test_parsing.py            # Tests d'intégration du parsing
 ```
 
 ## Fonctionnalités implémentées
 
 ### Authentification avec nom d'utilisateur
 
-- ✅ Champ username ajouté au formulaire d'inscription
-- ✅ Validation côté client et serveur du username
-- ✅ Vérification d'unicité du username
-- ✅ Stockage du username en base de données
-- ✅ Affichage du username dans le dashboard utilisateur
-- ✅ Session mise à jour pour inclure le username
+- Champ username ajouté au formulaire d'inscription
+- Validation côté client et serveur du username
+- Vérification d'unicité du username
+- Stockage du username en base de données
+- Affichage du username dans le dashboard utilisateur
+- Session mise à jour pour inclure le username
 
 ### Structure MVC
 
-- ✅ **User Model** : Gestion des utilisateurs, validation, requêtes DB
-- ✅ **AuthController** : Logique d'authentification et de session
-- ✅ **CVController** : Logique de gestion des CV (compatible avec le nouveau système)
-- ✅ **Handlers MVC** : Points d'entrée qui utilisent les contrôleurs
-- ✅ **Migration Legacy** : Anciens fichiers redirigent vers MVC
+- **User Model** : Gestion des utilisateurs, validation, requêtes DB
+- **AuthController** : Logique d'authentification et de session
+- **CVController** : Logique de gestion des CV (compatible avec le nouveau système)
+- **Handlers MVC** : Points d'entrée qui utilisent les contrôleurs
+- **Migration Legacy** : Anciens fichiers redirigent vers MVC
 
 ## Utilisation
 
@@ -106,7 +122,7 @@ ALTER TABLE users ADD COLUMN username VARCHAR(50) UNIQUE;
 
 ### Migration
 
-Exécutez le script `database_update_username.sql` pour :
+Exécutez le script [`database_update_username.sql`](database_update_username.sql) pour :
 
 - Ajouter la colonne username
 - Générer des usernames pour les utilisateurs existants
@@ -114,7 +130,8 @@ Exécutez le script `database_update_username.sql` pour :
 
 ## Test
 
-Exécutez `test_mvc_structure.php` pour vérifier que :
+Vérifiez manuellement que :
+
 
 - Toutes les classes se chargent correctement
 - La connexion à la base de données fonctionne
@@ -149,11 +166,11 @@ Le système inclut maintenant une fonctionnalité de réinitialisation de mot de
 
 Le système de recherche CV a été amélioré avec une fonctionnalité de recherche multi-mots-clés :
 
-- ✅ **Recherche entre guillemets** : `"java" "mysql" "spring"`
-- ✅ **Expressions multi-mots** : `"machine learning" "data science"`
-- ✅ **Compatibilité ascendante** : Recherche classique toujours supportée
-- ✅ **Architecture MVC** : Intégration complète avec le système MVC
-- ✅ **Performance optimisée** : Recherche rapide dans toutes les sections CV
+- **Recherche entre guillemets** : `"java" "mysql" "spring"`
+- **Expressions multi-mots** : `"machine learning" "data science"`
+- **Compatibilité ascendante** : Recherche classique toujours supportée
+- **Architecture MVC** : Intégration complète avec le système MVC
+- **Performance optimisée** : Recherche rapide dans toutes les sections CV
 
 ### Fonctionnalités
 
@@ -177,4 +194,4 @@ Le système de recherche CV a été amélioré avec une fonctionnalité de reche
 - **Interface principale** : `/cv_search_system/cv_search_interface.html`
 - **Page de test** : `/cv_search_system/test_multi_keywords.html`
 - **API Handler** : `/cv_search_system/search_handler_mvc.php`
-- **Documentation** : `/cv_search_system/README_MULTI_KEYWORDS.md`
+

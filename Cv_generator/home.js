@@ -92,7 +92,7 @@ let currentStep = 1;
           }
         };
         img.onload = function() {
-          console.log('✅ Existing photo loaded successfully:', photoPath);
+          console.log(' Existing photo loaded successfully:', photoPath);
           // Clear existing content and add image
           preview.innerHTML = '';
           preview.appendChild(img);
@@ -129,12 +129,12 @@ let currentStep = 1;
         
         // Hide authentication-related buttons in guest mode
         if (isGuestMode) {
-          console.log('👤 Guest mode detected - hiding authentication-related buttons');
+          console.log('<i class="fas fa-user"></i> Guest mode detected - hiding authentication-related buttons');
           hideAuthButtons();
         } else {
           // Optional session check on load - don't redirect if it fails
           checkSessionStatus(false).catch(error => {
-            console.warn('⚠️ Initial session check failed, but continuing:', error);
+            console.warn(' Initial session check failed, but continuing:', error);
           });
         }
         
@@ -147,7 +147,7 @@ let currentStep = 1;
         const editCvId = urlParams.get('edit');
         
         if (editCvId) {
-          console.log('🔧 Edit mode detected for CV ID:', editCvId);
+          console.log(' Edit mode detected for CV ID:', editCvId);
           loadCVForEdit(editCvId);
           
           // Update page title and header to indicate edit mode
@@ -186,7 +186,7 @@ let currentStep = 1;
           
           // Multiple ways to prevent form submission
           form.addEventListener('submit', function(e) {
-            console.log('🚫 Form submit intercepted!');
+            console.log(' Form submit intercepted!');
             e.preventDefault();
             e.stopPropagation();
             e.stopImmediatePropagation();
@@ -198,20 +198,20 @@ let currentStep = 1;
           
           // Override form submit method
           form.submit = function() {
-            console.log('🚫 Form.submit() method overridden!');
+            console.log(' Form.submit() method overridden!');
             handleFormSubmissionDirectly();
             return false;
           };
           
-          console.log('✅ Form submission completely blocked');
+          console.log(' Form submission completely blocked');
         } else {
-          console.error('❌ Form not found!');
+          console.error(' Form not found!');
         }
         
         // Additional safeguard: Override form onsubmit
         if (form) {
           form.onsubmit = function(e) {
-            console.log('🚫 Form onsubmit override triggered!');
+            console.log(' Form onsubmit override triggered!');
             e.preventDefault();
             e.stopPropagation();
             
@@ -220,7 +220,7 @@ let currentStep = 1;
             return false;
           };
           
-          console.log('✅ Form submission handlers installed successfully');
+          console.log(' Form submission handlers installed successfully');
         }
         
         // Add click handler to submit button
@@ -248,7 +248,7 @@ let currentStep = 1;
             return false;
           });
           
-          console.log('✅ Submit button click handler installed');
+          console.log(' Submit button click handler installed');
         }
         
         // COMPREHENSIVE FORM SUBMISSION BLOCKER
@@ -280,7 +280,7 @@ let currentStep = 1;
           // Block Enter key submissions
           form.addEventListener('keydown', function(e) {
             if (e.key === 'Enter' && e.target.type !== 'textarea') {
-              console.log('🛑 BLOCKING ENTER KEY SUBMISSION!');
+              console.log(' BLOCKING ENTER KEY SUBMISSION!');
               e.preventDefault();
               e.stopPropagation();
               e.stopImmediatePropagation();
@@ -291,7 +291,7 @@ let currentStep = 1;
           // Monitor for any button clicks that might trigger submission
           document.addEventListener('click', function(e) {
             if (e.target.form === form && (e.target.type === 'submit' || e.target.id === 'submitBtn')) {
-              console.log('🛑 BLOCKING BUTTON SUBMISSION!');
+              console.log(' BLOCKING BUTTON SUBMISSION!');
               e.preventDefault();
               e.stopPropagation();
               e.stopImmediatePropagation();
@@ -302,7 +302,7 @@ let currentStep = 1;
             }
           }, true);
           
-          console.log('🛡️ COMPREHENSIVE FORM SUBMISSION BLOCKER INSTALLED');
+          console.log('️ COMPREHENSIVE FORM SUBMISSION BLOCKER INSTALLED');
         }
         
         // Additional initialization for enhanced features
@@ -312,37 +312,37 @@ let currentStep = 1;
       // Function to check session status
       async function checkSessionStatus(isGuestMode = false) {
         try {
-          console.log('🔍 Checking session status...');
+          console.log(' Checking session status...');
           
           const response = await fetch('../Login_Signup/check_session_mvc.php');
           
           if (!response.ok) {
-            console.warn('⚠️ Session check failed with status:', response.status);
+            console.warn(' Session check failed with status:', response.status);
             // Don't fail hard if session check endpoint has issues
             return true; // Assume session is valid for now
           }
           
           const result = await response.json();
-          console.log('📋 Session status:', result);
+          console.log(' Session status:', result);
           
           if (!result.logged_in) {
             if (isGuestMode) {
-              console.log('👤 User not logged in but in guest mode - continuing...');
+              console.log('<i class="fas fa-user"></i> User not logged in but in guest mode - continuing...');
               return false; // Return false but don't redirect
             } else {
-              console.warn('⚠️ User not logged in! Session result:', result);
+              console.warn(' User not logged in! Session result:', result);
               alert('Session expirée. Vous allez être redirigé vers la page de connexion.');
               window.location.href = '../Login_Signup/auth.html';
               return false;
             }
           }
           
-          console.log('✅ User session valid:', result);
+          console.log(' User session valid:', result);
           return true;
         } catch (error) {
-          console.error('❌ Error checking session:', error);
+          console.error(' Error checking session:', error);
           // Don't fail the form submission if session check has network issues
-          console.log('⚠️ Session check failed, continuing anyway...');
+          console.log(' Session check failed, continuing anyway...');
           return true;
         }
       }
@@ -359,7 +359,7 @@ let currentStep = 1;
           const button = document.getElementById(buttonId);
           if (button) {
             button.style.display = 'none';
-            console.log(`🚫 Hidden button: ${buttonId}`);
+            console.log(` Hidden button: ${buttonId}`);
           }
         });
         
@@ -383,7 +383,7 @@ let currentStep = 1;
                 formatContent.appendChild(restriction);
               }
             }
-            console.log(`🚫 Disabled ${formatValue.toUpperCase()} download option for guest user`);
+            console.log(` Disabled ${formatValue.toUpperCase()} download option for guest user`);
           }
         });
         
@@ -392,7 +392,7 @@ let currentStep = 1;
         if (headerActions) {
           const guestNote = document.createElement('div');
           guestNote.className = 'guest-note';
-          guestNote.innerHTML = '<i class="fas fa-info-circle"></i> Mode invité - Téléchargement PDF uniquement. <a href="../Login_Signup/auth.html">Créez un compte</a> pour accéder à tous les formats';
+          guestNote.innerHTML = '<i class="fas fa-info-circle"></i> Mode invité';
           headerActions.insertBefore(guestNote, headerActions.firstChild);
         }
       }
@@ -540,7 +540,7 @@ let currentStep = 1;
       // Function to load CV data for editing
       async function loadCVForEdit(cvId) {
         try {
-          console.log('📥 Loading CV data for ID:', cvId);
+          console.log('<i class="fas fa-download"></i> Loading CV data for ID:', cvId);
           
           // Show loading indicator
           const headerTitle = document.querySelector('.header h2');
@@ -555,7 +555,7 @@ let currentStep = 1;
           }
           
           const result = await response.json();
-          console.log('📥 CV data response:', result);
+          console.log('<i class="fas fa-download"></i> CV data response:', result);
           
           if (result.status === 'success') {
             // Handle different response formats
@@ -569,7 +569,7 @@ let currentStep = 1;
             }
             
             if (xmlContent) {
-              console.log('✅ CV data loaded successfully');
+              console.log(' CV data loaded successfully');
               
               // Set the editing CV ID in the hidden field
               const editingCvIdField = document.getElementById('editing_cv_id');
@@ -585,19 +585,19 @@ let currentStep = 1;
               
               populateFormWithCVData(xmlContent);
             } else {
-              console.error('❌ No CV data found in response');
+              console.error(' No CV data found in response');
               alert('Erreur lors du chargement des données du CV');
               window.location.href = 'user_home.html';
             }
           } else {
-            console.error('❌ Failed to load CV data:', result.message);
+            console.error(' Failed to load CV data:', result.message);
             alert('Erreur lors du chargement des données du CV: ' + (result.message || 'Erreur inconnue'));
             
             // Redirect back to user home on error
             window.location.href = 'user_home.html';
           }
         } catch (error) {
-          console.error('❌ Network error loading CV:', error);
+          console.error(' Network error loading CV:', error);
           alert('Erreur réseau lors du chargement du CV');
           
           // Redirect back to user home on error
@@ -607,7 +607,7 @@ let currentStep = 1;
 
       // Function to populate form with CV data
       function populateFormWithCVData(xmlContent) {
-        console.log('📝 Populating form with XML data...', xmlContent);
+        console.log('<i class="fas fa-edit"></i> Populating form with XML data...', xmlContent);
         
         try {
           const parser = new DOMParser();
@@ -628,10 +628,10 @@ let currentStep = 1;
             }
           }
           
-          console.log('✓ XML parsé avec succès');
+          console.log(' XML parsé avec succès');
           
           // Debug: Show the actual XML structure
-          console.log('📋 XML Document structure:');
+          console.log(' XML Document structure:');
           console.log('- Root element:', xmlDoc.documentElement.tagName);
           console.log('- Child elements:', Array.from(xmlDoc.documentElement.children).map(el => el.tagName));
           
@@ -673,7 +673,7 @@ let currentStep = 1;
           // Informations personnelles
           const personalInfo = xmlDoc.querySelector('personalInfo');
           if (personalInfo) {
-            console.log('✓ Section personalInfo trouvée');
+            console.log(' Section personalInfo trouvée');
             
             setFieldValue('prenom', personalInfo.querySelector('firstname')?.textContent || '');
             setFieldValue('nom', personalInfo.querySelector('lastname')?.textContent || '');
@@ -708,7 +708,7 @@ let currentStep = 1;
           // Expériences professionnelles
           const workExperiences = xmlDoc.querySelectorAll('experiences experience') || xmlDoc.querySelectorAll('experience');
           if (workExperiences.length > 0) {
-            console.log('✓ Chargement des expériences:', workExperiences.length);
+            console.log(' Chargement des expériences:', workExperiences.length);
             const experiencesContainer = document.getElementById('experiences');
             if (experiencesContainer) {
               // Clear existing experience entries but keep the first one as template
@@ -754,7 +754,7 @@ let currentStep = 1;
           // Formation
           const educations = xmlDoc.querySelectorAll('education degree') || xmlDoc.querySelectorAll('education') || xmlDoc.querySelectorAll('degree');
           if (educations.length > 0) {
-            console.log('✓ Chargement de la formation:', educations.length);
+            console.log(' Chargement de la formation:', educations.length);
             const educationContainer = document.getElementById('education');
             if (educationContainer) {
               // Clear existing education entries but keep the first one as template
@@ -800,7 +800,7 @@ let currentStep = 1;
           // Compétences
           const skills = xmlDoc.querySelector('skills');
           if (skills) {
-            console.log('✓ Section compétences trouvée');
+            console.log(' Section compétences trouvée');
             const skillsContainer = document.getElementById('skills');
             if (skillsContainer) {
               // Clear existing skill entries but keep the first one as template
@@ -812,7 +812,7 @@ let currentStep = 1;
               // Handle the new XML structure with individual skill entries
               const skillEntries = skills.querySelectorAll('skill');
               if (skillEntries.length > 0) {
-                console.log('✓ Chargement des compétences:', skillEntries.length);
+                console.log(' Chargement des compétences:', skillEntries.length);
                 
                 skillEntries.forEach((skillEntry, index) => {
                   let currentEntry;
@@ -868,7 +868,7 @@ let currentStep = 1;
           // Langues
           const languages = xmlDoc.querySelectorAll('languages language') || xmlDoc.querySelectorAll('language');
           if (languages.length > 0) {
-            console.log('✓ Chargement des langues:', languages.length);
+            console.log(' Chargement des langues:', languages.length);
             const languagesContainer = document.getElementById('languages');
             if (languagesContainer) {
               // Clear existing language entries but keep the first one as template
@@ -908,7 +908,7 @@ let currentStep = 1;
           // Certificats
           const certificates = xmlDoc.querySelectorAll('certificates certificate') || xmlDoc.querySelectorAll('certificate');
           if (certificates.length > 0) {
-            console.log('✓ Chargement des certificats:', certificates.length);
+            console.log(' Chargement des certificats:', certificates.length);
             const certificatesContainer = document.getElementById('certificates');
             if (certificatesContainer) {
               // Clear existing certificate entries but keep the first one as template
@@ -953,7 +953,7 @@ let currentStep = 1;
           // Projets
           const projects = xmlDoc.querySelectorAll('projects project') || xmlDoc.querySelectorAll('project');
           if (projects.length > 0) {
-            console.log('✓ Chargement des projets:', projects.length);
+            console.log(' Chargement des projets:', projects.length);
             const projectsContainer = document.getElementById('projects');
             if (projectsContainer) {
               // Clear existing project entries but keep the first one as template
@@ -1034,21 +1034,21 @@ let currentStep = 1;
                 }
               }, 250); // Increased delay to ensure no conflicts with initialization
             } else {
-              console.log('⚠️ Aucune couleur trouvée dans la personnalisation');
+              console.log(' Aucune couleur trouvée dans la personnalisation');
             }
           } else {
-            console.log('⚠️ Section personnalisation non trouvée dans le XML');
+            console.log(' Section personnalisation non trouvée dans le XML');
           }
           
-          console.log('✅ Formulaire peuplé avec succès');
+          console.log(' Formulaire peuplé avec succès');
           
           // Log summary of what was loaded
-          console.log('📊 Résumé du chargement:');
-          console.log('- Informations personnelles:', personalInfo ? '✓' : '✗');
-          console.log('- Description profil:', profileDescription ? '✓' : '✗');
+          console.log(' Résumé du chargement:');
+          console.log('- Informations personnelles:', personalInfo ? '' : 'X');
+          console.log('- Description profil:', profileDescription ? '' : 'X');
           console.log('- Expériences:', workExperiences ? workExperiences.length : 0, 'trouvées');
           console.log('- Formations:', educations ? educations.length : 0, 'trouvées');
-          console.log('- Compétences:', skills ? '✓' : '✗');
+          console.log('- Compétences:', skills ? '' : 'X');
           console.log('- Langues:', languages ? languages.length : 0, 'trouvées');
           
           // Check certificates and projects (need to be declared here)
@@ -1060,7 +1060,7 @@ let currentStep = 1;
           
           console.log('- Certificats:', certificatesFound.length, 'trouvés');
           console.log('- Projets:', projectsFound.length, 'trouvés');
-          console.log('- Personnalisation:', customizationFound ? '✓' : '✗');
+          console.log('- Personnalisation:', customizationFound ? '' : 'X');
           
           // Show success message
           const headerTitleElement = document.querySelector('.header h2');
@@ -1070,7 +1070,7 @@ let currentStep = 1;
           
           // Optional: Show a brief success notification
           setTimeout(() => {
-            console.log('🎉 CV chargé et prêt pour modification');
+            console.log(' CV chargé et prêt pour modification');
             
             // Don't reinitialize color picker here as it overrides the loaded color
             // The color picker is already initialized on page load
@@ -1112,7 +1112,7 @@ let currentStep = 1;
           }, 400); // Increased delay to happen after color loading
           
         } catch (error) {
-          console.error('❌ Erreur lors du parsing XML:', error);
+          console.error(' Erreur lors du parsing XML:', error);
           alert('Erreur lors du chargement des données du CV: ' + error.message);
         }
       }
@@ -1140,9 +1140,9 @@ let currentStep = 1;
           }
           // Decode HTML entities before setting the value
           field.value = decodeHtmlEntities(value);
-          console.log(`✓ Field ${fieldName} set to: ${decodeHtmlEntities(value)}`);
+          console.log(` Field ${fieldName} set to: ${decodeHtmlEntities(value)}`);
         } else {
-          console.error(`✗ Field ${fieldName} not found`);
+          console.error(`X Field ${fieldName} not found`);
         }
       }
 
@@ -1286,15 +1286,15 @@ let currentStep = 1;
           }
           // Decode HTML entities before setting the value
           field.value = decodeHtmlEntities(value);
-          console.log(`✓ Field ${selector} in entry set to: ${decodeHtmlEntities(value)}`);
+          console.log(` Field ${selector} in entry set to: ${decodeHtmlEntities(value)}`);
         } else {
-          console.error(`✗ Field ${selector} not found in entry`);
+          console.error(`X Field ${selector} not found in entry`);
         }
       }
 
       // Function to fill form with test data
       function fillTestData() {
-        console.log('🔧 Filling form with test data...');
+        console.log(' Filling form with test data...');
         
         try {
           // Personal Information
@@ -1387,10 +1387,10 @@ let currentStep = 1;
             triggerPreviewUpdate();
           }
 
-          console.log('✅ Test data filled successfully!');
+          console.log(' Test data filled successfully!');
           alert('Formulaire rempli avec des données de test !');
         } catch (error) {
-          console.error('❌ Error filling test data:', error);
+          console.error(' Error filling test data:', error);
           alert('Erreur lors du remplissage des données de test: ' + error.message);
         }
       }
@@ -1399,7 +1399,7 @@ let currentStep = 1;
       function resetButtonAfterDownload(button, originalText) {
         // Method 1: Timer-based reset (fallback)
         const resetTimer = setTimeout(() => {
-          console.log('🔄 Resetting button after timeout');
+          console.log(' Resetting button after timeout');
           button.innerHTML = originalText;
           button.disabled = false;
         }, 5000); // Reset after 5 seconds
@@ -1408,7 +1408,7 @@ let currentStep = 1;
         let focusResetDone = false;
         const resetOnFocus = () => {
           if (!focusResetDone) {
-            console.log('🔄 Resetting button after window focus');
+            console.log(' Resetting button after window focus');
             clearTimeout(resetTimer);
             button.innerHTML = originalText;
             button.disabled = false;
@@ -1425,7 +1425,7 @@ let currentStep = 1;
         // Method 3: Detection via document visibility change
         const handleVisibilityChange = () => {
           if (!document.hidden && !focusResetDone) {
-            console.log('🔄 Resetting button after visibility change');
+            console.log(' Resetting button after visibility change');
             clearTimeout(resetTimer);
             button.innerHTML = originalText;
             button.disabled = false;
@@ -1680,15 +1680,15 @@ let currentStep = 1;
           }
           
           const responseText = await response.text();
-          // console.log('🔍 Raw response from server:', responseText); // Removed for cleaner console
+          // console.log(' Raw response from server:', responseText); // Removed for cleaner console
           
           // Try to parse JSON, catch any errors
           let result;
           try {
             result = JSON.parse(responseText);
           } catch (parseError) {
-            console.error('❌ JSON Parse Error:', parseError);
-            // console.error('📄 Raw response that failed to parse:', responseText); // Removed for cleaner console
+            console.error(' JSON Parse Error:', parseError);
+            // console.error('<i class="fas fa-file"></i> Raw response that failed to parse:', responseText); // Removed for cleaner console
             throw new Error(`Server returned invalid JSON. Check server logs for details.`);
           }
           
@@ -2152,7 +2152,7 @@ let currentStep = 1;
         const colorPresets = document.querySelectorAll('.color-preset');
         
         if (!externalColorPicker || !hiddenColorInput) {
-          console.error('❌ Color picker elements not found');
+          console.error(' Color picker elements not found');
           return;
         }
         
@@ -2333,7 +2333,7 @@ let currentStep = 1;
             formData.append('editing_cv_id', editingCvId);
           }
           
-          console.log('📤 Sending form data...');
+          console.log('<i class="fas fa-upload"></i> Sending form data...');
           
           // Debug: Log the selected format
           const selectedFormat = document.querySelector('input[name="format"]:checked')?.value || 'pdf';
@@ -2350,12 +2350,12 @@ let currentStep = 1;
           
           if (!response.ok) {
             const errorText = await response.text();
-            console.error('❌ HTTP Error Response:', errorText);
+            console.error(' HTTP Error Response:', errorText);
             throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
           }
           
           const result = await response.json();
-          console.log('📥 Server response:', result);
+          console.log('<i class="fas fa-download"></i> Server response:', result);
           
           if (result.success === true || result.status === 'success') {
             
@@ -2378,7 +2378,7 @@ let currentStep = 1;
             }
             
             // Show publish confirmation modal instead of immediate download
-            console.log('🔄 About to show publish modal...');
+            console.log(' About to show publish modal...');
             console.log('generatedCVData:', window.generatedCVData);
             showPublishModal();
             
@@ -2386,7 +2386,7 @@ let currentStep = 1;
             resetButtonAfterDownload(submitBtn, originalText);
             
           } else {
-            console.error('❌ Server error:', result.message);
+            console.error(' Server error:', result.message);
             alert('Erreur: ' + (result.message || 'Erreur inconnue lors de la génération du CV'));
             
             // Reset button
@@ -2396,7 +2396,7 @@ let currentStep = 1;
           }
           
         } catch (error) {
-          console.error('❌ Form submission error:', error);
+          console.error(' Form submission error:', error);
           alert('Erreur lors de la génération du CV: ' + error.message);
           
           // Reset button
@@ -2411,7 +2411,7 @@ let currentStep = 1;
       // ============ PUBLISH MODAL FUNCTIONS ============
       
       function showPublishModal() {
-        console.log('🔄 showPublishModal called - showing standalone modal window');
+        console.log(' showPublishModal called - showing standalone modal window');
         
         // Enhanced modal display to ensure it appears as a proper popup window
         const showModal = () => {
@@ -2419,7 +2419,7 @@ let currentStep = 1;
           console.log('Modal element found:', !!modal);
           
           if (!modal) {
-            console.log('🔧 Creating emergency modal...');
+            console.log(' Creating emergency modal...');
             createEmergencyModal();
             modal = document.getElementById('emergencyModal');
           }
@@ -2448,14 +2448,14 @@ let currentStep = 1;
             document.body.style.left = '0';
             document.body.style.right = '0';
             
-            console.log('✅ Modal displayed as standalone window');
+            console.log(' Modal displayed as standalone window');
             
             // Focus management
             modal.setAttribute('tabindex', '-1');
             modal.focus();
             
           } else {
-            console.error('❌ Could not create or find publish modal');
+            console.error(' Could not create or find publish modal');
           }
         };
         
@@ -2526,7 +2526,7 @@ let currentStep = 1;
           document.body.style.left = '';
           document.body.style.right = '';
           
-          console.log('✅ Modal hidden and page scroll restored');
+          console.log(' Modal hidden and page scroll restored');
         }
       }
       
@@ -2537,7 +2537,7 @@ let currentStep = 1;
       // Global functions for modal buttons with enhanced functionality - updated for user_home.css
       window.publishAndDownload = async function() {
         if (!window.generatedCVData || !window.generatedCVData.cv_id) {
-          console.error('❌ No CV data available for publishing');
+          console.error(' No CV data available for publishing');
           alert('Erreur: Aucune donnée de CV disponible pour la publication');
           return;
         }
@@ -2591,7 +2591,7 @@ let currentStep = 1;
             }, 1000);
             
           } else {
-            console.error('❌ Publish error:', result.message);
+            console.error(' Publish error:', result.message);
             alert('Erreur lors de la publication: ' + (result.message || 'Erreur inconnue'));
             
             // Reset button
@@ -2603,7 +2603,7 @@ let currentStep = 1;
           }
           
         } catch (error) {
-          console.error('❌ Publish error:', error);
+          console.error(' Publish error:', error);
           alert('Erreur lors de la publication: ' + error.message);
           
           // Reset button - use the same modal-specific selector
@@ -2618,14 +2618,14 @@ let currentStep = 1;
       };
       
       window.skipPublish = function() {
-        console.log('⏭️ Skipping publish, downloading only...');
+        console.log('Skipping publish, downloading only...');
         hidePublishModal();
         triggerDownload();
       };
       
       function triggerDownload() {
         if (!window.generatedCVData) {
-          console.error('❌ No CV data available for download');
+          console.error(' No CV data available for download');
           alert('Erreur: Aucune donnée de CV disponible pour le téléchargement');
           return;
         }
