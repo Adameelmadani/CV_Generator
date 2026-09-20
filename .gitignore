@@ -38,6 +38,7 @@ build/
 # =====================
 output.xml
 *.pdf
+saved_pdfs/
 
 # =====================
 # IDE / Editor
